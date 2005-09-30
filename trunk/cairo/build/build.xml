@@ -1,0 +1,133 @@
+<project name="cairo" default="all" basedir=".">
+
+  <property file="./build.properties"/>
+
+  <path id="compile.classpath">
+    <fileset dir="${thirdparty.dir}" includes="**/*.jar"/>
+    <pathelement location="${sphinx.home}/lib/sphinx4.jar"/>
+    <pathelement location="${sphinx.home}/lib/jsapi.jar"/>
+    <fileset dir="${freetts.jars.dir}" includes="**/*.jar"/>
+    <fileset dir="${jboss-aop.jars.dir}" includes="**/*.jar"/>
+  </path>
+
+  <path id="run.classpath">
+    <pathelement location="${classes.dir}"/>
+    <path refid="compile.classpath"/>
+    <pathelement location="${java.dir}"/>
+    <pathelement location="${sphinx.home}/lib/WSJ_8gau_13dCep_16k_40mel_130Hz_6800Hz.jar"/>
+  </path>
+
+  <!-- taskdefs -->
+
+  <!-- executable targets -->
+
+  <target name="all" depends="compile"/>
+
+  <target name="compile" depends="-init-compile">
+    <javac srcdir="${java.dir}"
+           destdir="${classes.dir}"
+           classpathref="compile.classpath"
+           includes="**/*.java"
+           excludes="com/onomatopia/cairo/server/recorder/xRecorderResource.java"
+           fork="true"
+           debug="true"
+           deprecation="${dep}"
+    >
+      <compilerarg value="-Xlint:unchecked"/>
+    </javac>
+    <jar jarfile="${output.jars.dir}/${ant.project.name}.jar"
+         basedir="${classes.dir}"
+         includes="**/*.class"
+    />
+  </target>
+
+  <target name="run" if="run" depends="-init-run">
+    <java classname="${run}" classpathref="run.classpath" fork="true" maxmemory="100m">
+      <arg value="${arg1}"/>
+      <arg value="${arg2}"/>
+      <arg value="${arg3}"/>
+    </java>
+  </target>
+
+  <target name="run-rserver" depends="-init-run">
+    <java classname="com.onomatopia.cairo.server.resource.ResourceServerImpl" classpathref="run.classpath" fork="true" maxmemory="100m"/>
+  </target>
+
+  <target name="run-ires" if="run" depends="-init-run">
+    <java classname="com.onomatopia.cairo.server.resource.InputResource" classpathref="run.classpath" fork="true" maxmemory="100m">
+      <arg value="file:///C:/work/cvs/onomatopia/cairo/config/cairo-config.xml"/>
+      <arg value="input"/>
+      <arg value="file:///C:/work/cvs/onomatopia/cairo/config/sphinx-rtp.xml"/>
+    </java>
+  </target>
+
+  <target name="run-aop" if="run" depends="-init-run">
+    <java classname="${run}" classpathref="run.classpath" fork="true" maxmemory="100m">
+      <sysproperty key="jboss.aop.path" value="${jboss-aop.config.file}"/>
+      <jvmarg line="-javaagent:C:\java\jboss-aop_1.3.1\lib-50\jboss-aop-jdk50.jar"/>
+      <arg value="${arg1}"/>
+      <arg value="${arg2}"/>
+      <arg value="${arg3}"/>
+    </java>
+  </target>
+
+  <target name="run-hellosphinx">
+    <java classname="com.onomatopia.cairo.test.HelloSphinx" classpathref="run.classpath" fork="true" maxmemory="200m">
+      <sysproperty key="java.util.logging.config.file" value="${logging.config.file}"/>
+      <arg value="${sphinx-basic.config.file}"/>
+    </java>
+  </target>
+
+  <target name="run-recserver">
+    <java classname="com.onomatopia.cairo.server.recognition.RecServer" classpathref="run.classpath" fork="true" maxmemory="400m">
+      <sysproperty key="java.util.logging.config.file" value="${logging.config.file}"/>
+      <arg value="${sphinx-rtp.config.file}"/>
+      <arg value="42050"/>
+    </java>
+  </target>
+
+  <target name="run-recclient">
+    <java classname="com.onomatopia.cairo.client.RecClient" classpathref="run.classpath" fork="false">
+      <arg value="file://C:\work\testbed\jmf\for_recog.wav"/>
+    </java>
+  </target>
+
+  <!-- internal targets -->
+
+  <target name="-init-run">
+    <!--copy file="${mrcp4j.jar}" todir="${thirdparty.dir}"/-->
+  </target>
+
+  <target name="-init-compile" depends="-init-run">
+    <delete file="${output.jars.dir}/${ant.project.name}.jar"/>
+    <delete dir="${classes.dir}"/>
+    <mkdir dir="${classes.dir}"/>
+    <mkdir dir="${output.jars.dir}"/>
+  </target>
+
+  <target name="-init-generate-stubs">
+    <delete dir="${generated.dir}"/>
+    <mkdir dir="${generated.dir}"/>
+  </target>
+
+  <!--target name="-copy-grammars">
+    <copy todir="${classes.dir}">
+      <fileset id="grammars" dir="${java.dir}" includes="**/*.gram"/>
+    </copy>
+  </target-->
+
+  <target name="-stop-tomcat-app">
+		<tomcat-stop path="/${webapp.name}"
+				username="admin" password="admin" 
+				url="http://localhost:8080/manager"
+    />
+  </target>
+
+  <target name="-start-tomcat-app">
+		<tomcat-start path="/${webapp.name}"
+				username="admin" password="admin" 
+				url="http://localhost:8080/manager"
+    />
+  </target>
+
+</project>
