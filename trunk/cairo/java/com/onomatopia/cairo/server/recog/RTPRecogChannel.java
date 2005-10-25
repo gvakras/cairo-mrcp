@@ -25,6 +25,7 @@ import javax.media.protocol.DataSource;
 import javax.media.protocol.FileTypeDescriptor;
 import javax.media.protocol.PushBufferDataSource;
 import javax.media.protocol.PushBufferStream;
+import javax.speech.recognition.GrammarException;
 
 import org.apache.commons.lang.Validate;
 import org.apache.commons.pool.ObjectPool;
@@ -69,8 +70,11 @@ public class RTPRecogChannel implements ControllerListener {
      * @throws IOException 
      * @throws IllegalStateException 
      * @throws ResourceUnavailableException 
+     * @throws GrammarException 
      */
-    public void recognize(RecogListener listener, boolean startInputTimers, GrammarLocation grammarLocation) throws IllegalStateException, IOException, ResourceUnavailableException {
+    public void recognize(RecogListener listener, boolean startInputTimers, GrammarLocation grammarLocation)
+      throws IllegalStateException, IOException, ResourceUnavailableException, GrammarException {
+
         if (_processor != null) {
             throw new IllegalStateException("Recognition already in progress!");
         }
@@ -103,20 +107,31 @@ public class RTPRecogChannel implements ControllerListener {
             //dataSource.start();
             // TODO: hang on to recEngine for recognition completion, etc.
             new RecogThread(recEngine, listener).start();
+        } catch (GrammarException e) {
+            close(recEngine);
+            throw e;
         } catch (IOException e) {
+            close(recEngine);
+            throw e;
+        }
+    }
+    
+    private void close(SphinxRecEngine recEngine) {
+        if (_processor != null) {
             _processor.close();
             _processor = null;
+        }
+        if (recEngine != null) {
             try {
                 _recEnginePool.returnObject(recEngine);
             } catch (Exception e1) {
                 // TODO Auto-generated catch block
                 e1.printStackTrace();
             }
-            throw e;
         }
-        
     }
     
+    // TODO: move threading to RecEngine
     private class RecogThread extends Thread {
 
         private SphinxRecEngine _recEngine;
