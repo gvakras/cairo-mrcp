@@ -21,4 +21,9 @@ public interface RecogListener {
      */
     public void speechStarted();
 
+    /**
+     * TODOC
+     */
+    public void speechEnded();
+
 }
