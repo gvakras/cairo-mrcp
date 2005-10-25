@@ -11,10 +11,10 @@ import com.onomatopia.cairo.server.recog.SpeechEventListener;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URL;
 
 import javax.media.protocol.PushBufferDataSource;
 import javax.media.protocol.PushBufferStream;
+import javax.speech.recognition.GrammarException;
 
 import edu.cmu.sphinx.jsapi.JSGFGrammar;
 import edu.cmu.sphinx.recognizer.Recognizer;
@@ -36,16 +36,24 @@ public class SphinxRecEngine implements SpeechEventListener {
     private RawAudioTransferHandler _rawAudioTransferHandler;
     private RecogListener _recogListener;
 
-    public SphinxRecEngine(ConfigurationManager cm)
+    protected SphinxRecEngine(ConfigurationManager cm)
       throws IOException, PropertyException, InstantiationException {
 
         _recognizer = (Recognizer) cm.lookup("recognizer");
         _recognizer.allocate();
 
         _jsgfGrammarManager = (JSGFGrammar) cm.lookup("jsgfGrammar");
-        
-        SpeechDataMonitor speechDataMonitor = (SpeechDataMonitor) cm.lookup("speechDataMonitor");
-        speechDataMonitor.setSpeechEventListener(this);
+
+        try {
+            SpeechDataMonitor speechDataMonitor = (SpeechDataMonitor) cm.lookup("speechDataMonitor");
+            speechDataMonitor.setSpeechEventListener(this);
+        } catch (InstantiationException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (PropertyException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
         Object primaryInput = cm.lookup("primaryInput");
         if (primaryInput instanceof RawAudioProcessor) {
@@ -73,9 +81,22 @@ public class SphinxRecEngine implements SpeechEventListener {
         // TODO: should wait to set this until after run thread completes (i.e. recognizer is cleared)
     }
 
-    public synchronized void loadJSGF(GrammarLocation grammarLocation) throws IOException {
+    public synchronized void loadJSGF(GrammarLocation grammarLocation) throws IOException, GrammarException {
         _jsgfGrammarManager.setBaseURL(grammarLocation.getBaseURL());
-        _jsgfGrammarManager.loadJSGF(grammarLocation.getGrammarName());
+        try {
+            _jsgfGrammarManager.loadJSGF(grammarLocation.getGrammarName());
+            System.out.println("loadJSGF(): completed successfully.");
+        } catch (com.sun.speech.engine.recognition.TokenMgrError e) {
+            System.out.println("loadJSGF(): encountered exception: " + e.getClass().getName()); // com.sun.speech.engine.recognition.TokenMgrError!!!
+            String message = e.getMessage();
+            /*if (message.indexOf("speech") < 0) {
+                throw e;
+            }*/
+            // else assume caused by GrammarException
+            // TODO: edu.cmu.sphinx.jsapi.JSGFGrammar.loadJSGF() should be updated not to swallow GrammarException
+            e.printStackTrace();
+            throw new GrammarException(message);
+        }
     }
 
     /**
@@ -141,6 +162,5 @@ public class SphinxRecEngine implements SpeechEventListener {
         // TODO Auto-generated method stub
         
     }
-
 
 }
