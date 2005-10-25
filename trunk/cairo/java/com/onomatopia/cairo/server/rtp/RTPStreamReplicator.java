@@ -119,34 +119,21 @@ public class RTPStreamReplicator extends RTPConsumer {
         //}
     }
 
-
     /**
      * TODOC
      * @param outputContentDescriptor A <code>ContentDescriptor</code> that describes the desired output content-type.
+     * @param maxWait the maximum time to wait in milliseconds if the stream has not yet been received.
      * @return A new <code>Processor</code> that is in the <code>Realized</code> state.
-     * @throws IOException
-     * @throws IllegalStateException
+     * @throws IOException if there are I/O problems creating the processor from the stream.
+     * @throws IllegalStateException if the stream has not been received yet, and is not received within the maximum time to wait.
      */
-    public synchronized Processor createRealizedProcessor(ContentDescriptor outputContentDescriptor)
-      throws IOException, IllegalStateException {
-        return createRealizedProcessor(outputContentDescriptor, -1);
-    }
-
-    /**
-     * TODOC
-     * @param outputContentDescriptor A <code>ContentDescriptor</code> that describes the desired output content-type.
-     * @param timeout the maximum time to wait in milliseconds
-     * @return A new <code>Processor</code> that is in the <code>Realized</code> state.
-     * @throws IOException
-     * @throws IllegalStateException
-     */
-    public synchronized Processor createRealizedProcessor(ContentDescriptor outputContentDescriptor, long timeout)
+    public synchronized Processor createRealizedProcessor(ContentDescriptor outputContentDescriptor, long maxWait)
       throws IOException, IllegalStateException {
 
         if (_replicator == null) {
-            if (timeout >= 0) {
+            if (maxWait >= 0) {
                 try {
-                    this.wait(timeout);
+                    this.wait(maxWait); //TODO: make sure timeout period has passed
                 } catch (InterruptedException e) {
                     // TODO: throw this exception?
                     e.printStackTrace();
@@ -173,7 +160,7 @@ public class RTPStreamReplicator extends RTPConsumer {
         }
 
         System.out.println("Processor realized.");
-        
+
         return processor;
 
     }
