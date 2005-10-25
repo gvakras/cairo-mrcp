@@ -11,10 +11,15 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
+import javax.speech.recognition.GrammarException;
+
 import org.mrcp4j.MrcpEventName;
 import org.mrcp4j.MrcpRequestState;
 import org.mrcp4j.message.MrcpEvent;
 import org.mrcp4j.message.MrcpResponse;
+import org.mrcp4j.message.header.CompletionCauseHeader;
+import org.mrcp4j.message.header.CompletionReasonHeader;
+import org.mrcp4j.message.header.ContentIdHeader;
 import org.mrcp4j.message.header.MrcpHeader;
 import org.mrcp4j.message.header.MrcpHeaderFactory;
 import org.mrcp4j.message.request.StartInputTimersRequest;
@@ -63,8 +68,12 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
      * @see org.mrcp4j.server.provider.RecogOnlyRequestHandler#recognize(org.mrcp4j.message.request.MrcpRequestFactory.UnimplementedRequest, org.mrcp4j.server.MrcpSession)
      */
     public synchronized MrcpResponse recognize(UnimplementedRequest request, MrcpSession session) {
+
         MrcpRequestState requestState = MrcpRequestState.COMPLETE;
+        CompletionCauseHeader completionCauseHeader = null;
+        CompletionReasonHeader completionReasonHeader = null;
         short statusCode = -1;
+
         if (_state == RECOGNIZING) {
             statusCode = MrcpResponse.STATUS_METHOD_NOT_VALID_IN_STATE;
         } else {
@@ -73,7 +82,7 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
                 String contentType = request.getContentType();
                 if (contentType.equalsIgnoreCase("application/jsgf")) {
                     // save grammar to file
-                    MrcpHeader contentIdHeader = request.getHeader(MrcpHeaderFactory.CONTENT_ID);
+                    MrcpHeader contentIdHeader = request.getHeader(ContentIdHeader.NAME);
                     String grammarID = (contentIdHeader == null) ? null : contentIdHeader.getValue();
                     try {
                         grammarLocation = _grammarManager.saveGrammar(grammarID, request.getContent());
@@ -103,11 +112,21 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
                     e.printStackTrace();
                     statusCode = MrcpResponse.STATUS_SERVER_INTERNAL_ERROR;
                     // TODO: add completion cause header
+                } catch (GrammarException e) {
+                    e.printStackTrace();
+                    statusCode = MrcpResponse.STATUS_OPERATION_FAILED;
+                    completionCauseHeader = new CompletionCauseHeader((short) 4, "grammar-load-failure");
+                    completionReasonHeader = new CompletionReasonHeader(e.getMessage());
                 }
             }
         }
+
         // TODO: cache event acceptor if request is not complete
-        return session.createResponse(statusCode, requestState);
+
+        MrcpResponse response = session.createResponse(statusCode, requestState);
+        response.addHeader(completionCauseHeader);
+        response.addHeader(completionReasonHeader);
+        return response;
     }
 
     /* (non-Javadoc)
@@ -194,6 +213,14 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
+        }
+
+        /* (non-Javadoc)
+         * @see com.onomatopia.cairo.server.recog.RecogListener#speechEnded()
+         */
+        public void speechEnded() {
+            // TODO Auto-generated method stub
+            
         }
         
     }
