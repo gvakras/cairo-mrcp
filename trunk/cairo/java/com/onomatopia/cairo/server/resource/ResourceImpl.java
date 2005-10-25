@@ -33,10 +33,8 @@ public abstract class ResourceImpl extends UnicastRemoteObject implements Resour
     /* (non-Javadoc)
      * @see com.onomatopia.cairo.server.manager.Resource#hello(java.lang.String)
      */
-    public String hello(String name) {
-        String greeting = "Hello " + name;
-        System.out.println(greeting);
-        return greeting;
+    public void ping() {
+        System.out.println("Resource received ping() request.");
     }
     
     /*protected boolean supports(MrcpResourceType resourceType) throws ResourceUnavailableException {

@@ -112,13 +112,22 @@ public class ResourceRegistryImpl extends UnicastRemoteObject implements Resourc
         }
 
         public synchronized Resource getResource() throws ResourceUnavailableException {
-            if (_index >= _resources.size()) {
-                if (_index < 1) {
-                    throw new ResourceUnavailableException("No resource registered for the specified type!");
+            int size;
+            while ((size = _resources.size()) > 0) {
+                if (_index >= size) {
+                    _index = 0;
                 }
-                _index = 0;
+                Resource resource = _resources.get(_index);
+                try {
+                    resource.ping();
+                    _index++;
+                    return resource;
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                    _resources.remove(_index);
+                }
             }
-            return _resources.get(_index++);  // TODO: verify resource before returning
+            throw new ResourceUnavailableException("No resource available for the specified type!");
         }
         
     }

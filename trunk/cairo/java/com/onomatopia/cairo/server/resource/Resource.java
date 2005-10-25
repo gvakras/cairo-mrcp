@@ -16,7 +16,7 @@ public interface Resource extends Remote {
 
     //public static final String NAME = "Resource";
 
-    public String hello(String name) throws RemoteException;
+    public void ping() throws RemoteException;
 
     public ResourceMessage invite(ResourceMessage request) throws ResourceUnavailableException, RemoteException;
 
