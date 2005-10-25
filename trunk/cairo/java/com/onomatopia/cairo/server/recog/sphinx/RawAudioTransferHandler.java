@@ -9,9 +9,13 @@ import javax.media.format.AudioFormat;
 import javax.media.protocol.BufferTransferHandler;
 import javax.media.protocol.PushBufferStream;
 
+import org.apache.log4j.Logger;
+
 /**
  */
 public class RawAudioTransferHandler implements BufferTransferHandler {
+
+    private static Logger _logger = Logger.getLogger(RawAudioTransferHandler.class);
 
     private RawAudioProcessor _rawAudioProcessor;
 
@@ -48,12 +52,14 @@ public class RawAudioTransferHandler implements BufferTransferHandler {
         }
     }
 
-    /**
-     * BufferTransferHandler
+    /* (non-Javadoc)
+     * @see javax.media.protocol.BufferTransferHandler#transferData(javax.media.protocol.PushBufferStream)
      */
-
     public synchronized void transferData(PushBufferStream stream) {
-        //System.out.println("transferData callback entered with stream format = " + stream.getFormat());
+        if (_logger.isTraceEnabled()) {
+            _logger.trace("transferData callback entered with stream format = " + stream.getFormat());
+        }
+
         try {
             Buffer buffer = new Buffer();
             stream.read(buffer);
@@ -63,7 +69,7 @@ public class RawAudioTransferHandler implements BufferTransferHandler {
                     _rawAudioProcessor.addRawData(data, buffer.getOffset(), buffer.getLength());
                 } // TODO: else debug output
             } else {
-                System.out.println("transferData(): buffer is discard!");
+                _logger.debug("transferData(): buffer is discard!");
             }
         } catch (IOException e){
             e.printStackTrace();
