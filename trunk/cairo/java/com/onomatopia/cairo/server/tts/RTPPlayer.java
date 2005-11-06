@@ -75,8 +75,8 @@ public class RTPPlayer implements ControllerListener {
                 if (_processor != null) {
                     throw new IllegalStateException("Attempt to call playPrompt() when prompt already playing!");
                 }
-                DataSource fileDataSource = Manager.createDataSource(source);
-                _processor = Manager.createProcessor(fileDataSource);
+                DataSource dataSource = Manager.createDataSource(source);
+                _processor = Manager.createProcessor(dataSource);
                 _processor.addControllerListener(this);
             }
 
