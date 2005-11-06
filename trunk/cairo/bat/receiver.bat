@@ -14,6 +14,7 @@ set CLASSPATH=%CLASSPATH%;%THIRDPARTY%\commons-pool-1.2.jar
 set CLASSPATH=%CLASSPATH%;%THIRDPARTY%\JainSipApi1.1.jar
 set CLASSPATH=%CLASSPATH%;%THIRDPARTY%\jdom.jar
 set CLASSPATH=%CLASSPATH%;%THIRDPARTY%\jmf.jar
+set CLASSPATH=%CLASSPATH%;%THIRDPARTY%\log4j-1.2.12.jar
 set CLASSPATH=%CLASSPATH%;%THIRDPARTY%\mina-0.7.2.jar
 set CLASSPATH=%CLASSPATH%;%THIRDPARTY%\nist-sip-1.2.jar
 set CLASSPATH=%CLASSPATH%;%THIRDPARTY%\servlet-api.jar
@@ -22,8 +23,7 @@ set CLASSPATH=%CLASSPATH%;%SPHINX_HOME%\lib\jsapi.jar
 set CLASSPATH=%CLASSPATH%;%SPHINX_HOME%\lib\WSJ_8gau_13dCep_16k_40mel_130Hz_6800Hz.jar
 
 set CLASS=com.onomatopia.cairo.server.resource.ReceiverResource
-set CAIRO_CONFIG=file:///C:/work/cvs/onomatopia/cairo/config/cairo-config.xml
+set CAIRO_CONFIG=file:///C:/cvs/sf/cairo/config/cairo-config.xml
 set RES_NAME=input
-set SPHINX_CONFIG=file:///C:/work/cvs/onomatopia/cairo/config/sphinx-rtp.xml
 
-java -cp %CLASSPATH% -Xmx200m %CLASS% "%CAIRO_CONFIG%" "%RES_NAME%" "%SPHINX_CONFIG%"
+java -cp %CLASSPATH% -Xmx200m -Dlog4j.configuration=log4j.xml %CLASS% "%CAIRO_CONFIG%" "%RES_NAME%"

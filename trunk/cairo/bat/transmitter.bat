@@ -14,6 +14,7 @@ set CLASSPATH=%CLASSPATH%;%THIRDPARTY%\commons-pool-1.2.jar
 set CLASSPATH=%CLASSPATH%;%THIRDPARTY%\JainSipApi1.1.jar
 set CLASSPATH=%CLASSPATH%;%THIRDPARTY%\jdom.jar
 set CLASSPATH=%CLASSPATH%;%THIRDPARTY%\jmf.jar
+set CLASSPATH=%CLASSPATH%;%THIRDPARTY%\log4j-1.2.12.jar
 set CLASSPATH=%CLASSPATH%;%THIRDPARTY%\mina-0.7.2.jar
 set CLASSPATH=%CLASSPATH%;%THIRDPARTY%\nist-sip-1.2.jar
 set CLASSPATH=%CLASSPATH%;%THIRDPARTY%\servlet-api.jar
@@ -26,7 +27,7 @@ set CLASSPATH=%CLASSPATH%;%FREETTS_HOME%/lib/en_us.jar
 set CLASSPATH=%CLASSPATH%;%FREETTS_HOME%/lib/freetts.jar
 
 set CLASS=com.onomatopia.cairo.server.resource.TransmitterResource
-set CAIRO_CONFIG=file:///C:/work/cvs/onomatopia/cairo/config/cairo-config.xml
+set CAIRO_CONFIG=file:///C:/cvs/sf/cairo/config/cairo-config.xml
 set RES_NAME=output
 
-java -cp %CLASSPATH% %CLASS% "%CAIRO_CONFIG%" "%RES_NAME%"
+java -cp %CLASSPATH% -Dlog4j.configuration=log4j.xml %CLASS% "%CAIRO_CONFIG%" "%RES_NAME%"
