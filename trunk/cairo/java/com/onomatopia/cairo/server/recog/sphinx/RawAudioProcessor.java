@@ -6,7 +6,6 @@ import com.onomatopia.util.ByteHexConverter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.logging.Logger;
 
 import javax.media.format.AudioFormat;
 
@@ -20,6 +19,8 @@ import edu.cmu.sphinx.util.props.PropertyException;
 import edu.cmu.sphinx.util.props.PropertySheet;
 import edu.cmu.sphinx.util.props.PropertyType;
 import edu.cmu.sphinx.util.props.Registry;
+
+import org.apache.log4j.Logger;
 
 
 /**
@@ -45,6 +46,8 @@ import edu.cmu.sphinx.util.props.Registry;
  */
 public class RawAudioProcessor extends BaseDataProcessor
   implements /*SessionListener, ReceiveStreamListener, ControllerListener, BufferTransferHandler,*/ Runnable {
+
+    private static Logger _logger = Logger.getLogger(RawAudioTransferHandler.class);
 
     /**
      * The Sphinx property that specifies the number of milliseconds of
@@ -72,7 +75,7 @@ public class RawAudioProcessor extends BaseDataProcessor
 
     // Configuration data
 
-    private Logger _logger;
+    //private java.util.logging.Logger _logger;
     //private boolean closeBetweenUtterances;
     /*private boolean keepDataReference;*/
     private int _msecPerRead;
@@ -102,7 +105,7 @@ public class RawAudioProcessor extends BaseDataProcessor
      */
     public void newProperties(PropertySheet ps) throws PropertyException {
         super.newProperties(ps);
-        _logger = ps.getLogger();
+        //_logger = ps.getLogger();
 
         _msecPerRead = ps.getInt(PROP_MSEC_PER_READ, 
                                 PROP_MSEC_PER_READ_DEFAULT);
@@ -140,13 +143,15 @@ public class RawAudioProcessor extends BaseDataProcessor
         try {
             //_fileWriter = new FileWriter("C:\\work\\cvs\\onomatopia\\cairo\\prompts\\test\\rtp.txt", false);
         } catch (Exception e) {
-            e.printStackTrace();
+            _logger.warn(e, e);
         }
 
 
         //_mediaFormat = format;
         _audioFormat = SourceAudioFormat.newInstance(_msecPerRead, format);
-        System.out.println("Frame size: " + _audioFormat.getFrameSizeInBytes() + " bytes");
+        if (_logger.isDebugEnabled()) {
+            _logger.debug("Frame size: " + _audioFormat.getFrameSizeInBytes() + " bytes");
+        }
         _utteranceEndReached = false;
         //_transformer = new AudioDataTransformer(_audioFormat, stereoToMono, selectedChannel);
         _transformer = new AudioDataTransformer(_audioFormat, "average", 0);
@@ -182,7 +187,7 @@ public class RawAudioProcessor extends BaseDataProcessor
                 _fileWriter.close();
                 _fileWriter = null;
             } catch (IOException e){
-                e.printStackTrace();
+                _logger.warn(e, e);
             }
         }
 
@@ -195,8 +200,7 @@ public class RawAudioProcessor extends BaseDataProcessor
     public void run() {            
         _totalSamplesRead = 0;
         _startTime = System.currentTimeMillis();
-        _logger.info("started processing");
-        System.out.println("started processing");
+        _logger.debug("started processing");
         
         /*if (keepDataReference) {
             currentUtterance = new Utterance
@@ -205,15 +209,13 @@ public class RawAudioProcessor extends BaseDataProcessor
         
         try {
             Data data = new DataStartSignal();
-            _logger.info("adding DataStartSignal...");
-            System.out.println("adding DataStartSignal...");
+            _logger.debug("adding DataStartSignal...");
             do {
                 _dataList.add(data);
                 data = readData(null);//currentUtterance);
             } while (data != null);
         } catch (InterruptedException e) {
-            _logger.warning("Exception " + e.getMessage());
-            e.printStackTrace();
+            _logger.warn(e, e);
         } 
 
         /*long duration = (long)
@@ -221,8 +223,7 @@ public class RawAudioProcessor extends BaseDataProcessor
               (double)audioFormat.getSampleRate())*1000.0);*/
         
         _dataList.add(new DataEndSignal(_audioFormat.calculateDurationMsecs(_totalSamplesRead)));
-        _logger.info("DataEndSignal added");
-        System.out.println("DataEndSignal added");
+        _logger.debug("DataEndSignal added");
 
         /*synchronized (lock) {
             lock.notify();
@@ -236,10 +237,13 @@ public class RawAudioProcessor extends BaseDataProcessor
      */
     private Data readData(Utterance utterance) throws InterruptedException {
 
-        //System.out.println("readData(): retrieving data from raw audio list...");
+        _logger.trace("readData(): retrieving data from raw audio list...");
 
         byte[] data = _rawAudioList.remove();
-        //System.out.println("readData(): data from raw audio list, bytes=" + data.length);
+
+        if (_logger.isTraceEnabled()) {
+            _logger.trace("readData(): data from raw audio list, bytes=" + data.length);
+        }
 
         long firstSampleNumber = _totalSamplesRead / _audioFormat.getChannels();
         long collectTime = _startTime + (firstSampleNumber * _audioFormat.getMsecPerRead());
@@ -291,7 +295,7 @@ public class RawAudioProcessor extends BaseDataProcessor
         /*try {
             throw new Exception("debugging stack for RawAudioProcessor.getData()");
         } catch (Exception e){
-            e.printStackTrace();
+            _logger.warn(e, e);
         }
 
 java.lang.Exception: debugging stack for RawAudioProcessor.getData()
@@ -327,7 +331,7 @@ java.lang.Exception: debugging stack for RawAudioProcessor.getData()
             try {
                 output = _dataList.remove();
             } catch (InterruptedException e){
-                e.printStackTrace();
+                _logger.warn(e, e);
                 throw (DataProcessingException) new DataProcessingException("Data processing thread interrupted!").initCause(e);
             }
             if (output instanceof DataEndSignal) {
@@ -339,7 +343,9 @@ java.lang.Exception: debugging stack for RawAudioProcessor.getData()
 
         // signalCheck(output);
 
-        //System.out.println("RawAudioProcessor.getData() returning data.");
+        if (_logger.isTraceEnabled()) {
+            _logger.trace("RawAudioProcessor.getData() returning data.");
+        }
 
         return output;
     }
@@ -357,13 +363,15 @@ java.lang.Exception: debugging stack for RawAudioProcessor.getData()
             throw new IllegalStateException("Attempt to add raw data when RawAudioProcessor not in processing state!");
         }
 
-        System.out.println("addRawData(): offset=" + offset + ", length=" + length);
+        if (_logger.isTraceEnabled()) {
+            _logger.trace("addRawData(): offset=" + offset + ", length=" + length);
+        }
 
         if (_fileWriter != null) {
             try {
                 ByteHexConverter.writeHexDigits(_fileWriter, data, offset, length);
             } catch (IOException e){
-                e.printStackTrace();
+                _logger.warn(e, e);
             }
         }
 
@@ -387,7 +395,9 @@ java.lang.Exception: debugging stack for RawAudioProcessor.getData()
             }
         }
 
-        //System.out.println("remainder = " + _framePointer);
+        if (_logger.isTraceEnabled()) {
+            _logger.trace("remainder = " + _framePointer);
+        }
 
     }
 
