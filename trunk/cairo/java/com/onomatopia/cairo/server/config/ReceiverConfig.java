@@ -7,6 +7,7 @@ package com.onomatopia.cairo.server.config;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.NoSuchElementException;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.XMLConfiguration;
@@ -32,7 +33,14 @@ public class ReceiverConfig extends ResourceConfig {
     public ReceiverConfig(int index, XMLConfiguration config) throws ConfigurationException {
         super(index, config);
         try {
-            _sphinxConfigURL = new URL(config.getString("resources.resource(" + index + ").sphinxConfigURL"));
+            try {
+                _sphinxConfigURL = new URL(config.getString("resources.resource(" + index + ").sphinxConfigURL"));
+            } catch (NoSuchElementException e) {
+                _sphinxConfigURL = this.getClass().getResource("config/sphinx-config.xml");
+                if (_sphinxConfigURL == null) {
+                    throw e;
+                }
+            }
             _recEngines = config.getInt("resources.resource(" + index + ").recEngines");
             _baseGrammarDir = new File(config.getString("resources.resource(" + index + ").baseGrammarDir"));
             ensureDir(_baseGrammarDir);
