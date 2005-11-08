@@ -42,6 +42,7 @@ public class RTPRecorderChannel implements DataSinkListener {
     public RTPRecorderChannel(File dir, RTPStreamReplicator replicator) throws IllegalArgumentException {
         Validate.notNull(dir, "Null directory!");
         Validate.isTrue(dir.isDirectory(), "File object specified must be a directory: ", dir);
+        // TODO: make subdirectory based on channel ID 
         Validate.notNull(replicator, "Null replicator!");
 
         _dir = dir;
