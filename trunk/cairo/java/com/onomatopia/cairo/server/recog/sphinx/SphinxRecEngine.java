@@ -9,12 +9,29 @@ import com.onomatopia.cairo.server.recog.RecogListener;
 import com.onomatopia.cairo.server.recog.RecognitionResult;
 import com.onomatopia.cairo.server.recog.SpeechEventListener;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
 
+import javax.media.CannotRealizeException;
+import javax.media.ControllerEvent;
+import javax.media.ControllerListener;
+import javax.media.Manager;
+import javax.media.MediaLocator;
+import javax.media.NoDataSourceException;
+import javax.media.NoProcessorException;
+import javax.media.Processor;
+import javax.media.ProcessorModel;
+import javax.media.StartEvent;
+import javax.media.format.AudioFormat;
+import javax.media.protocol.ContentDescriptor;
+import javax.media.protocol.DataSource;
 import javax.media.protocol.PushBufferDataSource;
 import javax.media.protocol.PushBufferStream;
 import javax.speech.recognition.GrammarException;
+import javax.speech.recognition.RuleGrammar;
+import javax.speech.recognition.RuleParse;
 
 import edu.cmu.sphinx.jsapi.JSGFGrammar;
 import edu.cmu.sphinx.recognizer.Recognizer;
@@ -30,7 +47,7 @@ import edu.cmu.sphinx.util.props.PropertyException;
 public class SphinxRecEngine implements SpeechEventListener {
 
     private Recognizer _recognizer;
-    private JSGFGrammar _jsgfGrammarManager;
+    private JSGFGrammar _jsgfGrammar;
     private RawAudioProcessor _rawAudioProcessor;
 
     private RawAudioTransferHandler _rawAudioTransferHandler;
@@ -42,7 +59,7 @@ public class SphinxRecEngine implements SpeechEventListener {
         _recognizer = (Recognizer) cm.lookup("recognizer");
         _recognizer.allocate();
 
-        _jsgfGrammarManager = (JSGFGrammar) cm.lookup("jsgfGrammar");
+        _jsgfGrammar = (JSGFGrammar) cm.lookup("jsgfGrammar");
 
         try {
             SpeechDataMonitor speechDataMonitor = (SpeechDataMonitor) cm.lookup("speechDataMonitor");
@@ -82,9 +99,9 @@ public class SphinxRecEngine implements SpeechEventListener {
     }
 
     public synchronized void loadJSGF(GrammarLocation grammarLocation) throws IOException, GrammarException {
-        _jsgfGrammarManager.setBaseURL(grammarLocation.getBaseURL());
+        _jsgfGrammar.setBaseURL(grammarLocation.getBaseURL());
         try {
-            _jsgfGrammarManager.loadJSGF(grammarLocation.getGrammarName());
+            _jsgfGrammar.loadJSGF(grammarLocation.getGrammarName());
             System.out.println("loadJSGF(): completed successfully.");
         } catch (com.sun.speech.engine.recognition.TokenMgrError e) {
             System.out.println("loadJSGF(): encountered exception: " + e.getClass().getName()); // com.sun.speech.engine.recognition.TokenMgrError!!!
@@ -97,6 +114,15 @@ public class SphinxRecEngine implements SpeechEventListener {
             e.printStackTrace();
             throw new GrammarException(message);
         }
+    }
+
+    public synchronized RuleParse parse(String text, String ruleName) throws GrammarException {
+        if (_rawAudioTransferHandler != null) {
+            throw new IllegalStateException("Recognition already in progress!");
+        }
+        
+        RuleGrammar ruleGrammar = _jsgfGrammar.getRuleGrammar();
+        return ruleGrammar.parse(text, ruleName);
     }
 
     /**
@@ -161,6 +187,90 @@ public class SphinxRecEngine implements SpeechEventListener {
     public void speechEnded() {
         // TODO Auto-generated method stub
         
+    }
+
+    private static MediaLocator MICROPHONE = new MediaLocator("dsound://");
+    private static AudioFormat[] PREFERRED_MEDIA_FORMATS = {SourceAudioFormat.PREFERRED_MEDIA_FORMAT};
+    private static final ContentDescriptor CONTENT_DESCRIPTOR_RAW = new ContentDescriptor(ContentDescriptor.RAW);
+
+    public static void main(String[] args) throws Exception {
+        URL url;
+        if (args.length > 0) {
+            url = new File(args[0]).toURL();
+        } else {
+            url = SphinxRecEngine.class.getResource("/config/sphinx-config.xml");
+        }
+        
+        if (url == null) {
+            throw new RuntimeException("Sphinx config file not found!");
+        }
+
+        System.out.println("Loading...");
+        ConfigurationManager cm = new ConfigurationManager(url);
+        SphinxRecEngine engine = new SphinxRecEngine(cm);
+
+        for (int i=0; i < 12; i++) {
+            System.out.println(engine._jsgfGrammar.getRandomSentence());
+        }
+
+        RecognitionResult result;
+        while (true) {
+            result = doRecognize(engine);
+        }
+
+//        RuleParse ruleParse = engine.parse("", "main");
+
+
+        //System.exit(0);
+    }
+
+    private static RecognitionResult doRecognize(SphinxRecEngine engine)
+      throws NoDataSourceException, IOException, NoProcessorException, CannotRealizeException {
+
+        engine.activate();
+
+        DataSource dataSource = Manager.createDataSource(MICROPHONE);
+        ProcessorModel pm = new ProcessorModel(dataSource, PREFERRED_MEDIA_FORMATS, CONTENT_DESCRIPTOR_RAW);
+        Processor processor = Manager.createRealizedProcessor(pm);
+        processor.addControllerListener(new Listener());
+
+        PushBufferDataSource pbds = (PushBufferDataSource) processor.getDataOutput();
+        engine.startRecognition(pbds);
+        processor.start();
+        System.out.println("Performing recognition...");
+        RecognitionResult result = engine.waitForResult(null);
+        System.out.println("**************************************************\n" +
+                           "result: " + result + "\n" +
+                           "**************************************************");
+
+        engine.passivate();
+
+        return result;
+    }
+    
+    private static class Listener implements ControllerListener {
+
+        /* (non-Javadoc)
+         * @see javax.media.ControllerListener#controllerUpdate(javax.media.ControllerEvent)
+         */
+        public void controllerUpdate(ControllerEvent event) {
+            System.out.println("RTPRecogChannel: ControllerEvent received: " + event);
+            try {
+                if (event instanceof StartEvent) {
+                    Processor processor = (Processor) event.getSourceController();
+                    DataSource dataSource = processor.getDataOutput();
+                    System.out.println("Starting data source...");
+                    dataSource.connect();
+                    dataSource.start();
+                //} else if (event instanceof StopEvent) { //EndOfMediaEvent) {
+                    //event.getSourceController().close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+
     }
 
 }
