@@ -1,7 +1,7 @@
 package com.onomatopia.cairo.server.recog.sphinx;
 
 import com.onomatopia.cairo.util.BlockingFifoQueue;
-import com.onomatopia.util.ByteHexConverter;
+import com.onomatopia.cairo.util.ByteHexConverter;
 
 import java.io.FileWriter;
 import java.io.IOException;
