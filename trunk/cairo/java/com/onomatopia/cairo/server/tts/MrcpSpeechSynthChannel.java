@@ -101,6 +101,7 @@ public class MrcpSpeechSynthChannel extends MrcpGenericChannel implements Speech
         _rtpChannel.stopPlayback();
         statusCode = MrcpResponse.STATUS_SUCCESS;
 
+        //TODO: set Active-Request-Id-List header
 
         return session.createResponse(statusCode, requestState);
     }
@@ -125,8 +126,14 @@ public class MrcpSpeechSynthChannel extends MrcpGenericChannel implements Speech
      * @see org.mrcp4j.server.provider.SpeechSynthRequestHandler#bargeInOccurred(org.mrcp4j.message.request.MrcpRequestFactory.UnimplementedRequest, org.mrcp4j.server.MrcpSession)
      */
     public synchronized MrcpResponse bargeInOccurred(UnimplementedRequest request, MrcpSession session) {
-        // TODO Auto-generated method stub
-        return null;
+        MrcpRequestState requestState = MrcpRequestState.COMPLETE;
+        short statusCode = -1;
+        _rtpChannel.stopPlayback();
+        statusCode = MrcpResponse.STATUS_SUCCESS;
+
+        //TODO: set Active-Request-Id-List header
+
+        return session.createResponse(statusCode, requestState);
     }
 
     /* (non-Javadoc)
