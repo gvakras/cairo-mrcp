@@ -7,8 +7,6 @@ package com.onomatopia.cairo.server.resource;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.rmi.server.RMIClientSocketFactory;
-import java.rmi.server.RMIServerSocketFactory;
 import java.rmi.server.UnicastRemoteObject;
 
 import org.apache.log4j.Logger;
@@ -75,7 +73,7 @@ public class ResourceServerImpl extends UnicastRemoteObject implements ResourceS
         for (ResourceChannel channel : request.getChannels()) {
             MrcpResourceType resourceType = channel.getResourceType();
             channel.setChannelID(channelID + '@' + resourceType.toString());
-            Resource.Type type = translateType(resourceType);
+            Resource.Type type = Resource.Type.fromMrcpType(resourceType);
             if (type.equals(Resource.Type.RECEIVER)) {
                 receiver = true;
             } else {
@@ -94,20 +92,6 @@ public class ResourceServerImpl extends UnicastRemoteObject implements ResourceS
         } // TODO: catch exception and release transmitter resources
 
         return request;
-    }
-
-    private static Resource.Type translateType(MrcpResourceType resourceType) throws ResourceUnavailableException {
-        switch (resourceType) {
-        case SPEECHSYNTH:
-            return Resource.Type.TRANSMITTER;
-
-        case RECORDER:
-        case SPEECHRECOG:
-            return Resource.Type.RECEIVER;
-
-        default:
-            throw new ResourceUnavailableException("Unsupported resource type!");
-        }
     }
 
     /**

@@ -42,18 +42,5 @@ public abstract class ResourceImpl extends UnicastRemoteObject implements Resour
         return type.equals(_type);
     }*/
 
-    public static Resource.Type translateType(MrcpResourceType resourceType) throws ResourceUnavailableException {
-        switch (resourceType) {
-        case SPEECHSYNTH:
-            return Resource.Type.TRANSMITTER;
-
-        case RECORDER:
-        case SPEECHRECOG:
-            return Resource.Type.RECEIVER;
-
-        default:
-            throw new ResourceUnavailableException("Unsupported resource type!");
-        }
-    }
 
 }

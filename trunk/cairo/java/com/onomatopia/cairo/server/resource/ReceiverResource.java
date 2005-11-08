@@ -66,7 +66,7 @@ public class ReceiverResource extends ResourceImpl {
 
         for (ResourceChannel channel : request.getChannels()) {
             MrcpResourceType resourceType = channel.getResourceType();
-            Type type = translateType(resourceType);
+            Type type = Resource.Type.fromMrcpType(resourceType);
             if (type.equals(RESOURCE_TYPE)) {
                 channels.add(channel);
             }
