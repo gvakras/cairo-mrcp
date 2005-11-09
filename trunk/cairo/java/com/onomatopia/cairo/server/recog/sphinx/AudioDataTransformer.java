@@ -33,6 +33,10 @@ public class AudioDataTransformer {
                 samples = convertStereoToMono(samples, _sourceFormat.getChannels());
             }
 
+            /*for (double sample : samples) {
+                System.out.println(sample);
+            }*/
+
             return new DoubleData(samples, _sourceFormat.getSampleRate(), collectTime, firstSampleNumber);
     }
 
