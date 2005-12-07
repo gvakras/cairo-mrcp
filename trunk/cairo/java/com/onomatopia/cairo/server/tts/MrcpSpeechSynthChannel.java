@@ -29,14 +29,8 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.media.rtp.InvalidSessionAddressException;
-import javax.sound.sampled.AudioFileFormat;
 
-import com.sun.speech.freetts.Voice;
-import com.sun.speech.freetts.VoiceManager;
-import com.sun.speech.freetts.audio.AudioPlayer;
-import com.sun.speech.freetts.audio.SingleFileAudioPlayer;
 
-import org.apache.commons.lang.Validate;
 import org.mrcp4j.MrcpRequestState;
 import org.mrcp4j.message.MrcpResponse;
 import org.mrcp4j.message.header.IllegalValueException;
@@ -59,20 +53,29 @@ public class MrcpSpeechSynthChannel extends MrcpGenericChannel implements Speech
 //
 //    volatile short _state = IDLE;
 
-    //private String _channelID;
     private PromptGenerator _promptGenerator;
     private RTPSpeechSynthChannel _rtpChannel;
+    private File _promptDir;
 
     /**
      * TODOC
      * @param channelID 
      * @param basePromptDir 
      * @param rtpChannel 
+     * @throws IllegalArgumentException 
      */
-    public MrcpSpeechSynthChannel(String channelID, RTPSpeechSynthChannel rtpChannel, File basePromptDir) {
-        //_channelID = channelID;
+    public MrcpSpeechSynthChannel(String channelID, RTPSpeechSynthChannel rtpChannel, File basePromptDir) throws IllegalArgumentException {
+        if (basePromptDir == null || !basePromptDir.isDirectory()) {
+            throw new IllegalArgumentException("Base prompt directory file specified does not exist or is not a directory: " + basePromptDir);
+        }
+
+        _promptDir = new File(basePromptDir, channelID);
+        if (!_promptDir.mkdir()) {
+            throw new RuntimeException("Could not make prompt directory: " + _promptDir.getAbsolutePath());
+        }
+
         _rtpChannel = rtpChannel;
-        _promptGenerator = new PromptGenerator(channelID, basePromptDir);
+        _promptGenerator = new PromptGenerator();
     }
 
     /* (non-Javadoc)
@@ -87,7 +90,7 @@ public class MrcpSpeechSynthChannel extends MrcpGenericChannel implements Speech
             if (contentType.equalsIgnoreCase("text/plain")) {
                 String text = request.getContent();
                 try {
-                    File promptFile = _promptGenerator.generatePrompt(text);
+                    File promptFile = _promptGenerator.generatePrompt(text, _promptDir);
                     int state = _rtpChannel.queuePrompt(promptFile);
                     requestState = (state == RTPSpeechSynthChannel.IDLE) ? MrcpRequestState.IN_PROGRESS : MrcpRequestState.PENDING;
                     statusCode = MrcpResponse.STATUS_SUCCESS;
@@ -177,51 +180,6 @@ public class MrcpSpeechSynthChannel extends MrcpGenericChannel implements Speech
     @Override
     protected boolean validateParam(MrcpHeader header) throws UnsupportedHeaderException, IllegalValueException {
         throw new UnsupportedHeaderException();
-    }
-
-    /**
-     * TODOC
-     *
-     */
-    private static class PromptGenerator {
-
-        //private String _channelID;
-        private File _promptDir;
-        private Voice _voice;
-
-        public PromptGenerator(String channelID, File basePromptDir) {
-            //_channelID = channelID;
-            Validate.isTrue(basePromptDir.isDirectory(), "basePromptDir parameter was not a directory: ", basePromptDir);
-            _promptDir = new File(basePromptDir, channelID);
-            if (!_promptDir.mkdir()) {
-                throw new IllegalArgumentException("Specified directory not valid: " + _promptDir.getAbsolutePath());
-            }
-            
-            String voiceName = "kevin16";
-            VoiceManager voiceManager = VoiceManager.getInstance();
-            _voice = voiceManager.getVoice(voiceName);
-
-            if (_voice == null) {
-                throw new RuntimeException("No tts voice found!");
-            }
-            _voice.allocate();
-        }
-
-        public synchronized File generatePrompt(String text) {
-            String promptName = Long.toString(System.currentTimeMillis());
-            File promptFile = new File(_promptDir, promptName);
-            AudioPlayer ap = new SingleFileAudioPlayer(promptFile.getAbsolutePath(), AudioFileFormat.Type.WAVE);
-            _voice.setAudioPlayer(ap);
-            _voice.speak(text);
-            ap.close();
-            _voice.setAudioPlayer(null);
-            promptFile = new File(_promptDir, promptName + ".wav");
-            if (!promptFile.exists()) {
-                throw new RuntimeException("generated prompt file does not exist!");
-            }
-            return promptFile;
-        }
-        
     }
 
 }
