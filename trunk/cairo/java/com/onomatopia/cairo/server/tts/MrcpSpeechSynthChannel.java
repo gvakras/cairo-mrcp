@@ -22,6 +22,7 @@
  */
 package com.onomatopia.cairo.server.tts;
 
+import com.onomatopia.cairo.exception.UnsupportedHeaderException;
 import com.onomatopia.cairo.server.MrcpGenericChannel;
 
 import java.io.File;
@@ -38,17 +39,17 @@ import com.sun.speech.freetts.audio.SingleFileAudioPlayer;
 import org.apache.commons.lang.Validate;
 import org.mrcp4j.MrcpRequestState;
 import org.mrcp4j.message.MrcpResponse;
+import org.mrcp4j.message.header.IllegalValueException;
 import org.mrcp4j.message.header.MrcpHeader;
-import org.mrcp4j.message.header.MrcpHeaderFactory;
 import org.mrcp4j.message.request.StopRequest;
 import org.mrcp4j.message.request.MrcpRequestFactory.UnimplementedRequest;
 import org.mrcp4j.server.MrcpSession;
 import org.mrcp4j.server.provider.SpeechSynthRequestHandler;
 
 /**
- * TODOC
- * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
+ * MRCP channel implementation for "speechsynth" resource.
  *
+ * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */
 public class MrcpSpeechSynthChannel extends MrcpGenericChannel implements SpeechSynthRequestHandler {
 
@@ -84,7 +85,7 @@ public class MrcpSpeechSynthChannel extends MrcpGenericChannel implements Speech
         if (request.hasContent()) {
             String contentType = request.getContentType();
             if (contentType.equalsIgnoreCase("text/plain")) {
-                String text = /*"What's " +*/ request.getContent();
+                String text = request.getContent();
                 try {
                     File promptFile = _promptGenerator.generatePrompt(text);
                     int state = _rtpChannel.queuePrompt(promptFile);
@@ -168,6 +169,14 @@ public class MrcpSpeechSynthChannel extends MrcpGenericChannel implements Speech
     public synchronized MrcpResponse defineLexicon(UnimplementedRequest request, MrcpSession session) {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.onomatopia.cairo.server.MrcpGenericChannel#validateParam(org.mrcp4j.message.header.MrcpHeader)
+     */
+    @Override
+    protected boolean validateParam(MrcpHeader header) throws UnsupportedHeaderException, IllegalValueException {
+        throw new UnsupportedHeaderException();
     }
 
     /**
