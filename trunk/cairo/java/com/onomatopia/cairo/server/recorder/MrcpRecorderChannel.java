@@ -22,6 +22,7 @@
  */
 package com.onomatopia.cairo.server.recorder;
 
+import com.onomatopia.cairo.exception.UnsupportedHeaderException;
 import com.onomatopia.cairo.server.MrcpGenericChannel;
 import com.onomatopia.cairo.server.rtp.RTPStreamReplicator;
 
@@ -32,6 +33,8 @@ import java.io.InputStreamReader;
 
 import org.mrcp4j.MrcpRequestState;
 import org.mrcp4j.message.MrcpResponse;
+import org.mrcp4j.message.header.IllegalValueException;
+import org.mrcp4j.message.header.MrcpHeader;
 import org.mrcp4j.message.request.RecordRequest;
 import org.mrcp4j.message.request.StartInputTimersRequest;
 import org.mrcp4j.message.request.StopRequest;
@@ -53,6 +56,9 @@ public class MrcpRecorderChannel extends MrcpGenericChannel implements RecorderR
         _recorderChannel = recorderChannel;
     }
 
+    /* (non-Javadoc)
+     * @see org.mrcp4j.server.provider.RecorderRequestHandler#record(org.mrcp4j.message.request.RecordRequest, org.mrcp4j.server.MrcpSession)
+     */
     public synchronized MrcpResponse record(RecordRequest request, MrcpSession session) {
         MrcpRequestState requestState = MrcpRequestState.COMPLETE;
         short statusCode = -1;
@@ -76,6 +82,9 @@ public class MrcpRecorderChannel extends MrcpGenericChannel implements RecorderR
         return session.createResponse(statusCode, requestState);
     }
 
+    /* (non-Javadoc)
+     * @see org.mrcp4j.server.provider.RecorderRequestHandler#stop(org.mrcp4j.message.request.StopRequest, org.mrcp4j.server.MrcpSession)
+     */
     public synchronized MrcpResponse stop(StopRequest request, MrcpSession session) {
         MrcpRequestState requestState = MrcpRequestState.COMPLETE;
         short statusCode = -1;
@@ -91,12 +100,23 @@ public class MrcpRecorderChannel extends MrcpGenericChannel implements RecorderR
         } else {
             statusCode = MrcpResponse.STATUS_METHOD_NOT_VALID_IN_STATE;
         }
-        // TODO: release event acceptor if request is complete
         return session.createResponse(statusCode, requestState);
     }
 
+    /* (non-Javadoc)
+     * @see org.mrcp4j.server.provider.RecorderRequestHandler#startInputTimers(org.mrcp4j.message.request.StartInputTimersRequest, org.mrcp4j.server.MrcpSession)
+     */
     public synchronized MrcpResponse startInputTimers(StartInputTimersRequest request, MrcpSession session) {
         return session.createResponse(MrcpResponse.STATUS_SERVER_INTERNAL_ERROR, MrcpRequestState.COMPLETE);
+    }
+
+    /* (non-Javadoc)
+     * @see com.onomatopia.cairo.server.MrcpGenericChannel#validateParam(org.mrcp4j.message.header.MrcpHeader)
+     */
+    @Override
+    protected boolean validateParam(MrcpHeader header) throws UnsupportedHeaderException, IllegalValueException {
+        // TODO: check if param is valid
+        throw new UnsupportedHeaderException();
     }
 
     public static void main(String[] args) throws Exception {
