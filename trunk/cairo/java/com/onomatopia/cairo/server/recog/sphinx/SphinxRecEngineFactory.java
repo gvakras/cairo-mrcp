@@ -1,20 +1,21 @@
 package com.onomatopia.cairo.server.recog.sphinx;
 
-import com.onomatopia.cairo.server.config.ReceiverConfig;
 import com.onomatopia.cairo.util.ConfigUtil;
+import com.onomatopia.cairo.util.pool.AbstractPoolableObjectFactory;
+import com.onomatopia.cairo.util.pool.PoolableObject;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
 
 import edu.cmu.sphinx.util.props.ConfigurationManager;
 
 import org.apache.commons.pool.ObjectPool;
 import org.apache.commons.pool.PoolableObjectFactory;
 import org.apache.commons.pool.impl.GenericObjectPool;
+import org.apache.log4j.Logger;
 
-public class SphinxRecEngineFactory implements PoolableObjectFactory {
+public class SphinxRecEngineFactory extends AbstractPoolableObjectFactory {
+
+    private static Logger _logger = Logger.getLogger(SphinxRecEngineFactory.class);
 
     URL _sphinxConfigURL = null;
 
@@ -22,28 +23,13 @@ public class SphinxRecEngineFactory implements PoolableObjectFactory {
         _sphinxConfigURL = sphinxConfigURL;
     }
 
-    public Object makeObject() throws Exception {
+    /* (non-Javadoc)
+     * @see org.apache.commons.pool.PoolableObjectFactory#makeObject()
+     */
+    @Override
+    public PoolableObject makeObject() throws Exception {
         ConfigurationManager cm = new ConfigurationManager(_sphinxConfigURL);
         return new SphinxRecEngine(cm);
-    }
-
-    public void activateObject(Object obj) throws Exception {
-        SphinxRecEngine recEngine = (SphinxRecEngine) obj;
-        recEngine.activate();
-    }
-
-    public void passivateObject(Object obj) {
-        SphinxRecEngine recEngine = (SphinxRecEngine) obj;
-        recEngine.passivate();
-    }
-
-    public boolean validateObject(Object obj) {
-        return true;
-    }
-
-    public void destroyObject(Object obj) {
-        //SphinxRecEngine recEngine = (SphinxRecEngine) obj;
-        // TODO: destroy object
     }
 
     /**
@@ -55,11 +41,14 @@ public class SphinxRecEngineFactory implements PoolableObjectFactory {
      */
     public static ObjectPool createObjectPool(URL sphinxConfigURL, int instances)
       throws InstantiationException {
+        
+        if (_logger.isDebugEnabled()) {
+            _logger.debug("creating new rec engine pool... instances: " + instances);
+        }
 
-        System.out.println("creating new rec engine pool... instances: " + instances);
         PoolableObjectFactory factory = new SphinxRecEngineFactory(sphinxConfigURL);
         GenericObjectPool.Config config = ConfigUtil.getGenericObjectPoolConfig(instances);
-        // TODO: initialize instances
+
         ObjectPool objectPool = new GenericObjectPool(factory, config);
         try {
             initPool(objectPool);
@@ -72,20 +61,6 @@ public class SphinxRecEngineFactory implements PoolableObjectFactory {
             throw (InstantiationException) new InstantiationException(e.getMessage()).initCause(e);
         }
         return objectPool;
-    }
-
-    private static void initPool(ObjectPool pool) throws Exception {
-        List<Object> objects = new ArrayList<Object>();
-        while (true) try {
-            objects.add(pool.borrowObject());
-        } catch (NoSuchElementException e){
-            // ignore, max active reached
-            //e.printStackTrace();
-            break;
-        }
-        for (Object obj : objects) {
-            pool.returnObject(obj);
-        }
     }
 
 }
