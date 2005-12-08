@@ -32,16 +32,17 @@ public interface RecogListener {
     /**
      * TODOC
      */
-    public void recognitionComplete();
-
-    /**
-     * TODOC
-     */
     public void speechStarted();
 
     /**
      * TODOC
+     * @param result 
      */
-    public void speechEnded();
+    public void recognitionComplete(RecognitionResult result);
+
+    /**
+     * TODOC
+     */
+    public void noInputTimeout();
 
 }
