@@ -24,6 +24,7 @@ package com.onomatopia.cairo.server.rtp;
 
 import com.onomatopia.cairo.server.recog.sphinx.SourceAudioFormat;
 import com.onomatopia.cairo.server.rtp.PBDSReplicator;
+import com.onomatopia.cairo.util.jmf.ProcessorStarter;
 
 import java.io.File;
 import java.io.IOException;
@@ -45,6 +46,8 @@ import javax.media.protocol.PushBufferDataSource;
 import javax.media.rtp.Participant;
 import javax.media.rtp.ReceiveStream;
 
+import org.apache.log4j.Logger;
+
 
 /**
  * TODOC
@@ -52,6 +55,8 @@ import javax.media.rtp.ReceiveStream;
  *
  */
 public class RTPStreamReplicator extends RTPConsumer {
+
+    private static Logger _logger = Logger.getLogger(RTPStreamReplicator.class);
 
     private static AudioFormat[] PREFERRED_MEDIA_FORMATS = {SourceAudioFormat.PREFERRED_MEDIA_FORMAT};
 
@@ -94,8 +99,9 @@ public class RTPStreamReplicator extends RTPConsumer {
                 ProcessorModel pm = new ProcessorModel(
                         dataSource, PREFERRED_MEDIA_FORMATS, CONTENT_DESCRIPTOR_RAW);
                 try {
-                    System.out.println("Creating realized processor...");
+                    _logger.debug("Creating realized processor...");
                     _processor = Manager.createRealizedProcessor(pm);
+                    _processor.addControllerListener(new ProcessorStarter());
                 } catch (IOException e){
                     throw e;
                 } catch (javax.media.CannotRealizeException e){
@@ -104,7 +110,7 @@ public class RTPStreamReplicator extends RTPConsumer {
                     throw (IOException) new IOException(e.getMessage()).initCause(e);
                 }
 
-                System.out.println("Processor realized.");
+                _logger.debug("Processor realized.");
 
                 PushBufferDataSource pbds = (PushBufferDataSource) _processor.getDataOutput();
                 _replicator = new PBDSReplicator(pbds);
@@ -113,7 +119,7 @@ public class RTPStreamReplicator extends RTPConsumer {
             } catch (IOException e) {
                 _processor = null;
                 _replicator = null;  // TODO: close properly
-                e.printStackTrace();
+                _logger.warn(e, e);
             }
         }
     }
@@ -134,7 +140,9 @@ public class RTPStreamReplicator extends RTPConsumer {
         //if (byeEvent) {
             _replicator = null; // TODO: close data source properly, make sure this triggers EndOfStreamEvent in replicated PBDS
             if (_processor != null) {
-                System.out.println("Closing RTP processor for SSRC=" + stream.getSSRC());
+                if (_logger.isDebugEnabled()) {
+                    _logger.debug("Closing RTP processor for SSRC=" + stream.getSSRC());
+                }
                 _processor.close();
                 _processor = null;
             }
@@ -158,7 +166,7 @@ public class RTPStreamReplicator extends RTPConsumer {
                     this.wait(maxWait); //TODO: make sure timeout period has passed
                 } catch (InterruptedException e) {
                     // TODO: throw this exception?
-                    e.printStackTrace();
+                    _logger.warn(e, e);
                 }
             }
             if (_replicator == null) {
@@ -171,7 +179,7 @@ public class RTPStreamReplicator extends RTPConsumer {
             _replicator.replicate(), PREFERRED_MEDIA_FORMATS, outputContentDescriptor);
         Processor processor;
         try {
-            System.out.println("Creating realized processor...");
+            _logger.debug("Creating realized processor...");
             processor = Manager.createRealizedProcessor(pm);
         } catch (IOException e){
             throw e;
@@ -181,7 +189,7 @@ public class RTPStreamReplicator extends RTPConsumer {
             throw (IOException) new IOException(e.getMessage()).initCause(e);
         }
 
-        System.out.println("Processor realized.");
+        _logger.debug("Processor realized.");
 
         return processor;
 

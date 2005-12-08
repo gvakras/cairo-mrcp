@@ -35,11 +35,15 @@ import javax.media.protocol.ContentDescriptor;
 import javax.media.protocol.PushBufferDataSource;
 import javax.media.protocol.PushBufferStream;
 
+import org.apache.log4j.Logger;
+
 /**
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  *
  */
 public class PBDSReplicator implements BufferTransferHandler {
+
+    static Logger _logger = Logger.getLogger(PBDSReplicator.class);
 
     static final Object[] EMPTY_CONTROLS_ARRAY = new Object[0];
 
@@ -56,22 +60,23 @@ public class PBDSReplicator implements BufferTransferHandler {
         _pbds = pbds;
         PushBufferStream[] pbStreams = _pbds.getStreams();
         if (pbStreams.length != 1) {
-            if (pbStreams.length > 1) {
-                System.out.println("Only first stream handled, total streams received: " + pbStreams.length);
+            if (pbStreams.length < 1) {
+                throw new IOException("PushBufferDataSource.getStreams() returned zero streams!");
+            } else if (_logger.isDebugEnabled()) {
+                _logger.debug("Only first stream handled, total streams received: " + pbStreams.length);
                 for (int i = 0; i < pbStreams.length; i++) {
                     ContentDescriptor cd = pbStreams[i].getContentDescriptor();
-                    System.out.println("stream " + i + " content type: " + cd.getContentType());
-                    System.out.println("stream " + i + " format: " + pbStreams[i].getFormat());
+                    _logger.debug("stream " + i + " content type: " + cd.getContentType());
+                    _logger.debug("stream " + i + " format: " + pbStreams[i].getFormat());
                 }
-            } else {
-                throw new IOException("PushBufferDataSource.getStreams() returned zero streams!");
             }
         }
 
         pbStreams[0].setTransferHandler(this);
         _format = pbStreams[0].getFormat();
-        _pbds.connect();
-        _pbds.start();
+
+//        _pbds.connect();
+//        _pbds.start();
     }
     
     public PushBufferDataSource replicate() {
@@ -93,7 +98,7 @@ public class PBDSReplicator implements BufferTransferHandler {
             pbs.read(buffer);
         } catch (IOException e) {
             ioe = e;
-            e.printStackTrace();
+            _logger.debug(e, e);
         }
         
         synchronized (_destinations) {
@@ -181,7 +186,9 @@ public class PBDSReplicator implements BufferTransferHandler {
          */
         @Override
         public Object getControl(String controlType) {
-            System.out.println("getControl() request received: controlType=" + controlType);
+            if (_logger.isDebugEnabled()) {
+                _logger.debug("getControl() request received: controlType=" + controlType);
+            }
             return _pbds.getControl(controlType);
         }
 
