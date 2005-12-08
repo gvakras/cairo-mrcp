@@ -3,7 +3,11 @@ package com.onomatopia.cairo.server.recog.sphinx;
 import edu.cmu.sphinx.frontend.DoubleData;
 import edu.cmu.sphinx.frontend.util.DataUtil;
 
+import org.apache.log4j.Logger;
+
 public class AudioDataTransformer {
+
+    private static Logger _logger = Logger.getLogger(AudioDataTransformer.class);
 
     public final static String STEREO_TO_MONO_AVERAGE = "average";
     public final static String STEREO_TO_MONO_SELECT_CHANNEL = "selectChannel";
@@ -32,10 +36,11 @@ public class AudioDataTransformer {
             if (_sourceFormat.getChannels() > 1) {
                 samples = convertStereoToMono(samples, _sourceFormat.getChannels());
             }
-
-            /*for (double sample : samples) {
-                System.out.println(sample);
-            }*/
+            if (_logger.isTraceEnabled()) {
+                for (double sample : samples) {
+                    _logger.trace("sample: " + sample);
+                }
+            }
 
             return new DoubleData(samples, _sourceFormat.getSampleRate(), collectTime, firstSampleNumber);
     }

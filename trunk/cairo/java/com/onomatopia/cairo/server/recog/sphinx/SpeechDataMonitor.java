@@ -30,13 +30,17 @@ import edu.cmu.sphinx.frontend.DataProcessingException;
 import edu.cmu.sphinx.frontend.endpoint.SpeechEndSignal;
 import edu.cmu.sphinx.frontend.endpoint.SpeechStartSignal;
 
+import org.apache.log4j.Logger;
+
 /**
  * TODOC
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  *
  */
 public class SpeechDataMonitor extends BaseDataProcessor {
-    
+
+    private static Logger _logger = Logger.getLogger(SpeechDataMonitor.class);
+
     private SpeechEventListener _speechEventListener = null;
 
     /**
@@ -66,14 +70,14 @@ public class SpeechDataMonitor extends BaseDataProcessor {
     }
     
     private void broadcastSpeechStartSignal() {
-        System.out.println("\n*************** SpeechStartSignal encountered!\n");
+        _logger.debug("*************** SpeechStartSignal encountered!");
         if (_speechEventListener != null) {
             _speechEventListener.speechStarted();
         }
     }
 
     private void broadcastSpeechEndSignal() {
-        System.out.println("\n*************** SpeechEndSignal encountered!\n");
+        _logger.debug("*************** SpeechEndSignal encountered!");
         if (_speechEventListener != null) {
             _speechEventListener.speechEnded();
         }

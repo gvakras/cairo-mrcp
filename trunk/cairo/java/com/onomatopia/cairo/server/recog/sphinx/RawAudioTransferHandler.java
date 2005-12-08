@@ -46,6 +46,7 @@ public class RawAudioTransferHandler implements BufferTransferHandler {
     }
 
     public synchronized void stopProcessing() {
+        _logger.debug("Stopping RawAudioProcessor...");
         if (_rawAudioProcessor != null) {
             _rawAudioProcessor.stopProcessing();
             _rawAudioProcessor = null;
