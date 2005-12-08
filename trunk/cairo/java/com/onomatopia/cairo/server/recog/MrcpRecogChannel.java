@@ -22,24 +22,27 @@
  */
 package com.onomatopia.cairo.server.recog;
 
+import com.onomatopia.cairo.exception.UnsupportedHeaderException;
 import com.onomatopia.cairo.server.MrcpGenericChannel;
 import com.onomatopia.cairo.server.resource.ResourceUnavailableException;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.EnumSet;
 import java.util.concurrent.TimeoutException;
 
 import javax.speech.recognition.GrammarException;
 
+import org.apache.log4j.Logger;
 import org.mrcp4j.MrcpEventName;
 import org.mrcp4j.MrcpRequestState;
+import org.mrcp4j.MrcpResourceType;
 import org.mrcp4j.message.MrcpEvent;
 import org.mrcp4j.message.MrcpResponse;
-import org.mrcp4j.message.header.CompletionCauseHeader;
-import org.mrcp4j.message.header.CompletionReasonHeader;
-import org.mrcp4j.message.header.ContentIdHeader;
+import org.mrcp4j.message.header.CompletionCause;
+import org.mrcp4j.message.header.IllegalValueException;
 import org.mrcp4j.message.header.MrcpHeader;
-import org.mrcp4j.message.header.MrcpHeaderFactory;
+import org.mrcp4j.message.header.MrcpHeaderName;
 import org.mrcp4j.message.request.StartInputTimersRequest;
 import org.mrcp4j.message.request.StopRequest;
 import org.mrcp4j.message.request.MrcpRequestFactory.UnimplementedRequest;
@@ -53,9 +56,16 @@ import org.mrcp4j.server.provider.RecogOnlyRequestHandler;
  */
 public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyRequestHandler {
 
-    private static short IDLE = 0;
-    private static short RECOGNIZING = 1;
-    private static short RECOGNIZED = 2;
+    private static final Long LONG_MINUS_ONE = new Long(-1);
+
+    static Logger _logger = Logger.getLogger(MrcpRecogChannel.class);
+
+    public static Long DEFAULT_NO_INPUT_TIMEOUT = new Long(10000);
+    public static Boolean DEFAULT_START_INPUT_TIMERS = Boolean.TRUE;
+
+    static short IDLE = 0;
+    static short RECOGNIZING = 1;
+    static short RECOGNIZED = 2;
 
     private RTPRecogChannel _rtpChannel;
     /*volatile*/ short _state = IDLE;
@@ -88,8 +98,8 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
     public synchronized MrcpResponse recognize(UnimplementedRequest request, MrcpSession session) {
 
         MrcpRequestState requestState = MrcpRequestState.COMPLETE;
-        CompletionCauseHeader completionCauseHeader = null;
-        CompletionReasonHeader completionReasonHeader = null;
+        MrcpHeader completionCauseHeader = null;
+        MrcpHeader completionReasonHeader = null;
         short statusCode = -1;
 
         if (_state == RECOGNIZING) {
@@ -100,12 +110,12 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
                 String contentType = request.getContentType();
                 if (contentType.equalsIgnoreCase("application/jsgf")) {
                     // save grammar to file
-                    MrcpHeader contentIdHeader = request.getHeader(ContentIdHeader.NAME);
-                    String grammarID = (contentIdHeader == null) ? null : contentIdHeader.getValue();
+                    MrcpHeader contentIdHeader = request.getHeader(MrcpHeaderName.CONTENT_ID);
+                    String grammarID = (contentIdHeader == null) ? null : contentIdHeader.getValueString();
                     try {
                         grammarLocation = _grammarManager.saveGrammar(grammarID, request.getContent());
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        _logger.debug(e, e);
                         statusCode = MrcpResponse.STATUS_SERVER_INTERNAL_ERROR;
                     }
                 } else {
@@ -114,32 +124,39 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
             }
             if (statusCode < 0) { // status not yet set
                 try {
-                    _rtpChannel.recognize(new Listener(session), false, grammarLocation); // TODO: retrieve header for boolean value
+                    Boolean startInputTimers = (Boolean) getParam(MrcpHeaderName.START_INPUT_TIMERS, request, DEFAULT_START_INPUT_TIMERS);
+                    Long noInputTimeout = (startInputTimers.booleanValue()) ?
+                            (Long) getParam(MrcpHeaderName.NO_INPUT_TIMEOUT, request, DEFAULT_NO_INPUT_TIMEOUT) : LONG_MINUS_ONE;
+                    _rtpChannel.recognize(new Listener(session), grammarLocation, noInputTimeout.longValue());
                     statusCode = MrcpResponse.STATUS_SUCCESS;
                     requestState = MrcpRequestState.IN_PROGRESS;
                     _state = RECOGNIZING;
                 } catch (IllegalStateException e) {
-                    e.printStackTrace();
+                    _logger.debug(e, e);
                     statusCode = MrcpResponse.STATUS_METHOD_NOT_VALID_IN_STATE;
                     // TODO: add completion cause header
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    _logger.debug(e, e);
                     statusCode = MrcpResponse.STATUS_SERVER_INTERNAL_ERROR;
                     // TODO: add completion cause header
                 } catch (ResourceUnavailableException e) {
-                    e.printStackTrace();
+                    _logger.debug(e, e);
                     statusCode = MrcpResponse.STATUS_SERVER_INTERNAL_ERROR;
                     // TODO: add completion cause header
                 } catch (GrammarException e) {
-                    e.printStackTrace();
+                    _logger.debug(e, e);
                     statusCode = MrcpResponse.STATUS_OPERATION_FAILED;
-                    completionCauseHeader = new CompletionCauseHeader((short) 4, "grammar-load-failure");
-                    completionReasonHeader = new CompletionReasonHeader(e.getMessage());
+                    CompletionCause completionCause = new CompletionCause((short) 4, "grammar-load-failure");
+                    completionCauseHeader = MrcpHeaderName.COMPLETION_CAUSE.constructHeader(completionCause);
+                    completionReasonHeader = MrcpHeaderName.COMPLETION_REASON.constructHeader(e.getMessage());
+                } catch (IllegalValueException e) {
+                    _logger.debug(e, e);
+                    statusCode = MrcpResponse.STATUS_ILLEGAL_VALUE_FOR_HEADER;
+                    // TODO: add completion cause header
+                    // TODO: add bad value headers
                 }
             }
         }
-
-        // TODO: cache event acceptor if request is not complete
 
         MrcpResponse response = session.createResponse(statusCode, requestState);
         response.addHeader(completionCauseHeader);
@@ -167,8 +184,22 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
      * @see org.mrcp4j.server.provider.RecogOnlyRequestHandler#startInputTimers(org.mrcp4j.message.request.StartInputTimersRequest, org.mrcp4j.server.MrcpSession)
      */
     public synchronized MrcpResponse startInputTimers(StartInputTimersRequest request, MrcpSession session) {
-        // TODO Auto-generated method stub
-        return null;
+        MrcpResponse response = null;
+
+        try {
+            Long noInputTimeout = (Long) getParam(MrcpHeaderName.NO_INPUT_TIMEOUT, request, DEFAULT_NO_INPUT_TIMEOUT);
+            _rtpChannel.startInputTimers(noInputTimeout.longValue());
+            response = session.createResponse(MrcpResponse.STATUS_SUCCESS, MrcpRequestState.COMPLETE);
+        } catch (IllegalStateException e) {
+            _logger.debug(e, e);
+            response = session.createResponse(MrcpResponse.STATUS_METHOD_NOT_VALID_IN_STATE, MrcpRequestState.COMPLETE);
+        } catch (IllegalValueException e) {
+            _logger.debug(e, e);
+            response = session.createResponse(MrcpResponse.STATUS_ILLEGAL_VALUE_FOR_HEADER, MrcpRequestState.COMPLETE);
+            response.addHeader(request.getHeader(MrcpHeaderName.NO_INPUT_TIMEOUT));  // TODO: get header name from exception?
+        }
+
+        return response;
     }
 
     /* (non-Javadoc)
@@ -194,7 +225,7 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
         /* (non-Javadoc)
          * @see com.onomatopia.cairo.server.recog.RecogListener#recognitionComplete()
          */
-        public void recognitionComplete() {
+        public void recognitionComplete(RecognitionResult result) {
             try {
                 synchronized (MrcpRecogChannel.this) {
                     _state = RECOGNIZED;
@@ -206,10 +237,10 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
                 _session.postEvent(event);
             } catch (IllegalStateException e) {
                 // TODO Auto-generated catch block
-                e.printStackTrace();
+                _logger.debug(e, e);
             } catch (TimeoutException e) {
                 // TODO Auto-generated catch block
-                e.printStackTrace();
+                _logger.debug(e, e);
             }
         }
 
@@ -226,21 +257,59 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
                 _session.postEvent(event);
             } catch (IllegalStateException e) {
                 // TODO Auto-generated catch block
-                e.printStackTrace();
+                _logger.debug(e, e);
             } catch (TimeoutException e) {
                 // TODO Auto-generated catch block
-                e.printStackTrace();
+                _logger.debug(e, e);
             }
         }
 
         /* (non-Javadoc)
-         * @see com.onomatopia.cairo.server.recog.RecogListener#speechEnded()
+         * @see com.onomatopia.cairo.server.recog.RecogListener#noInputTimeout()
          */
-        public void speechEnded() {
-            // TODO Auto-generated method stub
+        public void noInputTimeout() {
+            try {
+                //TODO: check state before posting event
+                MrcpEvent event = _session.createEvent(
+                        MrcpEventName.RECOGNITION_COMPLETE,
+                        MrcpRequestState.COMPLETE
+                );
+                CompletionCause completionCause = new CompletionCause((short) 2, "no-input-timeout");
+                MrcpHeader completionCauseHeader = MrcpHeaderName.COMPLETION_CAUSE.constructHeader(completionCause);
+                event.addHeader(completionCauseHeader);
+                _session.postEvent(event);
+            } catch (IllegalStateException e) {
+                // TODO Auto-generated catch block
+                _logger.debug(e, e);
+            } catch (TimeoutException e) {
+                // TODO Auto-generated catch block
+                _logger.debug(e, e);
+            }
             
         }
         
+    }
+
+    // TODO: define which headers are supported fully
+    private static EnumSet FULLY_SUPPORTED_HEADERS  = EnumSet.of(MrcpHeaderName.START_INPUT_TIMERS);
+
+    /* (non-Javadoc)
+     * @see com.onomatopia.cairo.server.MrcpGenericChannel#validateParam(org.mrcp4j.message.header.MrcpHeader)
+     */
+    @Override
+    protected boolean validateParam(MrcpHeader header) throws UnsupportedHeaderException, IllegalValueException {
+        header.getValueObject();
+        MrcpHeaderName headerName = header.getHeaderName();
+        if (headerName == null) {
+            throw new UnsupportedHeaderException();
+        }
+        if (!headerName.isApplicableTo(MrcpResourceType.SPEECHRECOG)) {
+            throw new UnsupportedHeaderException();
+        }
+        if (MrcpHeaderName.ENROLLMENT_HEADER_NAMES.contains(headerName)) {
+            throw new UnsupportedHeaderException();
+        }
+        return FULLY_SUPPORTED_HEADERS.contains(header);
     }
 
 }
