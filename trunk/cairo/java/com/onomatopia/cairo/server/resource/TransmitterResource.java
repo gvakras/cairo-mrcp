@@ -26,6 +26,7 @@ package com.onomatopia.cairo.server.resource;
 import com.onomatopia.cairo.server.config.CairoConfig;
 import com.onomatopia.cairo.server.config.TransmitterConfig;
 import com.onomatopia.cairo.server.tts.MrcpSpeechSynthChannel;
+import com.onomatopia.cairo.server.tts.PromptGeneratorFactory;
 import com.onomatopia.cairo.server.tts.RTPSpeechSynthChannel;
 
 import java.io.File;
@@ -37,6 +38,8 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.pool.ObjectPool;
+import org.apache.log4j.Logger;
 import org.mrcp4j.MrcpResourceType;
 import org.mrcp4j.server.MrcpServerSocket;
 
@@ -47,14 +50,14 @@ import org.mrcp4j.server.MrcpServerSocket;
  */
 public class TransmitterResource extends ResourceImpl {
 
+    private static Logger _logger = Logger.getLogger(TransmitterResource.class);
+
     public static final Resource.Type RESOURCE_TYPE = Resource.Type.TRANSMITTER;
 
-    private MrcpServerSocket _mrcpServer;
-
-    private TransmitterConfig _config;
     private File _basePromptDir;
-
     private int _rtpBasePort;
+    private MrcpServerSocket _mrcpServer;
+    private ObjectPool _promptGeneratorPool;
 
     public TransmitterResource(TransmitterConfig config)
       throws IOException, RemoteException {
@@ -62,14 +65,15 @@ public class TransmitterResource extends ResourceImpl {
         _basePromptDir = config.getBasePromptDir();
         _rtpBasePort = config.getRtpBasePort();
         _mrcpServer = new MrcpServerSocket(config.getMrcpPort());
-        _config = config;
+        _promptGeneratorPool = PromptGeneratorFactory.createObjectPool(15);
     }
 
     /* (non-Javadoc)
      * @see com.onomatopia.cairo.server.resource.Resource#invite(com.onomatopia.cairo.server.resource.ResourceMessage)
      */
     public ResourceMessage invite(ResourceMessage request) throws ResourceUnavailableException {
-        
+        _logger.debug("Resource received invite() request.");
+
         List<ResourceChannel> channels = new ArrayList<ResourceChannel>();
 
         for (ResourceChannel channel : request.getChannels()) {
@@ -93,8 +97,13 @@ public class TransmitterResource extends ResourceImpl {
                     switch (channel.getResourceType()) {
                     case BASICSYNTH:
                     case SPEECHSYNTH:
-                        RTPSpeechSynthChannel promptPlayer = new RTPSpeechSynthChannel(localPort, remoteHost, remotePort);
-                        _mrcpServer.openChannel(channelID, new MrcpSpeechSynthChannel(channelID, promptPlayer, _basePromptDir));
+                        MrcpSpeechSynthChannel mrcpChannel = new MrcpSpeechSynthChannel(
+                            channelID,
+                            new RTPSpeechSynthChannel(localPort, remoteHost, remotePort),
+                            _basePromptDir,
+                            _promptGeneratorPool
+                        );
+                        _mrcpServer.openChannel(channelID, mrcpChannel);
                         break;
 
                     default:
@@ -135,7 +144,6 @@ public class TransmitterResource extends ResourceImpl {
         resourceRegistry.register(impl, RESOURCE_TYPE);
 
         System.out.println("Resource bound and waiting...");
-        //Thread.sleep(90000);
     }
 
 }

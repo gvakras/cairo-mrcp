@@ -22,6 +22,8 @@
  */
 package com.onomatopia.cairo.server.tts;
 
+import com.onomatopia.cairo.util.pool.AbstractPoolableObject;
+
 import java.io.File;
 
 import javax.sound.sampled.AudioFileFormat;
@@ -36,7 +38,7 @@ import com.sun.speech.freetts.audio.SingleFileAudioPlayer;
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */
-public class PromptGenerator {
+public class PromptGenerator extends AbstractPoolableObject {
 
     private Voice _voice;
 
@@ -84,5 +86,5 @@ public class PromptGenerator {
         }
         return promptFile;
     }
-    
+
 }

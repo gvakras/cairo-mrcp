@@ -24,6 +24,7 @@ package com.onomatopia.cairo.server.tts;
 
 import com.onomatopia.cairo.exception.UnsupportedHeaderException;
 import com.onomatopia.cairo.server.MrcpGenericChannel;
+import com.onomatopia.cairo.server.resource.TransmitterResource;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,6 +32,8 @@ import java.io.IOException;
 import javax.media.rtp.InvalidSessionAddressException;
 
 
+import org.apache.commons.pool.ObjectPool;
+import org.apache.log4j.Logger;
 import org.mrcp4j.MrcpRequestState;
 import org.mrcp4j.message.MrcpResponse;
 import org.mrcp4j.message.header.IllegalValueException;
@@ -47,13 +50,15 @@ import org.mrcp4j.server.provider.SpeechSynthRequestHandler;
  */
 public class MrcpSpeechSynthChannel extends MrcpGenericChannel implements SpeechSynthRequestHandler {
 
+    private static Logger _logger = Logger.getLogger(MrcpSpeechSynthChannel.class);
+
 //    private static short IDLE = 0;
 //    private static short SPEAKING = 1;
 //    private static short PAUSED = 2;
 //
 //    volatile short _state = IDLE;
 
-    private PromptGenerator _promptGenerator;
+    private ObjectPool _promptGeneratorPool;
     private RTPSpeechSynthChannel _rtpChannel;
     private File _promptDir;
 
@@ -62,9 +67,12 @@ public class MrcpSpeechSynthChannel extends MrcpGenericChannel implements Speech
      * @param channelID 
      * @param basePromptDir 
      * @param rtpChannel 
+     * @param promptGeneratorPool 
      * @throws IllegalArgumentException 
      */
-    public MrcpSpeechSynthChannel(String channelID, RTPSpeechSynthChannel rtpChannel, File basePromptDir) throws IllegalArgumentException {
+    public MrcpSpeechSynthChannel(String channelID, RTPSpeechSynthChannel rtpChannel, File basePromptDir, ObjectPool promptGeneratorPool)
+      throws IllegalArgumentException {
+
         if (basePromptDir == null || !basePromptDir.isDirectory()) {
             throw new IllegalArgumentException("Base prompt directory file specified does not exist or is not a directory: " + basePromptDir);
         }
@@ -75,7 +83,7 @@ public class MrcpSpeechSynthChannel extends MrcpGenericChannel implements Speech
         }
 
         _rtpChannel = rtpChannel;
-        _promptGenerator = new PromptGenerator();
+        _promptGeneratorPool = promptGeneratorPool;
     }
 
     /* (non-Javadoc)
@@ -90,18 +98,18 @@ public class MrcpSpeechSynthChannel extends MrcpGenericChannel implements Speech
             if (contentType.equalsIgnoreCase("text/plain")) {
                 String text = request.getContent();
                 try {
-                    File promptFile = _promptGenerator.generatePrompt(text, _promptDir);
+                    File promptFile = generatePrompt(text);
                     int state = _rtpChannel.queuePrompt(promptFile);
                     requestState = (state == RTPSpeechSynthChannel.IDLE) ? MrcpRequestState.IN_PROGRESS : MrcpRequestState.PENDING;
                     statusCode = MrcpResponse.STATUS_SUCCESS;
                 } catch (RuntimeException e) {
-                    e.printStackTrace();
+                    _logger.debug(e, e);
                     statusCode = MrcpResponse.STATUS_SERVER_INTERNAL_ERROR;
                 } catch (InvalidSessionAddressException e) {
-                    e.printStackTrace();
+                    _logger.debug(e, e);
                     statusCode = MrcpResponse.STATUS_OPERATION_FAILED;
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    _logger.debug(e, e);
                     statusCode = MrcpResponse.STATUS_OPERATION_FAILED;
                 }
             } else {
@@ -177,9 +185,35 @@ public class MrcpSpeechSynthChannel extends MrcpGenericChannel implements Speech
     /* (non-Javadoc)
      * @see com.onomatopia.cairo.server.MrcpGenericChannel#validateParam(org.mrcp4j.message.header.MrcpHeader)
      */
+    @SuppressWarnings("unused")
     @Override
     protected boolean validateParam(MrcpHeader header) throws UnsupportedHeaderException, IllegalValueException {
         throw new UnsupportedHeaderException();
+    }
+
+    private File generatePrompt(String text) {
+        PromptGenerator promptGenerator = null;
+
+        // borrow prompt generator
+        try {
+            promptGenerator = (PromptGenerator) _promptGeneratorPool.borrowObject();
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            throw new RuntimeException(e);
+        }
+
+        // generate prompt
+        File promptFile = promptGenerator.generatePrompt(text, _promptDir);
+
+        // return prompt generator
+        try {
+            _promptGeneratorPool.returnObject(promptGenerator);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            _logger.debug(e, e);
+        }
+
+        return promptFile;
     }
 
 }
