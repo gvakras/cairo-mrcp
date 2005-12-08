@@ -53,11 +53,17 @@ public class ReceiverConfig extends ResourceConfig {
         super(index, config);
         try {
             try {
-                _sphinxConfigURL = new URL(config.getString("resources.resource(" + index + ").sphinxConfigURL"));
+                String sphinxConfigURL = config.getString("resources.resource(" + index + ").sphinxConfigURL");
+                if (sphinxConfigURL != null && sphinxConfigURL.length() > 0) {
+                    _sphinxConfigURL = new URL(sphinxConfigURL);
+                }
             } catch (NoSuchElementException e) {
-                _sphinxConfigURL = this.getClass().getResource("config/sphinx-config.xml");
+                // ignore
+            }
+            if (_sphinxConfigURL == null) {
+                _sphinxConfigURL = this.getClass().getResource("/config/sphinx-config.xml");
                 if (_sphinxConfigURL == null) {
-                    throw e;
+                    throw new ConfigurationException("Sphinx config URL not found in either cairo config file or cairo classpath!");
                 }
             }
             _recEngines = config.getInt("resources.resource(" + index + ").recEngines");
