@@ -4,7 +4,8 @@ set THIRDPARTY=%SOURCE_DIR%\..\..\thirdparty
 set JAVA_HOME=C:\java\jdk1.5.0
 set FREETTS_HOME=C:\java\freetts-1.2.1
 
-set CLASSPATH=%THIRDPARTY%\gen\cairo.jar
+set CLASSPATH=.
+set CLASSPATH=%CLASSPATH%;%THIRDPARTY%\gen\cairo.jar
 set CLASSPATH=%CLASSPATH%;%THIRDPARTY%\gen\mrcp4j.jar
 set CLASSPATH=%CLASSPATH%;%THIRDPARTY%\commons-collections-3.1.jar
 set CLASSPATH=%CLASSPATH%;%THIRDPARTY%\commons-configuration-1.1.jar
