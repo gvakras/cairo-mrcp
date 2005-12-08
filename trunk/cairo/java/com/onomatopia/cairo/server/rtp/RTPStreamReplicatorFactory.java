@@ -34,6 +34,7 @@ import org.apache.commons.lang.Validate;
 import org.apache.commons.pool.ObjectPool;
 import org.apache.commons.pool.PoolableObjectFactory;
 import org.apache.commons.pool.impl.GenericObjectPool;
+import org.apache.log4j.Logger;
 
 /**
  * TODOC
@@ -41,7 +42,9 @@ import org.apache.commons.pool.impl.GenericObjectPool;
  *
  */
 public class RTPStreamReplicatorFactory implements PoolableObjectFactory {
-    
+
+    private static Logger _logger = Logger.getLogger(RTPStreamReplicatorFactory.class);
+
     private int _nextPort;
     private List<Integer> _ports = new LinkedList<Integer>();
 
@@ -121,7 +124,9 @@ public class RTPStreamReplicatorFactory implements PoolableObjectFactory {
      */
     public static ObjectPool createObjectPool(int rtpBasePort, int maxConnects) {
         int maxPort = rtpBasePort + (maxConnects *2);
-        System.out.println("creating new replicator pool... ports: " + rtpBasePort + '-' + maxPort);
+        if (_logger.isDebugEnabled()) {
+            _logger.debug("creating new replicator pool... ports: " + rtpBasePort + '-' + maxPort);
+        }
 
         PoolableObjectFactory factory = new RTPStreamReplicatorFactory(rtpBasePort);
         GenericObjectPool.Config config = ConfigUtil.getGenericObjectPoolConfig(maxConnects);

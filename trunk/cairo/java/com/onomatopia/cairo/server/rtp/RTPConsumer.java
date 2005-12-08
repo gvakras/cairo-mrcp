@@ -49,6 +49,8 @@ import javax.media.rtp.event.SessionEvent;
 import javax.media.rtp.event.StreamMappedEvent;
 import javax.media.rtp.rtcp.SourceDescription;
 
+import org.apache.log4j.Logger;
+
 // TODO: convert to abstract base class
 
 /**
@@ -57,6 +59,8 @@ import javax.media.rtp.rtcp.SourceDescription;
  *
  */
 public abstract class RTPConsumer implements SessionListener, ReceiveStreamListener {
+
+    private static Logger _logger = Logger.getLogger(RTPConsumer.class);
 
     protected RTPManager _rtpManager;
     private SessionAddress _localAddress;
@@ -77,7 +81,9 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
     private void init() throws IOException {
 
         _rtpManager = RTPManager.newInstance();
-        System.out.println("RTPManager class: " + _rtpManager.getClass().getName());
+        if (_logger.isDebugEnabled()) {
+            _logger.debug("RTPManager class: " + _rtpManager.getClass().getName());
+        }
         _rtpManager.addSessionListener(this);
         _rtpManager.addReceiveStreamListener(this);
 
@@ -106,10 +112,12 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
      * @see javax.media.rtp.SessionListener#update(javax.media.rtp.event.SessionEvent)
      */
     public synchronized void update(SessionEvent event) {
-        System.out.println("SessionEvent received: " + event);
-        if (event instanceof NewParticipantEvent) {
-            Participant p = ((NewParticipantEvent) event).getParticipant();
-            System.out.println("  - A new participant has just joined: " + p.getCNAME());
+        if (_logger.isDebugEnabled()) {
+            _logger.debug("SessionEvent received: " + event);
+            if (event instanceof NewParticipantEvent) {
+                Participant p = ((NewParticipantEvent) event).getParticipant();
+                _logger.debug("  - A new participant has just joined: " + p.getCNAME());
+            }
         }
     }
 
@@ -117,51 +125,52 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
      * @see javax.media.rtp.ReceiveStreamListener#update(javax.media.rtp.event.ReceiveStreamEvent)
      */
     public synchronized void update(ReceiveStreamEvent event) {
-        System.out.println("ReceiveStreamEvent received: " + event);
+        if (_logger.isDebugEnabled()) {
+            _logger.debug("ReceiveStreamEvent received: " + event);
+        }
 
-//        if (event instanceof RemotePayloadChangeEvent) {
-//            System.err.println("  - Received an RTP PayloadChangeEvent.");
-//            System.err.println("Sorry, cannot handle payload change.");
-//            //System.exit(0);
-//            return;
-//        }
+        if (event instanceof RemotePayloadChangeEvent) {
+            _logger.warn("  - Received an RTP PayloadChangeEvent.\nSorry, cannot handle payload change.");
+            //System.exit(0);
+            return;
+        }
 
         ReceiveStream stream = event.getReceiveStream();
 
-
         if (event instanceof NewReceiveStreamEvent) {
-//            if (stream == null) {
-//                System.out.println("NewReceiveStreamEvent: receive stream is null!");
-//            } else {
+            if (stream == null) {
+                _logger.debug("NewReceiveStreamEvent: receive stream is null!");
+            } else {
                 DataSource dataSource = stream.getDataSource();
-//                if (dataSource == null) {
-//                    System.out.println("NewReceiveStreamEvent: data source is null!");
-//                } else if (!(dataSource instanceof PushBufferDataSource)) {
-//                    System.out.println("NewReceiveStreamEvent: data source is not PushBufferDataSource!");
-//                } else {
-//                    // Find out the formats.
-//                    RTPControl control = (RTPControl) dataSource.getControl("javax.media.rtp.RTPControl");
-//                    if (control != null) {
-//                        System.out.println("  - Recevied new RTP stream: " + control.getFormat());
-//                    } else {
-//                        System.out.println("  - Recevied new RTP stream: RTPControl is null!");
-//                    }
+                if (dataSource == null) {
+                    _logger.debug("NewReceiveStreamEvent: data source is null!");
+                } else if (!(dataSource instanceof PushBufferDataSource)) {
+                    _logger.debug("NewReceiveStreamEvent: data source is not PushBufferDataSource!");
+                } else {
+                    if (_logger.isDebugEnabled()) {
+                        // Find out the formats.
+                        RTPControl control = (RTPControl) dataSource.getControl("javax.media.rtp.RTPControl");
+                        if (control != null) {
+                            _logger.debug("  - Recevied new RTP stream: " + control.getFormat());
+                        } else {
+                            _logger.debug("  - Recevied new RTP stream: RTPControl is null!");
+                        }
+                    }
                     this.streamReceived(stream, (PushBufferDataSource) dataSource);
-//                }
-//
-//            }
+                }
+            }
         } else if (event instanceof StreamMappedEvent) {
             Participant participant = event.getParticipant();
-            if (participant != null) {
+            if (participant != null && _logger.isDebugEnabled()) {
                 for (Iterator it = participant.getSourceDescription().iterator(); it.hasNext(); ) {
                     SourceDescription sd = (SourceDescription) it.next();
-                    System.out.println("Source description: " + toString(sd));
+                    _logger.debug("Source description: " + toString(sd));
                 }
             }
             if (stream == null) {
-                System.out.println("StreamMappedEvent: receive stream is null!");
+                _logger.debug("StreamMappedEvent: receive stream is null!");
             } else if (participant == null) {
-                System.out.println("StreamMappedEvent: participant is null!");
+                _logger.debug("StreamMappedEvent: participant is null!");
             } else {
                 this.streamMapped(stream, participant);
             }
@@ -169,7 +178,6 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
             if (stream != null) {
                 this.streamInactive(stream, (event instanceof ByeEvent));
             }
-
         }
     }
 

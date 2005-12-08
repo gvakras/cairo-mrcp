@@ -42,6 +42,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.pool.ObjectPool;
+import org.apache.log4j.Logger;
 import org.mrcp4j.MrcpResourceType;
 import org.mrcp4j.server.MrcpServerSocket;
 
@@ -52,6 +53,8 @@ import org.mrcp4j.server.MrcpServerSocket;
  */
 public class ReceiverResource extends ResourceImpl {
 
+    private static Logger _logger = Logger.getLogger(ReceiverResource.class);
+
     public static final Resource.Type RESOURCE_TYPE = Resource.Type.RECEIVER;
 
     private MrcpServerSocket _mrcpServer;
@@ -59,7 +62,6 @@ public class ReceiverResource extends ResourceImpl {
     private ObjectPool _recEnginePool;
 
     private File _recordingDir;
-    private ReceiverConfig _config;
     private File _baseGrammarDir;
 
     public ReceiverResource(ReceiverConfig config)
@@ -72,14 +74,14 @@ public class ReceiverResource extends ResourceImpl {
                 config.getRtpBasePort(), config.getMaxConnects());
         _recEnginePool = SphinxRecEngineFactory.createObjectPool(
                 config.getSphinxConfigURL(), config.getRecEngines());
-        _config = config;
     }
 
     /* (non-Javadoc)
      * @see com.onomatopia.cairo.server.resource.Resource#invite(com.onomatopia.cairo.server.resource.ResourceMessage)
      */
     public ResourceMessage invite(ResourceMessage request) throws ResourceUnavailableException {
-        
+        _logger.debug("Resource received invite() request.");
+
         List<ResourceChannel> channels = new ArrayList<ResourceChannel>();
 
         for (ResourceChannel channel : request.getChannels()) {
@@ -147,10 +149,7 @@ public class ReceiverResource extends ResourceImpl {
         System.out.println("binding resource...");
         resourceRegistry.register(impl, RESOURCE_TYPE);
 
-        //System.out.println(rr.hello("Niels"));
-
         System.out.println("Resource bound and waiting...");
-        //Thread.sleep(90000);
     }
 
 }
