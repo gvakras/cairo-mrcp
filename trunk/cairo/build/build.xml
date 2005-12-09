@@ -10,6 +10,11 @@
     <fileset dir="${jboss-aop.jars.dir}" includes="**/*.jar"/>
   </path>
 
+  <path id="demo.compile.classpath">
+    <pathelement location="${classes.dir}"/>
+    <path refid="compile.classpath"/>
+  </path>
+
   <path id="run.classpath">
     <pathelement location="${classes.dir}"/>
     <path refid="compile.classpath"/>
@@ -51,6 +56,28 @@
          basedir="${source.dir}"
          includes="config/*.xml"
          update="true"
+    />
+  </target>
+
+  <target name="build-demo" depends="compile-demo, output-demo-jar"/>
+
+  <target name="compile-demo" depends="compile, output-jar, -init-compile-demo">
+    <javac srcdir="${demo.java.dir}"
+           destdir="${demo.classes.dir}"
+           classpathref="demo.compile.classpath"
+           includes="**/*.java"
+           fork="true"
+           debug="true"
+           deprecation="${dep}"
+    >
+      <compilerarg value="-Xlint:unchecked"/>
+    </javac>
+  </target>
+
+  <target name="output-demo-jar" if="output.jars.dir">
+    <jar jarfile="${output.jars.dir}/${ant.project.name}-demo.jar"
+         basedir="${demo.classes.dir}"
+         includes="**/*.class"
     />
   </target>
 
@@ -115,6 +142,13 @@
     <delete file="${output.jars.dir}/${ant.project.name}.jar"/>
     <delete dir="${classes.dir}"/>
     <mkdir dir="${classes.dir}"/>
+    <mkdir dir="${output.jars.dir}"/>
+  </target>
+
+  <target name="-init-compile-demo">
+    <delete file="${output.jars.dir}/${ant.project.name}-demo.jar"/>
+    <delete dir="${demo.classes.dir}"/>
+    <mkdir dir="${demo.classes.dir}"/>
     <mkdir dir="${output.jars.dir}"/>
   </target>
 
