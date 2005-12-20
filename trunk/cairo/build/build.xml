@@ -7,6 +7,8 @@
   <property name="java.dir" value="${source.dir}/java"/>
   <property name="config.dir" value="${source.dir}/config"/>
   <property name="classes.dir" value="${build.output}/${ant.project.name}/classes"/>
+  <property name="demo.java.dir" value="${source.dir}/demo/java"/>
+  <property name="demo.classes.dir" value="${build.output}/${ant.project.name}/demo/classes"/>
 
   <path id="compile.classpath">
     <pathelement location="${sphinx.jar}"/>
@@ -19,7 +21,7 @@
     <pathelement location="${commons-lang.jar}"/>
     <pathelement location="${commons-logging.jar}"/>
     <pathelement location="${commons-pool.jar}"/>
-    <pathelement location="${jainspi.jar}"/>
+    <pathelement location="${jainsip.jar}"/>
     <pathelement location="${nist-api.jar}"/>
     <pathelement location="${jdom.jar}"/>
     <pathelement location="${jmf.jar}"/>
