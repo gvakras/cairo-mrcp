@@ -77,28 +77,12 @@ public class RTPSpeechSynthChannel {
         _remotePort = remotePort;
     }
 
-    // TODO: move to config file
-    private static final File SILENCE_PROMPT_FILE = new File("C:\\work\\cvs\\onomatopia\\cairo\\prompts\\silence250.wav");
-
     private synchronized void init() throws InvalidSessionAddressException, IOException {
         if (_promptPlayer == null) {
             _promptPlayer = new RTPPlayer(_localPort, _remoteAddress, _remotePort);
 
-            try {
-                _promptQueue.put(SILENCE_PROMPT_FILE);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-
             (_sendThread = new SendThread()).start();
 
-            /*System.out.println("init(): Waiting 5 seconds for prompt player to \"settle\"...");
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }*/
         }
     }
 
