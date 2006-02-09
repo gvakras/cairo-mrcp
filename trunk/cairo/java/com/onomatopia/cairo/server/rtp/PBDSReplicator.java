@@ -66,10 +66,12 @@ public class PBDSReplicator implements BufferTransferHandler {
                 _logger.debug("Only first stream handled, total streams received: " + pbStreams.length);
                 for (int i = 0; i < pbStreams.length; i++) {
                     ContentDescriptor cd = pbStreams[i].getContentDescriptor();
-                    _logger.debug("stream " + i + " content type: " + cd.getContentType());
-                    _logger.debug("stream " + i + " format: " + pbStreams[i].getFormat());
+                    _logger.debug("stream " + i + " details: contentType=" + cd.getContentType() + ", format=" + pbStreams[i].getFormat());
                 }
             }
+        } else if (_logger.isDebugEnabled()) {
+            ContentDescriptor cd = pbStreams[0].getContentDescriptor();
+            _logger.debug("stream details: contentType=" + cd.getContentType() + ", format=" + pbStreams[0].getFormat());
         }
 
         pbStreams[0].setTransferHandler(this);
