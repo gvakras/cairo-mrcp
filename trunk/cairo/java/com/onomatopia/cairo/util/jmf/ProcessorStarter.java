@@ -7,6 +7,7 @@ import java.io.IOException;
 
 import javax.media.ControllerEvent;
 import javax.media.ControllerListener;
+import javax.media.EndOfMediaEvent;
 import javax.media.Processor;
 import javax.media.StartEvent;
 import javax.media.protocol.DataSource;
@@ -37,8 +38,8 @@ public class ProcessorStarter implements ControllerListener {
                 _logger.debug("Starting data source...");
                 dataSource.connect();
                 dataSource.start();
-            //} else if (event instanceof StopEvent) { //EndOfMediaEvent) {
-                //event.getSourceController().close();
+            } else if (event instanceof EndOfMediaEvent) { //StopEvent) {
+                event.getSourceController().close();
             }
         } catch (IOException e) {
             _logger.warn(e, e);
