@@ -176,12 +176,18 @@
   </dependencies>
 
   <distributionManagement>
+    <repository>
+      <uniqueVersion>false</uniqueVersion>
+      <id>cairo-repository</id>
+      <name>Cairo Deployment Repository</name>
+      <url>scp://shell.sf.net/home/groups/c/ca/cairo/htdocs/repository</url>
+    </repository>
     <site>
-      <id>website</id>
-      <!--url>scp://shell.sourceforge.net/home/groups/${pom.artifactId.substring(0,1)}/${pom.artifactId.substring(0,2)}/${pom.artifactId}/htdocs/</url-->
-      <url>scp://shell.sourceforge.net/home/groups/c/ca/cairo/htdocs</url>
+      <id>cairo-site</id>
+      <!--url>scp://shell.sf.net/home/groups/${pom.artifactId.substring(0,1)}/${pom.artifactId.substring(0,2)}/${pom.artifactId}/htdocs/</url-->
+      <url>scp://shell.sf.net/home/groups/c/ca/cairo/htdocs</url>
     </site>
-    <downloadUrl>https://sourceforge.net/project/showfiles.php?group_id=143504</downloadUrl>
+    <downloadUrl>https://sourceforge.net/project/showfiles.php?group_id=149085</downloadUrl>
   </distributionManagement>
 
   <build>
@@ -242,14 +248,14 @@
     </repository>
 
     <repository>
-      <id>cairoRepository</id>
+      <id>cairo</id>
       <name>Cairo Deployment Repository</name>
       <!--url>file://C:\backup\sourceforge\shell\cairo\htdocs\repository</url-->
       <url>http://cairo.sourceforge.net/repository</url>
     </repository>
 
     <repository>
-      <id>mrcp4jRepository</id>
+      <id>mrcp4j</id>
       <name>MRCP4J Deployment Repository</name>
       <url>http://mrcp4j.sourceforge.net/repository</url>
     </repository>
