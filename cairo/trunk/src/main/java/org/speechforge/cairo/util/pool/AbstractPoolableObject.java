@@ -1,7 +1,7 @@
 /*
  * Cairo - Open source framework for control of speech media resources.
  *
- * Copyright (C) 2005 Onomatopia, Inc. - http://www.onomatopia.com
+ * Copyright (C) 2005-2006 SpeechForge - http://www.speechforge.org
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  * Contact: ngodfredsen@users.sourceforge.net
  *
  */
-package com.onomatopia.cairo.util.pool;
+package org.speechforge.cairo.util.pool;
 
 import org.apache.log4j.Logger;
 
@@ -34,7 +34,7 @@ public abstract class AbstractPoolableObject implements PoolableObject {
     private static Logger _logger = Logger.getLogger(AbstractPoolableObject.class);
 
     /* (non-Javadoc)
-     * @see com.onomatopia.cairo.util.pool.PoolableObject#activate()
+     * @see org.speechforge.cairo.util.pool.PoolableObject#activate()
      */
     public void activate() throws Exception {
         _logger.debug("activate()");
@@ -42,7 +42,7 @@ public abstract class AbstractPoolableObject implements PoolableObject {
     }
 
     /* (non-Javadoc)
-     * @see com.onomatopia.cairo.util.pool.PoolableObject#passivate()
+     * @see org.speechforge.cairo.util.pool.PoolableObject#passivate()
      */
     public void passivate() throws Exception {
         _logger.debug("passivate()");
@@ -50,7 +50,7 @@ public abstract class AbstractPoolableObject implements PoolableObject {
     }
 
     /* (non-Javadoc)
-     * @see com.onomatopia.cairo.util.pool.PoolableObject#validate()
+     * @see org.speechforge.cairo.util.pool.PoolableObject#validate()
      */
     public boolean validate() {
         _logger.debug("validate(): returning true");
@@ -58,7 +58,7 @@ public abstract class AbstractPoolableObject implements PoolableObject {
     }
 
     /* (non-Javadoc)
-     * @see com.onomatopia.cairo.util.pool.PoolableObject#destroy()
+     * @see org.speechforge.cairo.util.pool.PoolableObject#destroy()
      */
     public void destroy() throws Exception {
         _logger.debug("destroy()");

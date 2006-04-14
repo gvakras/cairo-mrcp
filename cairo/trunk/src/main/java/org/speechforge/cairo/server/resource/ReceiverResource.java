@@ -1,7 +1,7 @@
 /*
  * Cairo - Open source framework for control of speech media resources.
  *
- * Copyright (C) 2005 Onomatopia, Inc. - http://www.onomatopia.com
+ * Copyright (C) 2005-2006 SpeechForge - http://www.speechforge.org
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,17 +20,17 @@
  * Contact: ngodfredsen@users.sourceforge.net
  *
  */
-package com.onomatopia.cairo.server.resource;
+package org.speechforge.cairo.server.resource;
 
-import com.onomatopia.cairo.server.config.CairoConfig;
-import com.onomatopia.cairo.server.config.ReceiverConfig;
-import com.onomatopia.cairo.server.recog.MrcpRecogChannel;
-import com.onomatopia.cairo.server.recog.RTPRecogChannel;
-import com.onomatopia.cairo.server.recog.sphinx.SphinxRecEngineFactory;
-import com.onomatopia.cairo.server.recorder.MrcpRecorderChannel;
-import com.onomatopia.cairo.server.recorder.RTPRecorderChannel;
-import com.onomatopia.cairo.server.rtp.RTPStreamReplicator;
-import com.onomatopia.cairo.server.rtp.RTPStreamReplicatorFactory;
+import org.speechforge.cairo.server.config.CairoConfig;
+import org.speechforge.cairo.server.config.ReceiverConfig;
+import org.speechforge.cairo.server.recog.MrcpRecogChannel;
+import org.speechforge.cairo.server.recog.RTPRecogChannel;
+import org.speechforge.cairo.server.recog.sphinx.SphinxRecEngineFactory;
+import org.speechforge.cairo.server.recorder.MrcpRecorderChannel;
+import org.speechforge.cairo.server.recorder.RTPRecorderChannel;
+import org.speechforge.cairo.server.rtp.RTPStreamReplicator;
+import org.speechforge.cairo.server.rtp.RTPStreamReplicatorFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -77,7 +77,7 @@ public class ReceiverResource extends ResourceImpl {
     }
 
     /* (non-Javadoc)
-     * @see com.onomatopia.cairo.server.resource.Resource#invite(com.onomatopia.cairo.server.resource.ResourceMessage)
+     * @see org.speechforge.cairo.server.resource.Resource#invite(org.speechforge.cairo.server.resource.ResourceMessage)
      */
     public ResourceMessage invite(ResourceMessage request) throws ResourceUnavailableException {
         _logger.debug("Resource received invite() request.");

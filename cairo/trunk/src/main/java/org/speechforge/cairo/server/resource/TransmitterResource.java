@@ -1,7 +1,7 @@
 /*
  * Cairo - Open source framework for control of speech media resources.
  *
- * Copyright (C) 2005 Onomatopia, Inc. - http://www.onomatopia.com
+ * Copyright (C) 2005-2006 SpeechForge - http://www.speechforge.org
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,14 +20,13 @@
  * Contact: ngodfredsen@users.sourceforge.net
  *
  */
-package com.onomatopia.cairo.server.resource;
+package org.speechforge.cairo.server.resource;
 
-
-import com.onomatopia.cairo.server.config.CairoConfig;
-import com.onomatopia.cairo.server.config.TransmitterConfig;
-import com.onomatopia.cairo.server.tts.MrcpSpeechSynthChannel;
-import com.onomatopia.cairo.server.tts.PromptGeneratorFactory;
-import com.onomatopia.cairo.server.tts.RTPSpeechSynthChannel;
+import org.speechforge.cairo.server.config.CairoConfig;
+import org.speechforge.cairo.server.config.TransmitterConfig;
+import org.speechforge.cairo.server.tts.MrcpSpeechSynthChannel;
+import org.speechforge.cairo.server.tts.PromptGeneratorFactory;
+import org.speechforge.cairo.server.tts.RTPSpeechSynthChannel;
 
 import java.io.File;
 import java.io.IOException;
@@ -69,7 +68,7 @@ public class TransmitterResource extends ResourceImpl {
     }
 
     /* (non-Javadoc)
-     * @see com.onomatopia.cairo.server.resource.Resource#invite(com.onomatopia.cairo.server.resource.ResourceMessage)
+     * @see org.speechforge.cairo.server.resource.Resource#invite(org.speechforge.cairo.server.resource.ResourceMessage)
      */
     public ResourceMessage invite(ResourceMessage request) throws ResourceUnavailableException {
         _logger.debug("Resource received invite() request.");

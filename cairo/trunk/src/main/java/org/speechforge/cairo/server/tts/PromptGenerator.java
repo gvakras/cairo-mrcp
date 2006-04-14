@@ -1,7 +1,7 @@
 /*
  * Cairo - Open source framework for control of speech media resources.
  *
- * Copyright (C) 2005 Onomatopia, Inc. - http://www.onomatopia.com
+ * Copyright (C) 2005-2006 SpeechForge - http://www.speechforge.org
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,9 +20,9 @@
  * Contact: ngodfredsen@users.sourceforge.net
  *
  */
-package com.onomatopia.cairo.server.tts;
+package org.speechforge.cairo.server.tts;
 
-import com.onomatopia.cairo.util.pool.AbstractPoolableObject;
+import org.speechforge.cairo.util.pool.AbstractPoolableObject;
 
 import java.io.File;
 

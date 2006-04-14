@@ -1,7 +1,7 @@
 /*
  * Cairo - Open source framework for control of speech media resources.
  *
- * Copyright (C) 2005 Onomatopia, Inc. - http://www.onomatopia.com
+ * Copyright (C) 2005-2006 SpeechForge - http://www.speechforge.org
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  * Contact: ngodfredsen@users.sourceforge.net
  *
  */
-package com.onomatopia.cairo.util.pool;
+package org.speechforge.cairo.util.pool;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,11 +31,11 @@ import org.apache.commons.pool.PoolableObjectFactory;
 
 /**
  * Generic implementation of a <@link org.apache.commons.pool.PoolableObjectFactory> which makes
- * <@link com.onomatopia.cairo.util.pool.PoolableObject> instances and delegates all object pool
+ * <@link org.speechforge.cairo.util.pool.PoolableObject> instances and delegates all object pool
  * life-cycle methods to the pooled objects themselves.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
- * @see com.onomatopia.cairo.util.pool.PoolableObject
+ * @see org.speechforge.cairo.util.pool.PoolableObject
  */
 public abstract class AbstractPoolableObjectFactory implements PoolableObjectFactory {
 

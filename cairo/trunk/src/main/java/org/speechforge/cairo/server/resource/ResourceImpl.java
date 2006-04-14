@@ -1,7 +1,7 @@
 /*
  * Cairo - Open source framework for control of speech media resources.
  *
- * Copyright (C) 2005 Onomatopia, Inc. - http://www.onomatopia.com
+ * Copyright (C) 2005-2006 SpeechForge - http://www.speechforge.org
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  * Contact: ngodfredsen@users.sourceforge.net
  *
  */
-package com.onomatopia.cairo.server.resource;
+package org.speechforge.cairo.server.resource;
 
 
 import java.rmi.RemoteException;
@@ -49,7 +49,7 @@ public abstract class ResourceImpl extends UnicastRemoteObject implements Resour
     }
 
     /* (non-Javadoc)
-     * @see com.onomatopia.cairo.server.manager.Resource#hello(java.lang.String)
+     * @see org.speechforge.cairo.server.manager.Resource#hello(java.lang.String)
      */
     public void ping() {
         _logger.debug("Resource received ping() request.");

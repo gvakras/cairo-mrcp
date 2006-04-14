@@ -1,7 +1,7 @@
 /*
  * Cairo - Open source framework for control of speech media resources.
  *
- * Copyright (C) 2005 Onomatopia, Inc. - http://www.onomatopia.com
+ * Copyright (C) 2005-2006 SpeechForge - http://www.speechforge.org
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,11 +20,11 @@
  * Contact: ngodfredsen@users.sourceforge.net
  *
  */
-package com.onomatopia.cairo.server.rtp;
+package org.speechforge.cairo.server.rtp;
 
-import com.onomatopia.cairo.server.recog.sphinx.SourceAudioFormat;
-import com.onomatopia.cairo.server.rtp.PBDSReplicator;
-import com.onomatopia.cairo.util.jmf.ProcessorStarter;
+import org.speechforge.cairo.server.recog.sphinx.SourceAudioFormat;
+import org.speechforge.cairo.server.rtp.PBDSReplicator;
+import org.speechforge.cairo.util.jmf.ProcessorStarter;
 
 import java.io.File;
 import java.io.IOException;
@@ -82,7 +82,7 @@ public class RTPStreamReplicator extends RTPConsumer {
     }
 
     /* (non-Javadoc)
-     * @see com.onomatopia.cairo.server.rtp.RTPConsumer#shutdown()
+     * @see org.speechforge.cairo.server.rtp.RTPConsumer#shutdown()
      */
     @Override
     public void shutdown() {
@@ -90,7 +90,7 @@ public class RTPStreamReplicator extends RTPConsumer {
     }
 
     /* (non-Javadoc)
-     * @see com.onomatopia.cairo.server.rtp.RTPConsumer#streamReceived(javax.media.rtp.ReceiveStream, javax.media.protocol.PushBufferDataSource)
+     * @see org.speechforge.cairo.server.rtp.RTPConsumer#streamReceived(javax.media.rtp.ReceiveStream, javax.media.protocol.PushBufferDataSource)
      */
     @Override
     public synchronized void streamReceived(ReceiveStream stream, PushBufferDataSource dataSource) {
@@ -125,7 +125,7 @@ public class RTPStreamReplicator extends RTPConsumer {
     }
 
     /* (non-Javadoc)
-     * @see com.onomatopia.cairo.server.rtp.RTPConsumer#streamMapped(javax.media.rtp.ReceiveStream, javax.media.rtp.Participant)
+     * @see org.speechforge.cairo.server.rtp.RTPConsumer#streamMapped(javax.media.rtp.ReceiveStream, javax.media.rtp.Participant)
      */
     @Override
     public void streamMapped(ReceiveStream stream, Participant participant) {
@@ -133,7 +133,7 @@ public class RTPStreamReplicator extends RTPConsumer {
     }
 
     /* (non-Javadoc)
-     * @see com.onomatopia.cairo.server.rtp.RTPConsumer#streamInactive(javax.media.rtp.ReceiveStream, boolean)
+     * @see org.speechforge.cairo.server.rtp.RTPConsumer#streamInactive(javax.media.rtp.ReceiveStream, boolean)
      */
     @Override
     public synchronized void streamInactive(ReceiveStream stream, boolean byeEvent) {

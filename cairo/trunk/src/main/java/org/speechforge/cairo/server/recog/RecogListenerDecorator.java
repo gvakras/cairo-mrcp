@@ -1,7 +1,7 @@
 /*
  * Cairo - Open source framework for control of speech media resources.
  *
- * Copyright (C) 2005 Onomatopia, Inc. - http://www.onomatopia.com
+ * Copyright (C) 2005-2006 SpeechForge - http://www.speechforge.org
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  * Contact: ngodfredsen@users.sourceforge.net
  *
  */
-package com.onomatopia.cairo.server.recog;
+package org.speechforge.cairo.server.recog;
 
 import org.apache.log4j.Logger;
 
@@ -44,7 +44,7 @@ public class RecogListenerDecorator implements RecogListener {
     }
 
     /* (non-Javadoc)
-     * @see com.onomatopia.cairo.server.recog.RecogListener#speechStarted()
+     * @see org.speechforge.cairo.server.recog.RecogListener#speechStarted()
      */
     public void speechStarted() {
         _logger.debug("speechStarted()");
@@ -54,7 +54,7 @@ public class RecogListenerDecorator implements RecogListener {
     }
 
     /* (non-Javadoc)
-     * @see com.onomatopia.cairo.server.recog.RecogListener#recognitionComplete()
+     * @see org.speechforge.cairo.server.recog.RecogListener#recognitionComplete()
      */
     public void recognitionComplete(RecognitionResult result) {
         _logger.debug("recognitionComplete()");
@@ -64,7 +64,7 @@ public class RecogListenerDecorator implements RecogListener {
     }
 
     /* (non-Javadoc)
-     * @see com.onomatopia.cairo.server.recog.RecogListener#noInputTimeout()
+     * @see org.speechforge.cairo.server.recog.RecogListener#noInputTimeout()
      */
     public void noInputTimeout() {
         _logger.debug("noInputTimeout()");

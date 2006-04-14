@@ -1,7 +1,29 @@
-package com.onomatopia.cairo.server.recog.sphinx;
+/*
+ * Cairo - Open source framework for control of speech media resources.
+ *
+ * Copyright (C) 2005-2006 SpeechForge - http://www.speechforge.org
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * Contact: ngodfredsen@users.sourceforge.net
+ *
+ */
+package org.speechforge.cairo.server.recog.sphinx;
 
-import com.onomatopia.cairo.util.BlockingFifoQueue;
-import com.onomatopia.cairo.util.ByteHexConverter;
+import org.speechforge.cairo.util.BlockingFifoQueue;
+import org.speechforge.cairo.util.ByteHexConverter;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -299,7 +321,7 @@ public class RawAudioProcessor extends BaseDataProcessor
         }
 
 java.lang.Exception: debugging stack for RawAudioProcessor.getData()
-	at com.onomatopia.cairo.server.recog.sphinx.RawAudioProcessor.getData(RawAudioProcessor.java:339)
+	at org.speechforge.cairo.server.recog.sphinx.RawAudioProcessor.getData(RawAudioProcessor.java:339)
 	at edu.cmu.sphinx.frontend.endpoint.SpeechClassifier.getData(SpeechClassifier.java:241)
 	at edu.cmu.sphinx.frontend.endpoint.SpeechMarker.readData(SpeechMarker.java:204)
 	at edu.cmu.sphinx.frontend.endpoint.SpeechMarker.getData(SpeechMarker.java:171)
@@ -320,7 +342,7 @@ java.lang.Exception: debugging stack for RawAudioProcessor.getData()
 	at edu.cmu.sphinx.decoder.Decoder.decode(Decoder.java:94)
 	at edu.cmu.sphinx.recognizer.Recognizer.recognize(Recognizer.java:116)
 	at edu.cmu.sphinx.recognizer.Recognizer.recognize(Recognizer.java:135)
-	at com.onomatopia.cairo.server.recognition.RecServlet.run(RecServlet.java:110)
+	at org.speechforge.cairo.server.recognition.RecServlet.run(RecServlet.java:110)
 	at java.lang.Thread.run(Thread.java:595)
 
         */
@@ -352,7 +374,7 @@ java.lang.Exception: debugging stack for RawAudioProcessor.getData()
 
 
     /* (non-Javadoc)
-     * @see com.onomatopia.cairo.server.recog.sphinx.RawAudioListener#addRawData(byte[])
+     * @see org.speechforge.cairo.server.recog.sphinx.RawAudioListener#addRawData(byte[])
      */
     public synchronized void addRawData(byte[] data) {
         addRawData(data, 0, data.length);

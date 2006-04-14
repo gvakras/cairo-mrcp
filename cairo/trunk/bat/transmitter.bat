@@ -27,7 +27,7 @@ set CLASSPATH=%CLASSPATH%;%FREETTS_HOME%/lib/cmu_us_kal.jar
 set CLASSPATH=%CLASSPATH%;%FREETTS_HOME%/lib/en_us.jar
 set CLASSPATH=%CLASSPATH%;%FREETTS_HOME%/lib/freetts.jar
 
-set CLASS=com.onomatopia.cairo.server.resource.TransmitterResource
+set CLASS=org.speechforge.cairo.server.resource.TransmitterResource
 set CAIRO_CONFIG=file:///C:/cvs/sf/cairo/config/cairo-config.xml
 set RES_NAME=output
 

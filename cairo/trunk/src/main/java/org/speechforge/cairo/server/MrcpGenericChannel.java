@@ -1,7 +1,7 @@
 /*
  * Cairo - Open source framework for control of speech media resources. 
  *
- * Copyright (C) 2005 Onomatopia, Inc. - http://www.onomatopia.com
+ * Copyright (C) 2005-2006 SpeechForge - http://www.speechforge.org
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,9 +20,9 @@
  * Contact: ngodfredsen@users.sourceforge.net
  * 
  */
-package com.onomatopia.cairo.server;
+package org.speechforge.cairo.server;
 
-import com.onomatopia.cairo.exception.UnsupportedHeaderException;
+import org.speechforge.cairo.exception.UnsupportedHeaderException;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -1,7 +1,7 @@
 /*
  * Cairo - Open source framework for control of speech media resources.
  *
- * Copyright (C) 2005 Onomatopia, Inc. - http://www.onomatopia.com
+ * Copyright (C) 2005-2006 SpeechForge - http://www.speechforge.org
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  * Contact: ngodfredsen@users.sourceforge.net
  *
  */
-package com.onomatopia.cairo.server.resource;
+package org.speechforge.cairo.server.resource;
 
 
 import java.util.List;
@@ -77,7 +77,7 @@ public class ResourceRegistryImpl extends UnicastRemoteObject implements Resourc
     }
 
     /* (non-Javadoc)
-     * @see com.onomatopia.cairo.server.manager.ResourceRegistry#hello(java.lang.String)
+     * @see org.speechforge.cairo.server.manager.ResourceRegistry#hello(java.lang.String)
      */
     public String hello(String name) throws RemoteException {
         String greeting = "Hello " + name;
@@ -89,7 +89,7 @@ public class ResourceRegistryImpl extends UnicastRemoteObject implements Resourc
     }
     
     /* (non-Javadoc)
-     * @see com.onomatopia.cairo.server.manager.ResourceRegistry#bind(com.onomatopia.cairo.server.resource.Resource)
+     * @see org.speechforge.cairo.server.manager.ResourceRegistry#bind(org.speechforge.cairo.server.resource.Resource)
      */
     public synchronized void register(Resource resource, Resource.Type type) throws RemoteException {
         System.out.println("register(): registering resource of type " + type);

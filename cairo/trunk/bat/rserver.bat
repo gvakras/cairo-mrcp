@@ -19,5 +19,5 @@ set CLASSPATH=%CLASSPATH%;%THIRDPARTY%\mina-0.7.2.jar
 set CLASSPATH=%CLASSPATH%;%THIRDPARTY%\nist-sip-1.2.jar
 set CLASSPATH=%CLASSPATH%;%THIRDPARTY%\servlet-api.jar
 
-set CLASS=com.onomatopia.cairo.server.resource.ResourceServerImpl
+set CLASS=org.speechforge.cairo.server.resource.ResourceServerImpl
 java -cp %CLASSPATH%  -Xmx200m -Dlog4j.configuration=log4j.xml %CLASS%

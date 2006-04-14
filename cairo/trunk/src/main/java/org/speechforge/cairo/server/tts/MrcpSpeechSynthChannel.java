@@ -1,7 +1,7 @@
 /*
  * Cairo - Open source framework for control of speech media resources.
  *
- * Copyright (C) 2005 Onomatopia, Inc. - http://www.onomatopia.com
+ * Copyright (C) 2005-2006 SpeechForge - http://www.speechforge.org
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,17 +20,16 @@
  * Contact: ngodfredsen@users.sourceforge.net
  *
  */
-package com.onomatopia.cairo.server.tts;
+package org.speechforge.cairo.server.tts;
 
-import com.onomatopia.cairo.exception.UnsupportedHeaderException;
-import com.onomatopia.cairo.server.MrcpGenericChannel;
-import com.onomatopia.cairo.server.resource.TransmitterResource;
+import org.speechforge.cairo.exception.UnsupportedHeaderException;
+import org.speechforge.cairo.server.MrcpGenericChannel;
+import org.speechforge.cairo.server.resource.TransmitterResource;
 
 import java.io.File;
 import java.io.IOException;
 
 import javax.media.rtp.InvalidSessionAddressException;
-
 
 import org.apache.commons.pool.ObjectPool;
 import org.apache.log4j.Logger;
@@ -183,7 +182,7 @@ public class MrcpSpeechSynthChannel extends MrcpGenericChannel implements Speech
     }
 
     /* (non-Javadoc)
-     * @see com.onomatopia.cairo.server.MrcpGenericChannel#validateParam(org.mrcp4j.message.header.MrcpHeader)
+     * @see org.speechforge.cairo.server.MrcpGenericChannel#validateParam(org.mrcp4j.message.header.MrcpHeader)
      */
     @SuppressWarnings("unused")
     @Override

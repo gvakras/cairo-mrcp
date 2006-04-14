@@ -2,7 +2,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.onomatopia</groupId>
+  <groupId>org.speechforge</groupId>
   <artifactId>cairo</artifactId>
   <packaging>jar</packaging>
   <name>Cairo</name>
@@ -70,8 +70,8 @@
   </scm>
 
   <organization>
-    <name>Onomatopia</name>
-    <url>http://www.onomatopia.com</url>
+    <name>SpeechForge</name>
+    <url>http://www.speechforge.org</url>
   </organization>
 
   <dependencies>

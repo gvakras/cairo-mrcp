@@ -1,7 +1,7 @@
 /*
  * Cairo - Open source framework for control of speech media resources.
  *
- * Copyright (C) 2005 Onomatopia, Inc. - http://www.onomatopia.com
+ * Copyright (C) 2005-2006 SpeechForge - http://www.speechforge.org
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,12 +20,12 @@
  * Contact: ngodfredsen@users.sourceforge.net
  *
  */
-package com.onomatopia.cairo.server.recog;
+package org.speechforge.cairo.server.recog;
 
-import com.onomatopia.cairo.server.recog.sphinx.SphinxRecEngine;
-import com.onomatopia.cairo.server.resource.ResourceUnavailableException;
-import com.onomatopia.cairo.server.rtp.RTPStreamReplicator;
-import com.onomatopia.cairo.util.jmf.ProcessorStarter;
+import org.speechforge.cairo.server.recog.sphinx.SphinxRecEngine;
+import org.speechforge.cairo.server.resource.ResourceUnavailableException;
+import org.speechforge.cairo.server.rtp.RTPStreamReplicator;
+import org.speechforge.cairo.util.jmf.ProcessorStarter;
 
 import java.io.IOException;
 import java.util.Timer;
@@ -222,7 +222,7 @@ public class RTPRecogChannel {
         }
 
         /* (non-Javadoc)
-         * @see com.onomatopia.cairo.server.recog.RecogListener#speechStarted()
+         * @see org.speechforge.cairo.server.recog.RecogListener#speechStarted()
          */
         @Override
         public void speechStarted() {
@@ -238,7 +238,7 @@ public class RTPRecogChannel {
         }
 
         /* (non-Javadoc)
-         * @see com.onomatopia.cairo.server.recog.RecogListener#recognitionComplete()
+         * @see org.speechforge.cairo.server.recog.RecogListener#recognitionComplete()
          */
         @Override
         public void recognitionComplete(RecognitionResult result) {

@@ -1,7 +1,7 @@
 /*
  * Cairo - Open source framework for control of speech media resources.
  *
- * Copyright (C) 2005 Onomatopia, Inc. - http://www.onomatopia.com
+ * Copyright (C) 2005-2006 SpeechForge - http://www.speechforge.org
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,16 +20,16 @@
  * Contact: ngodfredsen@users.sourceforge.net
  *
  */
-package com.onomatopia.cairo.server.recog.sphinx;
+package org.speechforge.cairo.server.recog.sphinx;
 
-import com.onomatopia.cairo.server.recog.GrammarLocation;
-import com.onomatopia.cairo.server.recog.RecogListener;
-import com.onomatopia.cairo.server.recog.RecogListenerDecorator;
-import com.onomatopia.cairo.server.recog.RecognitionResult;
-import com.onomatopia.cairo.server.recog.SpeechEventListener;
-import com.onomatopia.cairo.server.rtp.PBDSReplicator;
-import com.onomatopia.cairo.util.jmf.ProcessorStarter;
-import com.onomatopia.cairo.util.pool.AbstractPoolableObject;
+import org.speechforge.cairo.server.recog.GrammarLocation;
+import org.speechforge.cairo.server.recog.RecogListener;
+import org.speechforge.cairo.server.recog.RecogListenerDecorator;
+import org.speechforge.cairo.server.recog.RecognitionResult;
+import org.speechforge.cairo.server.recog.SpeechEventListener;
+import org.speechforge.cairo.server.rtp.PBDSReplicator;
+import org.speechforge.cairo.util.jmf.ProcessorStarter;
+import org.speechforge.cairo.util.pool.AbstractPoolableObject;
 
 import java.awt.Toolkit;
 import java.io.File;
@@ -109,7 +109,7 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
     }
 
     /* (non-Javadoc)
-     * @see com.onomatopia.cairo.util.pool.PoolableObject#activate()
+     * @see org.speechforge.cairo.util.pool.PoolableObject#activate()
      */
     @Override
     public synchronized void activate() {
@@ -117,7 +117,7 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
     }
 
     /* (non-Javadoc)
-     * @see com.onomatopia.cairo.util.pool.PoolableObject#passivate()
+     * @see org.speechforge.cairo.util.pool.PoolableObject#passivate()
      */
     @Override
     public synchronized void passivate() {
@@ -228,7 +228,7 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
     }
 
     /* (non-Javadoc)
-     * @see com.onomatopia.cairo.server.recog.SpeechEventListener#speechStarted()
+     * @see org.speechforge.cairo.server.recog.SpeechEventListener#speechStarted()
      */
     public void speechStarted() {
         if (_toolkit != null) {
@@ -248,7 +248,7 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
     }
 
     /* (non-Javadoc)
-     * @see com.onomatopia.cairo.server.recog.SpeechEventListener#speechEnded()
+     * @see org.speechforge.cairo.server.recog.SpeechEventListener#speechEnded()
      */
     public void speechEnded() {
         if (_toolkit != null) {
@@ -313,7 +313,7 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
         }
 
         /* (non-Javadoc)
-         * @see com.onomatopia.cairo.server.recog.RecogListener#recognitionComplete(com.onomatopia.cairo.server.recog.RecognitionResult)
+         * @see org.speechforge.cairo.server.recog.RecogListener#recognitionComplete(org.speechforge.cairo.server.recog.RecognitionResult)
          */
         @Override
         public synchronized void recognitionComplete(RecognitionResult result) {

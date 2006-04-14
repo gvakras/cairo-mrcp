@@ -1,7 +1,7 @@
 /*
  * Cairo - Open source framework for control of speech media resources.
  *
- * Copyright (C) 2005 Onomatopia, Inc. - http://www.onomatopia.com
+ * Copyright (C) 2005-2006 SpeechForge - http://www.speechforge.org
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  * Contact: ngodfredsen@users.sourceforge.net
  *
  */
-package com.onomatopia.cairo.server.resource;
+package org.speechforge.cairo.server.resource;
 
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -68,7 +68,7 @@ public class ResourceServerImpl extends UnicastRemoteObject implements ResourceS
     }
 
     /* (non-Javadoc)
-     * @see com.onomatopia.cairo.server.resource.ResourceServer#invite(com.onomatopia.cairo.server.resource.ResourceMessage)
+     * @see org.speechforge.cairo.server.resource.ResourceServer#invite(org.speechforge.cairo.server.resource.ResourceMessage)
      */
     public ResourceMessage invite(ResourceMessage request) throws ResourceUnavailableException, RemoteException {
         try {

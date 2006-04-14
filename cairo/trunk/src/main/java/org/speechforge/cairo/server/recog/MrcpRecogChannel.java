@@ -1,7 +1,7 @@
 /*
  * Cairo - Open source framework for control of speech media resources.
  *
- * Copyright (C) 2005 Onomatopia, Inc. - http://www.onomatopia.com
+ * Copyright (C) 2005-2006 SpeechForge - http://www.speechforge.org
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,11 +20,11 @@
  * Contact: ngodfredsen@users.sourceforge.net
  *
  */
-package com.onomatopia.cairo.server.recog;
+package org.speechforge.cairo.server.recog;
 
-import com.onomatopia.cairo.exception.UnsupportedHeaderException;
-import com.onomatopia.cairo.server.MrcpGenericChannel;
-import com.onomatopia.cairo.server.resource.ResourceUnavailableException;
+import org.speechforge.cairo.exception.UnsupportedHeaderException;
+import org.speechforge.cairo.server.MrcpGenericChannel;
+import org.speechforge.cairo.server.resource.ResourceUnavailableException;
 
 import java.io.File;
 import java.io.IOException;
@@ -223,7 +223,7 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
         }
 
         /* (non-Javadoc)
-         * @see com.onomatopia.cairo.server.recog.RecogListener#recognitionComplete()
+         * @see org.speechforge.cairo.server.recog.RecogListener#recognitionComplete()
          */
         public void recognitionComplete(RecognitionResult result) {
             try {
@@ -245,7 +245,7 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
         }
 
         /* (non-Javadoc)
-         * @see com.onomatopia.cairo.server.recog.RecogListener#speechStarted()
+         * @see org.speechforge.cairo.server.recog.RecogListener#speechStarted()
          */
         public void speechStarted() {
             try {
@@ -265,7 +265,7 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
         }
 
         /* (non-Javadoc)
-         * @see com.onomatopia.cairo.server.recog.RecogListener#noInputTimeout()
+         * @see org.speechforge.cairo.server.recog.RecogListener#noInputTimeout()
          */
         public void noInputTimeout() {
             try {
@@ -294,7 +294,7 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
     private static EnumSet FULLY_SUPPORTED_HEADERS  = EnumSet.of(MrcpHeaderName.START_INPUT_TIMERS);
 
     /* (non-Javadoc)
-     * @see com.onomatopia.cairo.server.MrcpGenericChannel#validateParam(org.mrcp4j.message.header.MrcpHeader)
+     * @see org.speechforge.cairo.server.MrcpGenericChannel#validateParam(org.mrcp4j.message.header.MrcpHeader)
      */
     @Override
     protected boolean validateParam(MrcpHeader header) throws UnsupportedHeaderException, IllegalValueException {

@@ -26,7 +26,7 @@
     <property name="showCreations" value="false"/>
 
     <property name="xgrammarLocation" value="file:///work/source/zanzibar/grammar"/>
-    <property name="grammarLocation" value="resource:/com.onomatopia.cairo.server.recog.sphinx.SphinxRecEngine!/grammar"/>
+    <property name="grammarLocation" value="resource:/org.speechforge.cairo.server.recog.sphinx.SphinxRecEngine!/grammar"/>
     <property name="grammarName" value="example"/>
 
     <!-- ******************************************************** -->
@@ -198,7 +198,7 @@
     </component>
 
     <component name="speechDataMonitor"
-               type="com.onomatopia.cairo.server.recog.sphinx.SpeechDataMonitor" >
+               type="org.speechforge.cairo.server.recog.sphinx.SpeechDataMonitor" >
     </component>
 
 
@@ -227,7 +227,7 @@
                type="edu.cmu.sphinx.frontend.feature.DeltasFeatureExtractor"/>
 
     <component name="primaryInput"
-               type="com.onomatopia.cairo.server.recog.sphinx.RawAudioProcessor">
+               type="org.speechforge.cairo.server.recog.sphinx.RawAudioProcessor">
         <!--property name="closeBetweenUtterances" value="false"/-->
     </component>
 

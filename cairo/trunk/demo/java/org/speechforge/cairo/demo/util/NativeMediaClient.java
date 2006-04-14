@@ -1,7 +1,7 @@
 /*
  * Cairo - Open source framework for control of speech media resources.
  *
- * Copyright (C) 2005 Onomatopia, Inc. - http://www.onomatopia.com
+ * Copyright (C) 2005-2006 SpeechForge - http://www.speechforge.org
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,10 +20,10 @@
  * Contact: ngodfredsen@users.sourceforge.net
  *
  */
-package com.onomatopia.cairo.demo.util;
+package org.speechforge.cairo.demo.util;
 
-import com.onomatopia.cairo.server.rtp.RTPConsumer;
-import com.onomatopia.cairo.server.tts.RTPPlayer;
+import org.speechforge.cairo.server.rtp.RTPConsumer;
+import org.speechforge.cairo.server.tts.RTPPlayer;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -97,7 +97,7 @@ public class NativeMediaClient extends RTPConsumer {
 
 
     /* (non-Javadoc)
-     * @see com.onomatopia.cairo.server.rtp.RTPConsumer#streamReceived(javax.media.rtp.ReceiveStream, javax.media.protocol.PushBufferDataSource)
+     * @see org.speechforge.cairo.server.rtp.RTPConsumer#streamReceived(javax.media.rtp.ReceiveStream, javax.media.protocol.PushBufferDataSource)
      */
     @Override
     public synchronized void streamReceived(ReceiveStream stream, PushBufferDataSource dataSource) {
@@ -118,7 +118,7 @@ public class NativeMediaClient extends RTPConsumer {
     }
 
     /* (non-Javadoc)
-     * @see com.onomatopia.cairo.server.rtp.RTPConsumer#streamMapped(javax.media.rtp.ReceiveStream, javax.media.rtp.Participant)
+     * @see org.speechforge.cairo.server.rtp.RTPConsumer#streamMapped(javax.media.rtp.ReceiveStream, javax.media.rtp.Participant)
      */
     @Override
     public void streamMapped(ReceiveStream stream, Participant participant) {
@@ -127,7 +127,7 @@ public class NativeMediaClient extends RTPConsumer {
     }
 
     /* (non-Javadoc)
-     * @see com.onomatopia.cairo.server.rtp.RTPConsumer#streamInactive(javax.media.rtp.ReceiveStream, boolean)
+     * @see org.speechforge.cairo.server.rtp.RTPConsumer#streamInactive(javax.media.rtp.ReceiveStream, boolean)
      */
     @Override
     public void streamInactive(ReceiveStream stream, boolean byeEvent) {

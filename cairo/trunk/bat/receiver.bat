@@ -23,7 +23,7 @@ set CLASSPATH=%CLASSPATH%;%SPHINX_HOME%\lib\sphinx4.jar
 set CLASSPATH=%CLASSPATH%;%SPHINX_HOME%\lib\jsapi.jar
 set CLASSPATH=%CLASSPATH%;%SPHINX_HOME%\lib\WSJ_8gau_13dCep_16k_40mel_130Hz_6800Hz.jar
 
-set CLASS=com.onomatopia.cairo.server.resource.ReceiverResource
+set CLASS=org.speechforge.cairo.server.resource.ReceiverResource
 set CAIRO_CONFIG=file:///C:/cvs/sf/cairo/config/cairo-config.xml
 set RES_NAME=input
 

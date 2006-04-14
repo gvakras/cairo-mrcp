@@ -1,7 +1,7 @@
 /*
  * Cairo - Open source framework for control of speech media resources.
  *
- * Copyright (C) 2005 Onomatopia, Inc. - http://www.onomatopia.com
+ * Copyright (C) 2005-2006 SpeechForge - http://www.speechforge.org
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  * Contact: ngodfredsen@users.sourceforge.net
  *
  */
-package com.onomatopia.cairo.server.recog.sphinx;
+package org.speechforge.cairo.server.recog.sphinx;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,10 +40,10 @@ import javax.media.protocol.PushBufferDataSource;
 
 import org.apache.log4j.Logger;
 
-import com.onomatopia.cairo.server.recog.RecogListenerDecorator;
-import com.onomatopia.cairo.server.recog.RecognitionResult;
-import com.onomatopia.cairo.server.rtp.PBDSReplicator;
-import com.onomatopia.cairo.util.jmf.ProcessorStarter;
+import org.speechforge.cairo.server.recog.RecogListenerDecorator;
+import org.speechforge.cairo.server.recog.RecognitionResult;
+import org.speechforge.cairo.server.rtp.PBDSReplicator;
+import org.speechforge.cairo.util.jmf.ProcessorStarter;
 
 import edu.cmu.sphinx.util.props.ConfigurationManager;
 
@@ -74,7 +74,7 @@ public class RunSphinxRecEngine extends RecogListenerDecorator {
     }
 
     /* (non-Javadoc)
-     * @see com.onomatopia.cairo.server.recog.RecogListener#recognitionComplete(com.onomatopia.cairo.server.recog.RecognitionResult)
+     * @see org.speechforge.cairo.server.recog.RecogListener#recognitionComplete(org.speechforge.cairo.server.recog.RecognitionResult)
      */
     @Override
     public synchronized void recognitionComplete(RecognitionResult result) {

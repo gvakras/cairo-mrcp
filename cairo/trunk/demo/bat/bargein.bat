@@ -21,6 +21,6 @@ set CLASSPATH=%CLASSPATH%;%THIRDPARTY%\mina-0.7.2.jar
 set CLASSPATH=%CLASSPATH%;%THIRDPARTY%\nist-sip-1.2.jar
 set CLASSPATH=%CLASSPATH%;%THIRDPARTY%\servlet-api.jar
 
-set CLASS=com.onomatopia.cairo.demo.bargein.BargeInClient
+set CLASS=org.speechforge.cairo.demo.bargein.BargeInClient
 set ARG1=file:///cvs/sf/cairo/grammar/example.gram
 java -cp %CLASSPATH% -Dlog4j.configuration=log4j.xml %CLASS% "%ARG1%"

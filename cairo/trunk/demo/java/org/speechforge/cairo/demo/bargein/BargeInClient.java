@@ -1,7 +1,7 @@
 /*
  * Cairo - Open source framework for control of speech media resources.
  *
- * Copyright (C) 2005 Onomatopia, Inc. - http://www.onomatopia.com
+ * Copyright (C) 2005-2006 SpeechForge - http://www.speechforge.org
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,15 +20,15 @@
  * Contact: ngodfredsen@users.sourceforge.net
  *
  */
-package com.onomatopia.cairo.demo.bargein;
+package org.speechforge.cairo.demo.bargein;
 
-import com.onomatopia.cairo.demo.util.NativeMediaClient;
+import org.speechforge.cairo.demo.util.NativeMediaClient;
 
-import com.onomatopia.cairo.server.resource.ReceiverResource;
-import com.onomatopia.cairo.server.resource.ResourceChannel;
-import com.onomatopia.cairo.server.resource.ResourceMediaStream;
-import com.onomatopia.cairo.server.resource.ResourceMessage;
-import com.onomatopia.cairo.server.resource.ResourceServer;
+import org.speechforge.cairo.server.resource.ReceiverResource;
+import org.speechforge.cairo.server.resource.ResourceChannel;
+import org.speechforge.cairo.server.resource.ResourceMediaStream;
+import org.speechforge.cairo.server.resource.ResourceMessage;
+import org.speechforge.cairo.server.resource.ResourceServer;
 
 import java.awt.Toolkit;
 import java.io.IOException;
@@ -70,8 +70,6 @@ public class BargeInClient implements MrcpEventListener {
     private MrcpChannel _ttsChannel;
     private MrcpChannel _recogChannel;
     private MrcpChannel _recordChannel;
-
-    //private URL ;= new URL("file:///work/cvs/onomatopia/cairo/grammar");
 
     /**
      * TODOC
