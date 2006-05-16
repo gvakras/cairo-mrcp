@@ -41,7 +41,7 @@ import edu.cmu.sphinx.util.props.ConfigurationManager;
 /**
  * Unit test for SphinxRecEngine.
  */
-public class TestSphinxRecEngine extends TestCase {
+public class TestRunSphinxRecEngine extends TestCase {
 	
 	private RunSphinxRecEngine _runner = null;
 
@@ -50,7 +50,7 @@ public class TestSphinxRecEngine extends TestCase {
      *
      * @param testName name of the test case
      */
-    public TestSphinxRecEngine(String testName){
+    public TestRunSphinxRecEngine(String testName){
         super(testName);
     }
 
@@ -58,7 +58,7 @@ public class TestSphinxRecEngine extends TestCase {
      * @return the suite of tests being tested
      */
     public static Test suite() {
-        return new TestSuite(TestSphinxRecEngine.class );
+        return new TestSuite(TestRunSphinxRecEngine.class );
     }
 
     public void setUp() throws Exception {
@@ -77,7 +77,7 @@ public class TestSphinxRecEngine extends TestCase {
 */    	
     }
 
-    public void testSphinxRecEngine() throws Exception {
+    public void testRunSphinxRecEngine() throws Exception {
     	/*for (Map.Entry entry : System.getProperties().entrySet()) {
         	System.out.println(entry.getKey().toString() + '=' + entry.getValue().toString());
     	}*/
