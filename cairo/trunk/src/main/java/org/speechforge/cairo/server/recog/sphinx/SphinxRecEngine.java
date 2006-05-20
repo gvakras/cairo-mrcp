@@ -89,22 +89,17 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
 
         _jsgfGrammar = (JSGFGrammar) cm.lookup("jsgfGrammar");
 
-        try {
-            SpeechDataMonitor speechDataMonitor = (SpeechDataMonitor) cm.lookup("speechDataMonitor");
+        SpeechDataMonitor speechDataMonitor = (SpeechDataMonitor) cm.lookup("speechDataMonitor");
+        if (speechDataMonitor != null) {
             speechDataMonitor.setSpeechEventListener(this);
-        } catch (InstantiationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (PropertyException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         }
 
         Object primaryInput = cm.lookup("primaryInput");
         if (primaryInput instanceof RawAudioProcessor) {
             _rawAudioProcessor = (RawAudioProcessor) primaryInput;
         } else {
-            throw new InstantiationException("Unsupported primary input type: " + primaryInput.getClass().getName());
+            String className = (primaryInput == null) ? null : primaryInput.getClass().getName();
+            throw new InstantiationException("Unsupported primary input type: " + className);
         }
     }
 
