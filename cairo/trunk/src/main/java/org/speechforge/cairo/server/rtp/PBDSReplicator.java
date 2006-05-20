@@ -30,6 +30,7 @@ import javax.media.Buffer;
 import javax.media.Duration;
 import javax.media.Format;
 import javax.media.Time;
+import javax.media.format.AudioFormat;
 import javax.media.protocol.BufferTransferHandler;
 import javax.media.protocol.ContentDescriptor;
 import javax.media.protocol.PushBufferDataSource;
@@ -49,38 +50,64 @@ public class PBDSReplicator implements BufferTransferHandler {
 
     List<PBDS> _destinations = new ArrayList<PBDS>();
     PushBufferDataSource _pbds;
-    Format _format;
+    AudioFormat _format = null;
 
     /**
      * TODOC
-     * @param pbds a data source to be replicated.  This will attempt to connect to and start the data source.
-     * @throws IOException if there are I/O problems when connecting to or starting the data source
+     * @param pbds a data source to be replicated.
+     * @throws IllegalArgumentException if the data source provided has no audio streams.
      */
-    public PBDSReplicator(PushBufferDataSource pbds) throws IOException {
+    public PBDSReplicator(PushBufferDataSource pbds) throws IllegalArgumentException {
+
         _pbds = pbds;
+
         PushBufferStream[] pbStreams = _pbds.getStreams();
-        if (pbStreams.length != 1) {
-            if (pbStreams.length < 1) {
-                throw new IOException("PushBufferDataSource.getStreams() returned zero streams!");
-            } else if (_logger.isDebugEnabled()) {
-                _logger.debug("Only first stream handled, total streams received: " + pbStreams.length);
+
+        if (pbStreams.length < 1) {
+            throw new IllegalArgumentException("No streams found in provided data source!");
+        }
+
+        if (_logger.isDebugEnabled()) {
+            if (pbStreams.length == 1) {
+                ContentDescriptor cd = pbStreams[0].getContentDescriptor();
+                _logger.debug("stream details: contentType=" + cd.getContentType() + ", format=" + pbStreams[0].getFormat());
+            } else {
+                _logger.debug("Only first audio stream handled, total streams received: " + pbStreams.length);
                 for (int i = 0; i < pbStreams.length; i++) {
                     ContentDescriptor cd = pbStreams[i].getContentDescriptor();
                     _logger.debug("stream " + i + " details: contentType=" + cd.getContentType() + ", format=" + pbStreams[i].getFormat());
                 }
             }
-        } else if (_logger.isDebugEnabled()) {
-            ContentDescriptor cd = pbStreams[0].getContentDescriptor();
-            _logger.debug("stream details: contentType=" + cd.getContentType() + ", format=" + pbStreams[0].getFormat());
         }
 
-        pbStreams[0].setTransferHandler(this);
-        _format = pbStreams[0].getFormat();
+        for (int i = 0; i < pbStreams.length; i++) {
+            Format format = pbStreams[i].getFormat();
+            if (format instanceof AudioFormat) {
+                _format = (AudioFormat) format;
+                pbStreams[i].setTransferHandler(this);
+                break;
+            }
+        }
+
+        if (_format == null) {
+            throw new IllegalArgumentException("No audio streams found in provided data source!");
+        }
 
 //        _pbds.connect();
 //        _pbds.start();
     }
-    
+
+    /**
+     * @return the format of the underlying PushBufferDataSource
+     */
+    public AudioFormat getAudioFormat() {
+        return _format;
+    }
+
+    /**
+     * Replicates the underlying data source.
+     * @return replication of the underlying data source.
+     */
     public PushBufferDataSource replicate() {
         PBDS pbds = new PBDS();
         synchronized (_destinations) {
@@ -93,6 +120,8 @@ public class PBDSReplicator implements BufferTransferHandler {
      * @see javax.media.protocol.BufferTransferHandler#transferData(javax.media.protocol.PushBufferStream)
      */
     public void transferData(PushBufferStream pbs) {
+        _logger.debug("transferData()");
+        
         Buffer buffer = new Buffer();
         IOException ioe = null;
 
@@ -104,8 +133,12 @@ public class PBDSReplicator implements BufferTransferHandler {
         }
         
         synchronized (_destinations) {
-            for (PBDS pbds : _destinations) {
-                pbds.newData(buffer, ioe);
+            if (_destinations.size() > 0) {
+                for (PBDS pbds : _destinations) {
+                    pbds.newData(buffer, ioe);
+                }
+            } else if (_logger.isDebugEnabled()) {
+                _logger.debug("transferData called with no destinations registered!");
             }
         }
     }
@@ -126,6 +159,7 @@ public class PBDSReplicator implements BufferTransferHandler {
          * @param ioe
          */
         public synchronized void newData(Buffer buffer, IOException ioe) {
+            _logger.debug("newData()");
             if (_started) {
                 _buffer = buffer;
                 _ioe = ioe;
@@ -172,6 +206,7 @@ public class PBDSReplicator implements BufferTransferHandler {
          */
         @Override
         public void start() {
+            _logger.debug("start()");
             _started = true;
         }
 
@@ -180,6 +215,7 @@ public class PBDSReplicator implements BufferTransferHandler {
          */
         @Override
         public void stop() {
+            _logger.debug("stop()");
             _started = false;
         }
 
