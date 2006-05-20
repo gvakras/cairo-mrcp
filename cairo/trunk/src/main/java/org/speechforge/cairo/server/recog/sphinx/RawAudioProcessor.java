@@ -69,7 +69,7 @@ import org.apache.log4j.Logger;
 public class RawAudioProcessor extends BaseDataProcessor
   implements /*SessionListener, ReceiveStreamListener, ControllerListener, BufferTransferHandler,*/ Runnable {
 
-    private static Logger _logger = Logger.getLogger(RawAudioTransferHandler.class);
+    private static Logger _logger = Logger.getLogger(RawAudioProcessor.class);
 
     /**
      * The Sphinx property that specifies the number of milliseconds of
@@ -191,6 +191,7 @@ public class RawAudioProcessor extends BaseDataProcessor
      * has been stopped and all data has been read from the audio line.
      */
     public synchronized void stopProcessing() {
+        _logger.debug("stopProcessing() called: adding final frame data and end signal...");
         _processing = false;
 
         if (_framePointer > 0) {
@@ -351,7 +352,9 @@ java.lang.Exception: debugging stack for RawAudioProcessor.getData()
 
         if (!_utteranceEndReached) {
             try {
+                _logger.trace("getData(): getting data from data list...");
                 output = _dataList.remove();
+                _logger.trace("getData(): got data from data list.");
             } catch (InterruptedException e){
                 _logger.warn(e, e);
                 throw (DataProcessingException) new DataProcessingException("Data processing thread interrupted!").initCause(e);
@@ -364,10 +367,6 @@ java.lang.Exception: debugging stack for RawAudioProcessor.getData()
         //getTimer().stop();
 
         // signalCheck(output);
-
-        if (_logger.isTraceEnabled()) {
-            _logger.trace("RawAudioProcessor.getData() returning data.");
-        }
 
         return output;
     }
@@ -387,6 +386,19 @@ java.lang.Exception: debugging stack for RawAudioProcessor.getData()
 
         if (_logger.isTraceEnabled()) {
             _logger.trace("addRawData(): offset=" + offset + ", length=" + length);
+        }
+
+        if (length < 1) {
+            _logger.debug("addRawData(): no data to add (length < 1).");
+            return;
+        }
+
+        if (data == null) {
+            throw new IllegalArgumentException("Attempt to call addRawData() passing null data argument!");
+        }
+
+        if (offset + length > data.length) {
+            throw new IllegalArgumentException("Attempt to call addRawData() with offset plus length greater than data length!");
         }
 
         if (_fileWriter != null) {
@@ -421,6 +433,13 @@ java.lang.Exception: debugging stack for RawAudioProcessor.getData()
             _logger.trace("remainder = " + _framePointer);
         }
 
+    }
+
+    public static RawAudioProcessor getInstanceForTesting(){
+        RawAudioProcessor instance = new RawAudioProcessor();
+        instance._msecPerRead = PROP_MSEC_PER_READ_DEFAULT;
+        instance.initialize();
+        return instance;
     }
 
 }
