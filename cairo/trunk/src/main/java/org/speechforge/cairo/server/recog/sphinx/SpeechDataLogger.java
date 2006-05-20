@@ -41,7 +41,8 @@ import edu.cmu.sphinx.util.props.Registry;
 import org.apache.log4j.Logger;
 
 /**
- * TODOC
+ * Sphinx data processor used for logging speech data as it passes through the pipeline.
+ *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  *
  */
