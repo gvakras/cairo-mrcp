@@ -289,7 +289,7 @@ public class SourceAudioFormat {
     private static javax.media.format.AudioFormat getPreferredMediaFormatTwo() {
         return new javax.media.format.AudioFormat(
             javax.media.format.AudioFormat.LINEAR, //encoding
-            8000.0,                                //sample rate
+            16000.0,                                //sample rate
             16,                                    //sample size in bits
             1,                                     //channels
             javax.media.format.AudioFormat.LITTLE_ENDIAN,
