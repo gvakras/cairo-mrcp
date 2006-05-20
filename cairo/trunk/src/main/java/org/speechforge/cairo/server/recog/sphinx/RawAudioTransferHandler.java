@@ -83,20 +83,41 @@ public class RawAudioTransferHandler implements BufferTransferHandler {
             _logger.trace("transferData callback entered with stream format = " + stream.getFormat());
         }
 
-        try {
-            Buffer buffer = new Buffer();
-            stream.read(buffer);
-            if (!buffer.isDiscard()) {
-                byte[] data = (byte[]) buffer.getData();
-                if (_rawAudioProcessor != null && data != null) {
-                    _rawAudioProcessor.addRawData(data, buffer.getOffset(), buffer.getLength());
-                } // TODO: else debug output
-            } else {
-                _logger.debug("transferData(): buffer is discard!");
+        if (stream.endOfStream()) {
+            _logger.debug("transferData(): end of stream reached.");
+            //_rawAudioProcessor.stopProcessing();
+        } else {
+            try {
+                Buffer buffer = new Buffer();
+                _logger.trace("transferData(): reading stream into buffer...");
+                stream.read(buffer);
+                if (_logger.isTraceEnabled()) {
+                    _logger.trace("transferData(): stream read into buffer : offset=" + buffer.getOffset() + " length=" + buffer.getLength());
+                }
+                if (buffer.isEOM()) {
+                    _logger.debug("transferData(): buffer is EOM.");
+                    _rawAudioProcessor.stopProcessing();
+                } else if (buffer.isDiscard()) {
+                    _logger.debug("transferData(): buffer is discard!");
+                } else {
+                    byte[] data = (byte[]) buffer.getData();
+                    if (_rawAudioProcessor != null) {
+                        if (buffer.getLength() > 0) {
+                            _rawAudioProcessor.addRawData(data, buffer.getOffset(), buffer.getLength());
+                        } else {
+                            _logger.debug("transferData(): buffer length is zero!");
+                        }
+                    } else {
+                        _logger.debug("transferData(): _rawAudioProcessor is null, discarding data.");
+                    }
+                }
+            } catch (IOException e){
+                _logger.warn("transferData() encountered IOException!", e);
+            } catch (RuntimeException e){
+                _logger.warn("transferData() encountered RuntimeException!", e);
             }
-        } catch (IOException e){
-            e.printStackTrace();
         }
+        
     }
 
 }
