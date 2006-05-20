@@ -41,13 +41,29 @@ import org.apache.log4j.Logger;
 public class ProcessorStarter implements ControllerListener {
 
     private static Logger _logger = Logger.getLogger(ProcessorStarter.class);
+    
+    private boolean _handleEOM;
+
+    /**
+     * Handles EndOfMediaEvent by default.
+     */
+    public ProcessorStarter() {
+        this(true);
+    }
+
+    /**
+     * @param handleEOM if true close processor on EndOfMediaEvent
+     */
+    public ProcessorStarter(boolean handleEOM) {
+        _handleEOM = handleEOM;
+    }
 
     /* (non-Javadoc)
      * @see javax.media.ControllerListener#controllerUpdate(javax.media.ControllerEvent)
      */
     public void controllerUpdate(ControllerEvent event) {
         if (_logger.isDebugEnabled()) {
-            _logger.debug("ControllerEvent received: " + event);
+            _logger.debug("controllerUpdate(): ControllerEvent received: " + event);
         }
 
         try {
@@ -58,7 +74,12 @@ public class ProcessorStarter implements ControllerListener {
                 dataSource.connect();
                 dataSource.start();
             } else if (event instanceof EndOfMediaEvent) { //StopEvent) {
-                event.getSourceController().close();
+                if (_handleEOM) {
+                    _logger.debug("controllerUpdate(): EndOfMediaEvent received: closing processor...");
+                    event.getSourceController().close();
+                } else {
+                    _logger.debug("controllerUpdate(): ignoring EndOfMediaEvent.");
+                }
             }
         } catch (IOException e) {
             _logger.warn(e, e);
