@@ -99,6 +99,13 @@
       <scope>runtime</scope>
     </dependency>
 
+    <dependency>
+      <groupId>sphinx</groupId>
+      <artifactId>TIDIGITS_8gau_13dCep_16k_40mel_130Hz_6800Hz</artifactId>
+      <version>1.0beta</version>
+      <scope>test</scope>
+    </dependency>
+
     <!-- Need to install this artifact separately for license reasons! -->
     <!-- Download jsapi.exe to your java ext dir (jre/lib/ext) and execute to extract the jsapi jar file. -->
     <!--dependency>
