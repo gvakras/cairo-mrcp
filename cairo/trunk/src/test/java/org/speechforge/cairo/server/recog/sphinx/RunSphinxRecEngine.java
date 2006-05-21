@@ -43,6 +43,7 @@ import org.apache.log4j.Logger;
 import org.speechforge.cairo.server.recog.RecogListenerDecorator;
 import org.speechforge.cairo.server.recog.RecognitionResult;
 import org.speechforge.cairo.server.rtp.PBDSReplicator;
+import org.speechforge.cairo.util.jmf.JMFUtil;
 import org.speechforge.cairo.util.jmf.ProcessorStarter;
 
 import edu.cmu.sphinx.util.props.ConfigurationManager;
@@ -55,12 +56,11 @@ import edu.cmu.sphinx.util.props.ConfigurationManager;
  */
 public class RunSphinxRecEngine extends RecogListenerDecorator {
 
-    private static Logger _logger = Logger.getLogger(SphinxRecEngine.class);
+    private static Logger _logger = Logger.getLogger(RunSphinxRecEngine.class);
 
     public static final MediaLocator MICROPHONE = new MediaLocator("dsound://");
 
     private static final AudioFormat[] PREFERRED_MEDIA_FORMATS = {SourceAudioFormat.PREFERRED_MEDIA_FORMAT};
-    private static final ContentDescriptor CONTENT_DESCRIPTOR_RAW = new ContentDescriptor(ContentDescriptor.RAW);
 
     private SphinxRecEngine _engine;
     private RecognitionResult _result;
@@ -87,7 +87,7 @@ public class RunSphinxRecEngine extends RecogListenerDecorator {
         _result = null;
         _engine.activate();
 
-        Processor processor = createReplicatedProcessor();
+        Processor processor = createReplicatedProcessor(_replicator);
         processor.addControllerListener(new ProcessorStarter());
 
         PushBufferDataSource pbds = (PushBufferDataSource) processor.getDataOutput();
@@ -111,36 +111,30 @@ public class RunSphinxRecEngine extends RecogListenerDecorator {
         return result;
     }
 
-    private Processor createReplicatedProcessor() throws IOException,
-            IllegalStateException, NoProcessorException,
-            CannotRealizeException {
-        
+    public static Processor createReplicatedProcessor(PBDSReplicator replicator)
+      throws IOException, IllegalStateException, NoProcessorException, CannotRealizeException {
+
+        DataSource dataSource = replicator.replicate();
+
         ProcessorModel pm = new ProcessorModel(
-                _replicator.replicate(),
+                dataSource,
                 PREFERRED_MEDIA_FORMATS,
-                CONTENT_DESCRIPTOR_RAW
+                JMFUtil.CONTENT_DESCRIPTOR_RAW
         );
         
         _logger.debug("Creating realized processor...");
         Processor processor = Manager.createRealizedProcessor(pm);
         _logger.debug("Processor realized.");
-        
+
+        dataSource.start();
+
         return processor;
     }
 
-    private static Processor createProcessor(MediaLocator mediaLocator)
-      throws NoDataSourceException, IOException, NoProcessorException, CannotRealizeException {
-
-        DataSource dataSource = Manager.createDataSource(mediaLocator);
-        ProcessorModel pm = new ProcessorModel(dataSource,
-                PREFERRED_MEDIA_FORMATS, CONTENT_DESCRIPTOR_RAW);
-        Processor processor = Manager.createRealizedProcessor(pm);
-        return processor;
-    }
-
-    private static PBDSReplicator createReplicator(MediaLocator mediaLocator)
+    public static PBDSReplicator createReplicator(MediaLocator mediaLocator)
       throws NoProcessorException, NoDataSourceException, CannotRealizeException, IOException {
-        Processor processor = createProcessor(mediaLocator);
+
+        Processor processor = JMFUtil.createRealizedProcessor(mediaLocator, PREFERRED_MEDIA_FORMATS);
         processor.addControllerListener(new ProcessorStarter());
         PushBufferDataSource pbds = (PushBufferDataSource) processor.getDataOutput();
         PBDSReplicator replicator = new PBDSReplicator(pbds);

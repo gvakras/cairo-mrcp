@@ -11,8 +11,12 @@
      </layout>
   </appender>
 
-  <root>
+  <category name="org.speechforge.cairo.server.recog.sphinx.TestRawAudioProcessor">
     <priority value="debug"/>
+  </category>
+
+  <root>
+    <priority value="info"/>
     <appender-ref ref="Console"/>
   </root>
 
