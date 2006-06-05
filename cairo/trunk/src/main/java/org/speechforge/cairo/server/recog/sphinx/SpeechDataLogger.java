@@ -50,6 +50,16 @@ public class SpeechDataLogger extends BaseDataProcessor {
 
     private static Logger _logger = Logger.getLogger(SpeechDataLogger.class);
 
+    /**
+     * Property specifying the location of the log file to log speech data to.
+     */
+    public static final String PROP_LOG_FILE_DIR = "logFileDir";
+
+    /**
+     * The default value of PROP_LOG_FILE_DIR.
+     */
+    public static final String PROP_LOG_FILE_DIR_DEFAULT = "/temp/speechdata";
+
 	/**
 	 * Property specifying the name of the log file to log speech data to.
 	 */
@@ -60,16 +70,16 @@ public class SpeechDataLogger extends BaseDataProcessor {
 	 */
 	public static final String PROP_LOG_FILE_NAME_DEFAULT = "speechdata";
 
+
     private static final String NL = System.getProperty("line.separator");
 
 	private FileWriter _fileWriter = null;
 
     /**
-     * TODOC
+     * Default constructor.
      */
     public SpeechDataLogger() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     /* (non-Javadoc)
@@ -77,14 +87,26 @@ public class SpeechDataLogger extends BaseDataProcessor {
      */
     public void register(String name, Registry registry) throws PropertyException {
 	    super.register(name, registry);
+        registry.register(PROP_LOG_FILE_DIR, PropertyType.STRING);
 	    registry.register(PROP_LOG_FILE_NAME, PropertyType.STRING);
     }
 
     public void newProperties(PropertySheet ps) throws PropertyException {
         super.newProperties(ps);
+
+        File logFileDir = new File(ps.getString(PROP_LOG_FILE_DIR, PROP_LOG_FILE_DIR_DEFAULT));
+        if (!logFileDir.exists()) {
+            if (!logFileDir.mkdirs()) {
+                throw new PropertyException(this, PROP_LOG_FILE_DIR, "Invalid log file dir: " + logFileDir);
+            }
+        } else if (!logFileDir.isDirectory()) {
+            throw new PropertyException(this, PROP_LOG_FILE_DIR, "Specified log file dir exists as file: " + logFileDir);
+        }
+
         String logFileName = ps.getString(PROP_LOG_FILE_NAME, PROP_LOG_FILE_NAME_DEFAULT);
+
         try {
-			_fileWriter = new FileWriter(constructLogFile(logFileName), false);
+			_fileWriter = new FileWriter(constructLogFile(logFileDir, logFileName), false);
 		} catch (IOException e) {
 			throw (PropertyException) new PropertyException(this, PROP_LOG_FILE_NAME, e.getMessage()).initCause(e);
 		}
@@ -128,13 +150,29 @@ public class SpeechDataLogger extends BaseDataProcessor {
             	_fileWriter.append(Float.toString(values[i]));
             	_fileWriter.append(NL);
         	}
+//        } else if ("edu.cmu.sphinx.frontend.endpoint.SpeechClassifiedData".equals(data.getClass().getName())) {
+        } else {
+            _fileWriter.append("Unknown data type: " + data.getClass().getName());
+            _fileWriter.append(NL);
         }
         _fileWriter.flush();
     }
 
-    private static File constructLogFile(String logFileName) {
-        File dir = new File(".");
-        File logFile = new File(dir, logFileName + '-' + System.currentTimeMillis() + ".txt");
+    private static File constructLogFile(String logFileDir, String logFileName) {
+        File dir = new File(logFileDir);
+        if (!dir.exists()) {
+            if (!dir.mkdirs()) {
+                throw new IllegalArgumentException("invalid log file dir: " + dir);
+            }
+        } else if (!dir.isDirectory()) {
+            throw new IllegalArgumentException("Specified log file dir exists as file: " + dir);
+        }
+
+        return constructLogFile(dir, logFileName);
+    }
+
+    private static File constructLogFile(File logFileDir, String logFileName) {
+        File logFile = new File(logFileDir, logFileName + '-' + System.currentTimeMillis() + ".txt");
         if (_logger.isDebugEnabled()) {
             try {
                 URL logFileURL = logFile.toURL();
@@ -146,9 +184,9 @@ public class SpeechDataLogger extends BaseDataProcessor {
         return logFile;
     }
 
-    public static SpeechDataLogger getInstanceForTesting(String logFileName) throws IOException{
+    public static SpeechDataLogger getInstanceForTesting(String logFileName) throws IOException {
         SpeechDataLogger instance = new SpeechDataLogger();
-        instance._fileWriter = new FileWriter(constructLogFile(logFileName), false);
+        instance._fileWriter = new FileWriter(constructLogFile(PROP_LOG_FILE_DIR_DEFAULT, logFileName), false);
         return instance;
     }
 
