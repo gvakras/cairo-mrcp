@@ -164,7 +164,7 @@ public class SourceAudioFormat {
         } else if (javax.sound.sampled.AudioFormat.Encoding.PCM_UNSIGNED.equals(encoding)) {
             format.setSigned(false);
         } else {
-            throw new UnsupportedEncodingException(encoding.toString());
+            throw new UnsupportedEncodingException("Unsupported encoding: " + encoding.toString());
         }
 
         format.setBigEndian(soundFormat.isBigEndian());
@@ -202,7 +202,7 @@ public class SourceAudioFormat {
             break;
 
         default:
-            throw new UnsupportedEncodingException(mediaFormat.getEncoding());
+            throw new UnsupportedEncodingException("Unsupported/unspecified signed: " + mediaFormat.toString());
         
         }
 
@@ -216,7 +216,7 @@ public class SourceAudioFormat {
             break;
 
         default:
-            throw new UnsupportedEncodingException(mediaFormat.getEncoding());
+            throw new UnsupportedEncodingException("Unsupported/unspecified endian: " + mediaFormat.toString());
         
         }
         

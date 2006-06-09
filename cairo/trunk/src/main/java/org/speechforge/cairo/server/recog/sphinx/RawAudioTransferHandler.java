@@ -85,7 +85,7 @@ public class RawAudioTransferHandler implements BufferTransferHandler {
 
         if (stream.endOfStream()) {
             _logger.debug("transferData(): end of stream reached.");
-            //_rawAudioProcessor.stopProcessing();
+            //stopProcessing();
         } else {
             try {
                 Buffer buffer = new Buffer();
@@ -96,7 +96,7 @@ public class RawAudioTransferHandler implements BufferTransferHandler {
                 }
                 if (buffer.isEOM()) {
                     _logger.debug("transferData(): buffer is EOM.");
-                    _rawAudioProcessor.stopProcessing();
+                    stopProcessing();
                 } else if (buffer.isDiscard()) {
                     _logger.debug("transferData(): buffer is discard!");
                 } else {

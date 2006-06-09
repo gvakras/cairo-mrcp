@@ -190,7 +190,9 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
             throw new IllegalArgumentException(
                 "Rec engine can handle only single stream datasources, # of streams: " + streams);
         }
-        _logger.debug("starting recognition");
+        if (_logger.isDebugEnabled()) {
+            _logger.debug("Starting recognition on stream format: " + streams[0].getFormat());
+        }
         try {
             _rawAudioTransferHandler = new RawAudioTransferHandler(_rawAudioProcessor);
             _rawAudioTransferHandler.startProcessing(streams[0]);
