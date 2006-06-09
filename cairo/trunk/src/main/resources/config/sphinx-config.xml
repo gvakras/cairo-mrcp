@@ -185,7 +185,7 @@
     <!-- ******************************************************** -->
 
     <component name="speechClassifier"
-               type="edu.cmu.sphinx.frontend.endpoint.SpeechClassifier">
+               type="edu.cmu.sphinx.frontend.endpoint.SpeechClassifierPatch">
         <property name="threshold" value="13"/>
     </component>
 
