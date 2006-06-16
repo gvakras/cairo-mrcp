@@ -22,13 +22,14 @@
  */
 package org.speechforge.cairo.test.sphinx.wavfile;
 
+import org.speechforge.cairo.server.recog.sphinx.AbstractTestCase;
+
 import java.net.URL;
 
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import edu.cmu.sphinx.frontend.util.StreamDataSource;
@@ -37,12 +38,11 @@ import edu.cmu.sphinx.result.Result;
 import edu.cmu.sphinx.util.props.ConfigurationManager;
 
 import org.apache.log4j.Logger;
-import org.apache.log4j.xml.DOMConfigurator;
 
 /**
- * Unit test for SphinxRecEngine.
+ * Unit test for basic recognition with Sphinx (no Cairo classes).
  */
-public class TestSphinxWavFile extends TestCase {
+public class TestSphinxWavFile extends AbstractTestCase {
 
     private static Logger _logger = Logger.getLogger(TestSphinxWavFile.class);
 
@@ -63,33 +63,36 @@ public class TestSphinxWavFile extends TestCase {
     }
 
     public void setUp() throws Exception {
-
-        // configure log4j
-        URL log4jURL = this.getClass().getResource("/log4j.xml");
-        assertNotNull(log4jURL);
-        DOMConfigurator.configure(log4jURL);
+        super.setUp();
+        System.setProperty("frontend", "mfcFrontEnd");
     }
 
     public void test12345() throws Exception {
-        URL audioFileURL = this.getClass().getResource("/prompts/12345.wav");
+        debugTestName(_logger);
+
+        URL audioFileURL = this.getClass().getResource("/prompts/12345-alt2.wav");
         String expected = "one two three four five";
         recognize(audioFileURL, expected);
     }
 
     public void test65536() throws Exception {
+        debugTestName(_logger);
+
         URL audioFileURL = this.getClass().getResource("/prompts/65536.wav");
         String expected = "six five five three six";
         recognize(audioFileURL, expected);
     }
 
     public void test1984() throws Exception {
+        debugTestName(_logger);
+
         URL audioFileURL = this.getClass().getResource("/prompts/1984.wav");
         String expected = "one nine eight four";
         recognize(audioFileURL, expected);
     }
 
     private void recognize(URL audioFileURL, String expected) throws Exception {
-        URL sphinxConfigURL = this.getClass().getResource("sphinx-config.xml");
+        URL sphinxConfigURL = this.getClass().getResource("sphinx-config-TIDIGITS.xml");
         _logger.debug("configURL: " + sphinxConfigURL);
 
         _logger.debug("Loading Recognizer...");

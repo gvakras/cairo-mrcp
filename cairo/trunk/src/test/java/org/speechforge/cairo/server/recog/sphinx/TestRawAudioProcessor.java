@@ -37,7 +37,6 @@ import javax.media.protocol.PushBufferDataSource;
 import javax.media.protocol.PushBufferStream;
 
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import edu.cmu.sphinx.frontend.Data;
@@ -46,12 +45,11 @@ import edu.cmu.sphinx.frontend.DataStartSignal;
 import edu.cmu.sphinx.frontend.DoubleData;
 
 import org.apache.log4j.Logger;
-import org.apache.log4j.xml.DOMConfigurator;
 
 /**
- * Unit test for SphinxRecEngine.
+ * Unit test for RawAudioProcessor.
  */
-public class TestRawAudioProcessor extends TestCase {
+public class TestRawAudioProcessor extends AbstractTestCase {
 
     private static Logger _logger = Logger.getLogger(TestRawAudioProcessor.class);
 
@@ -72,15 +70,9 @@ public class TestRawAudioProcessor extends TestCase {
         return new TestSuite(TestRawAudioProcessor.class);
     }
 
-    public void setUp() throws Exception {
-
-        // configure log4j
-        URL log4jURL = this.getClass().getResource("/log4j.xml");
-        assertNotNull(log4jURL);
-        DOMConfigurator.configure(log4jURL);
-    }
-
     public void test12345() throws Exception {
+        debugTestName(_logger);
+
         URL audioFileURL = this.getClass().getResource("/prompts/12345.wav");
         assertNotNull(audioFileURL);
 
@@ -98,7 +90,8 @@ public class TestRawAudioProcessor extends TestCase {
         processor.start();
 
         PushBufferStream[] streams = pbds.getStreams();
-        assert(streams.length == 1);
+        assertEquals("Should be single stream in data source.", 1, streams.length);
+        _logger.debug("PushBufferStream format: " + streams[0].getFormat());
 
         RawAudioProcessor rawAudioProcessor = RawAudioProcessor.getInstanceForTesting();
 
@@ -123,7 +116,9 @@ public class TestRawAudioProcessor extends TestCase {
 
             double[] values = ((DoubleData) data).getValues();
             for (int i=0; i < values.length; i++) {
-                _logger.trace("expected=" + tokenizer.nval + " actual=" + values[i]);
+                if (_logger.isTraceEnabled()) {
+                    _logger.trace("expected=" + tokenizer.nval + " actual=" + values[i]);
+                }
                 assertEquals(tokenizer.nval, values[i]);
                 ttype = tokenizer.nextToken();
             }

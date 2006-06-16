@@ -33,6 +33,7 @@ import edu.cmu.sphinx.frontend.DataProcessingException;
 import edu.cmu.sphinx.frontend.DoubleData;
 import edu.cmu.sphinx.frontend.FloatData;
 import edu.cmu.sphinx.frontend.Signal;
+import edu.cmu.sphinx.frontend.endpoint.SpeechClassifiedDataAccessor;
 import edu.cmu.sphinx.util.props.PropertyException;
 import edu.cmu.sphinx.util.props.PropertySheet;
 import edu.cmu.sphinx.util.props.PropertyType;
@@ -41,7 +42,7 @@ import edu.cmu.sphinx.util.props.Registry;
 import org.apache.log4j.Logger;
 
 /**
- * Sphinx data processor used for logging speech data as it passes through the pipeline.
+ * Sphinx data processor for logging speech data as it passes through the pipeline.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  *
@@ -53,7 +54,7 @@ public class SpeechDataLogger extends BaseDataProcessor {
     /**
      * Property specifying the location of the log file to log speech data to.
      */
-    public static final String PROP_LOG_FILE_DIR = "logFileDir";
+    public static final String PROP_LOG_FILE_DIR = "speechDataLogFileDir";
 
     /**
      * The default value of PROP_LOG_FILE_DIR.
@@ -63,7 +64,7 @@ public class SpeechDataLogger extends BaseDataProcessor {
 	/**
 	 * Property specifying the name of the log file to log speech data to.
 	 */
-	public static final String PROP_LOG_FILE_NAME = "logFileName";
+	public static final String PROP_LOG_FILE_NAME = "speechDataLogFileName";
 
 	/**
 	 * The default value of PROP_LOG_FILE_NAME.
@@ -135,7 +136,10 @@ public class SpeechDataLogger extends BaseDataProcessor {
     }
     
     private void logData(Data data) throws IOException {
-        if (data instanceof Signal) {
+        if (data == null) {
+            _fileWriter.append("data is null!");
+            _fileWriter.append(NL);
+        } else if (data instanceof Signal) {
         	_fileWriter.append(data.getClass().getName());
             _fileWriter.append(NL);
         } else if (data instanceof DoubleData) {
@@ -150,7 +154,10 @@ public class SpeechDataLogger extends BaseDataProcessor {
             	_fileWriter.append(Float.toString(values[i]));
             	_fileWriter.append(NL);
         	}
-//        } else if ("edu.cmu.sphinx.frontend.endpoint.SpeechClassifiedData".equals(data.getClass().getName())) {
+        } else if ("edu.cmu.sphinx.frontend.endpoint.SpeechClassifiedData".equals(data.getClass().getName())) {
+            boolean isSpeech = SpeechClassifiedDataAccessor.isSpeech(data);
+            _fileWriter.append("isSpeech? " + isSpeech);
+            _fileWriter.append(NL);
         } else {
             _fileWriter.append("Unknown data type: " + data.getClass().getName());
             _fileWriter.append(NL);

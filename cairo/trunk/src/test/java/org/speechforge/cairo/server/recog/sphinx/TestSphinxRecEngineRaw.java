@@ -22,8 +22,8 @@
  */
 package org.speechforge.cairo.server.recog.sphinx;
 
-import org.speechforge.cairo.server.recog.RecogListenerDecorator;
 import org.speechforge.cairo.server.recog.RecognitionResult;
+import org.speechforge.cairo.test.sphinx.util.RecogNotifier;
 import org.speechforge.cairo.util.jmf.JMFUtil;
 import org.speechforge.cairo.util.jmf.ProcessorStarter;
 
@@ -34,20 +34,24 @@ import javax.media.Processor;
 import javax.media.protocol.PushBufferDataSource;
 
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import edu.cmu.sphinx.util.props.ConfigurationManager;
 
 import org.apache.log4j.Logger;
-import org.apache.log4j.xml.DOMConfigurator;
 
 /**
- * Unit test for SphinxRecEngine.
+ * Unit test for SphinxRecEngine using raw (un-replicated) audio data from a prompt file for input.
  */
-public class TestSphinxRecEngineRaw extends TestCase {
+public class TestSphinxRecEngineRaw extends AbstractTestCase {
 
     private static Logger _logger = Logger.getLogger(TestSphinxRecEngineRaw.class);
+    
+    private static final String PROP_FRONTEND =     "frontend";
+    private static final String EP_FRONTEND =       "epFrontEnd";
+    private static final String NO_EP_FRONTEND =    "frontEnd";
+
+    private static final String PROP_GRAMMAR_NAME = "grammarName";
 
     /**
      * Create the test case
@@ -66,30 +70,169 @@ public class TestSphinxRecEngineRaw extends TestCase {
         return new TestSuite(TestSphinxRecEngineRaw.class);
     }
 
-    public void setUp() throws Exception {
-        // configure log4j
-        URL log4jURL = this.getClass().getResource("/log4j.xml");
-        assertNotNull(log4jURL);
-        DOMConfigurator.configure(log4jURL);
-    }
-
     public void test12345() throws Exception {
+        debugTestName(_logger);
+
+        URL sphinxConfigURL = this.getClass().getResource("sphinx-config-TIDIGITS.xml");
+        System.setProperty(PROP_FRONTEND, NO_EP_FRONTEND);
+
         URL audioFileURL = this.getClass().getResource("/prompts/12345.wav");
-        assertNotNull(audioFileURL);
         String expected = "one two three four five";
-        recognizeAudioFile(audioFileURL, expected);
+
+        recognizeAudioFile(sphinxConfigURL, audioFileURL, expected);
     }
 
-    private void recognizeAudioFile(URL audioFileURL, String expected) throws Exception {
+    public void test12345Alt() throws Exception {
+        debugTestName(_logger);
+
+        URL sphinxConfigURL = this.getClass().getResource("sphinx-config-TIDIGITS.xml");
+        System.setProperty(PROP_FRONTEND, NO_EP_FRONTEND);
+
+        URL audioFileURL = this.getClass().getResource("/prompts/12345-alt.wav");
+        String expected = "one two three four five";
+
+        recognizeAudioFile(sphinxConfigURL, audioFileURL, expected);
+    }
+
+    public void test12345Alt2() throws Exception {
+        debugTestName(_logger);
+
+        URL sphinxConfigURL = this.getClass().getResource("sphinx-config-TIDIGITS.xml");
+        System.setProperty(PROP_FRONTEND, NO_EP_FRONTEND);
+
+        URL audioFileURL = this.getClass().getResource("/prompts/12345-alt2.wav");
+        String expected = "one two three four five";
+
+        recognizeAudioFile(sphinxConfigURL, audioFileURL, expected);
+    }
+
+    public void testSilence12345() throws Exception {
+        debugTestName(_logger);
+
+        URL sphinxConfigURL = this.getClass().getResource("sphinx-config-TIDIGITS.xml");
+        System.setProperty(PROP_FRONTEND, EP_FRONTEND);
+
+        URL audioFileURL = this.getClass().getResource("/prompts/12345-silence.wav");
+        String expected = "one two three four five";
+
+        recognizeAudioFile(sphinxConfigURL, audioFileURL, expected);
+    }
+
+    public void test123456() throws Exception {
+        debugTestName(_logger);
+
+        URL sphinxConfigURL = this.getClass().getResource("sphinx-config-TIDIGITS.xml");
+        System.setProperty(PROP_FRONTEND, EP_FRONTEND);
+
+        URL audioFileURL = this.getClass().getResource("/prompts/123456.wav");
+        String expected = "one two three four five six";
+
+        recognizeAudioFile(sphinxConfigURL, audioFileURL, expected);
+    }
+
+    public void test123456NoSpeechClassifier() throws Exception {
+        debugTestName(_logger);
+
+        URL sphinxConfigURL = this.getClass().getResource("sphinx-config-TIDIGITS.xml");
+        System.setProperty(PROP_FRONTEND, NO_EP_FRONTEND);
+
+        URL audioFileURL = this.getClass().getResource("/prompts/123456.wav");
+        String expected = "nine one two three four five six";
+
+        recognizeAudioFile(sphinxConfigURL, audioFileURL, expected);
+    }
+
+    public void testHelloRita() throws Exception {
+        debugTestName(_logger);
+
+        URL sphinxConfigURL = this.getClass().getResource("sphinx-config-WSJ.xml");
+        System.setProperty(PROP_FRONTEND, EP_FRONTEND);
+        System.setProperty(PROP_GRAMMAR_NAME, "hello");
+
+        URL audioFileURL = this.getClass().getResource("/prompts/hello_rita.wav");
+        String expected = "hello rita";
+
+        recognizeAudioFile(sphinxConfigURL, audioFileURL, expected);
+    }
+
+    public void testGetMeAStockQuote() throws Exception {
+        debugTestName(_logger);
+
+        URL sphinxConfigURL = this.getClass().getResource("sphinx-config-WSJ.xml");
+        System.setProperty(PROP_FRONTEND, EP_FRONTEND);
+        System.setProperty(PROP_GRAMMAR_NAME, "example");
+
+        URL audioFileURL = this.getClass().getResource("/prompts/get_me_a_stock_quote.wav");
+        String expected = "get me a stock quote";
+
+        recognizeAudioFile(sphinxConfigURL, audioFileURL, expected);
+    }
+
+    public void testIWouldLikeSportsNews() throws Exception {
+        debugTestName(_logger);
+
+        URL sphinxConfigURL = this.getClass().getResource("sphinx-config-WSJ.xml");
+        System.setProperty(PROP_FRONTEND, EP_FRONTEND);
+        System.setProperty(PROP_GRAMMAR_NAME, "example");
+
+        URL audioFileURL = this.getClass().getResource("/prompts/i_would_like_sports_news.wav");
+        String expected = "i would like sports news";
+
+        recognizeAudioFile(sphinxConfigURL, audioFileURL, expected);
+    }
+
+    public void testMultiRecog() throws Exception {
+        debugTestName(_logger);
+
+        URL sphinxConfigURL = this.getClass().getResource("sphinx-config-WSJ.xml");
+        System.setProperty(PROP_FRONTEND, EP_FRONTEND);
+        System.setProperty(PROP_GRAMMAR_NAME, "example");
+
+        URL audioFileURL2 = this.getClass().getResource("/prompts/get_me_a_stock_quote.wav");
+        String expected2 = "get me a stock quote";
+
+        URL audioFileURL1 = this.getClass().getResource("/prompts/i_would_like_sports_news.wav");
+        String expected1 = "i would like sports news";
+
+        recognizeAudioFile(sphinxConfigURL, audioFileURL1, expected1, audioFileURL2, expected2);
+    }
+
+    private static void recognizeAudioFile(URL sphinxConfigURL, URL audioFileURL, String expected) throws Exception {
+        recognizeAudioFile(sphinxConfigURL, audioFileURL, expected, null, null);
+    }
+
+    private static void recognizeAudioFile(URL sphinxConfigURL, URL audioFileURL1, String expected1, URL audioFileURL2, String expected2)
+      throws Exception {
+
+        _logger.debug("sphinxConfigURL: " + sphinxConfigURL);
+        _logger.debug("audioFileURL: " + audioFileURL1);
+        _logger.debug("expected: \"" + expected1 + '"');
+
+        assertNotNull(sphinxConfigURL);
+        assertNotNull(audioFileURL1);
+        assertNotNull(expected1);
 
         // configure sphinx
-        URL sphinxConfigURL = this.getClass().getResource("sphinx-config-TIDIGITS.xml");
-        assertNotNull(sphinxConfigURL);
-        _logger.debug("sphinxConfigURL: " + sphinxConfigURL);
-
         ConfigurationManager cm = new ConfigurationManager(sphinxConfigURL);
         SphinxRecEngine engine = new SphinxRecEngine(cm);
 
+        RecognitionResult result1 = doRecognize(engine, audioFileURL1);
+        _logger.debug("result=" + result1);
+        assertEquals(expected1, result1.toString());
+
+        if (audioFileURL2 != null && expected2 != null) {
+            _logger.debug("audioFileURL2: " + audioFileURL2);
+            _logger.debug("expected2: \"" + expected2 + '"');
+
+            RecognitionResult result2 = doRecognize(engine, audioFileURL2);
+            _logger.debug("result2=" + result2);
+            assertEquals(expected2, result2.toString());
+
+        }
+
+    }
+
+    private static RecognitionResult doRecognize(SphinxRecEngine engine, URL audioFileURL) throws Exception {
         Processor processor = JMFUtil.createRealizedProcessor(new MediaLocator(audioFileURL), SourceAudioFormat.PREFERRED_MEDIA_FORMAT);
         processor.addControllerListener(new ProcessorStarter());
 
@@ -97,42 +240,23 @@ public class TestSphinxRecEngineRaw extends TestCase {
 
         engine.activate();
 
-        PrivateRecogListener listener = new PrivateRecogListener();
+        RecogNotifier listener = new RecogNotifier();
         engine.startRecognition(pbds, listener);
         processor.start();
-        _logger.debug("Performing recognition...");
+        _logger.debug("Starting recog thread...");
         engine.startRecogThread();
 
         // wait for result
+        RecognitionResult result = null;
         synchronized (listener) {
-            while (listener._result == null) {
+            while ((result = listener.getResult()) == null) {
                 listener.wait(1000);
             }
         }
 
         engine.passivate();
 
-        _logger.debug("result=" + listener._result);
-        assertEquals(expected, listener._result.toString());
+        return result;
 
-    }
-
-    private class PrivateRecogListener extends RecogListenerDecorator {
-
-        private RecognitionResult _result;
-
-        public PrivateRecogListener() {
-            super(null);  // use RecogListenerDecorator as adaptor
-        }
-
-        /* (non-Javadoc)
-         * @see org.speechforge.cairo.server.recog.RecogListener#recognitionComplete(org.speechforge.cairo.server.recog.RecognitionResult)
-         */
-        @Override
-        public synchronized void recognitionComplete(RecognitionResult result) {
-            _result = result;
-            this.notify();
-        }
-        
     }
 }

@@ -215,7 +215,9 @@
         <directory>src/test/resources</directory>
       </testResource>
     </testResources>
+
     <plugins>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -224,6 +226,7 @@
           <target>1.5</target>
         </configuration>
       </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-site-plugin</artifactId>
@@ -231,6 +234,7 @@
           <locales>en</locales>
         </configuration>
       </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
@@ -238,7 +242,42 @@
           <destDir>${project.build.directory}/site/docs/apidocs</destDir>
         </configuration>
       </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <!--debug>true</debug-->
+          <!--forkMode>once</forkMode-->
+          <!--childDelegation>false</childDelegation-->
+          <excludes>
+
+            <!-- not excluded (left here for convenience if need to temporarily disable)
+            <exclude>**/TestRawAudioProcessor.java</exclude>
+            <exclude>**/TestSphinxWavFile.java</exclude>
+            <exclude>**/TestSphinxRecEngineRaw.java</exclude>
+            -->
+
+            <!-- The following tests are disabled since using PBDSReplicator with an audio file causes
+                 timing issues that intermittently cause tests to hang or fail. -->
+            <exclude>**/TestSphinxRecEngineReplicated.java</exclude>
+            <exclude>**/TestPBDSReplicator.java</exclude>
+            <exclude>**/TestRunSphinxRecEngine.java</exclude>
+
+            <!-- The following test is disabled since it requires user input through a microphone. -->
+            <exclude>**/TestSphinxRecEngineMicrophone.java</exclude>
+
+          </excludes>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-report-plugin</artifactId>
+      </plugin>
+
     </plugins>
+
   </build>
 
   <repositories>

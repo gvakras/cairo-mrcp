@@ -22,9 +22,9 @@
  */
 package org.speechforge.cairo.server.recog.sphinx;
 
-import org.speechforge.cairo.server.recog.RecogListenerDecorator;
 import org.speechforge.cairo.server.recog.RecognitionResult;
 import org.speechforge.cairo.server.rtp.PBDSReplicator;
+import org.speechforge.cairo.test.sphinx.util.RecogNotifier;
 import org.speechforge.cairo.util.jmf.JMFUtil;
 import org.speechforge.cairo.util.jmf.ProcessorStarter;
 
@@ -39,18 +39,16 @@ import javax.media.protocol.DataSource;
 import javax.media.protocol.PushBufferDataSource;
 
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import edu.cmu.sphinx.util.props.ConfigurationManager;
 
 import org.apache.log4j.Logger;
-import org.apache.log4j.xml.DOMConfigurator;
 
 /**
- * Unit test for SphinxRecEngine.
+ * Unit test for SphinxRecEngine using replicated audio data from a prompt file for input.
  */
-public class TestSphinxRecEngineReplicated extends TestCase {
+public class TestSphinxRecEngineReplicated extends AbstractTestCase {
 
     private static Logger _logger = Logger.getLogger(TestSphinxRecEngineReplicated.class);
 
@@ -71,14 +69,9 @@ public class TestSphinxRecEngineReplicated extends TestCase {
         return new TestSuite(TestSphinxRecEngineReplicated.class);
     }
 
-    public void setUp() throws Exception {
-        // configure log4j
-        URL log4jURL = this.getClass().getResource("/log4j.xml");
-        assertNotNull(log4jURL);
-        DOMConfigurator.configure(log4jURL);
-    }
-
     public void test12345() throws Exception {
+        debugTestName(_logger);
+
         URL audioFileURL = this.getClass().getResource("/prompts/12345.wav");
         assertNotNull(audioFileURL);
         String expected = "one two three four five";
@@ -96,7 +89,7 @@ public class TestSphinxRecEngineReplicated extends TestCase {
         SphinxRecEngine engine = new SphinxRecEngine(cm);
 
         Processor processor1 = JMFUtil.createRealizedProcessor(new MediaLocator(audioFileURL), SourceAudioFormat.PREFERRED_MEDIA_FORMAT);
-        processor1.addControllerListener(new ProcessorStarter(false));
+        processor1.addControllerListener(new ProcessorStarter(true));
 
         PushBufferDataSource pbds1 = (PushBufferDataSource) processor1.getDataOutput();
         PBDSReplicator replicator = new PBDSReplicator(pbds1);
@@ -105,8 +98,7 @@ public class TestSphinxRecEngineReplicated extends TestCase {
 
         ProcessorModel pm = new ProcessorModel(
                 dataSource,
-                //new AudioFormat[] { replicator.getAudioFormat() },
-                new AudioFormat[] { SourceAudioFormat.PREFERRED_MEDIA_FORMAT },
+                new AudioFormat[] { replicator.getAudioFormat() },
                 JMFUtil.CONTENT_DESCRIPTOR_RAW
         );
 
@@ -114,50 +106,32 @@ public class TestSphinxRecEngineReplicated extends TestCase {
         Processor processor2 = Manager.createRealizedProcessor(pm);
         _logger.debug("Processor realized.");
 
-        processor2.addControllerListener(new ProcessorStarter(false));
+        processor2.addControllerListener(new ProcessorStarter(true));
         PushBufferDataSource pbds2 = (PushBufferDataSource) processor2.getDataOutput();
 
         engine.activate();
 
-        PrivateRecogListener listener = new PrivateRecogListener();
+        RecogNotifier listener = new RecogNotifier();
         engine.startRecognition(pbds2, listener);
 
         processor2.start();
         Thread.sleep(1000);  // give processor2 a chance to start
         processor1.start();
-        _logger.debug("Performing recognition...");
+        _logger.debug("Starting recog thread...");
         engine.startRecogThread();
 
         // wait for result
+        RecognitionResult result = null;
         synchronized (listener) {
-            while (listener._result == null) {
+            while ((result = listener.getResult()) == null) {
                 listener.wait(1000);
             }
         }
 
         engine.passivate();
 
-        _logger.debug("result=" + listener._result);
-        assertEquals(expected, listener._result.toString());
+        _logger.debug("result=" + result);
+        assertEquals(expected, result.toString());
 
-    }
-
-    private class PrivateRecogListener extends RecogListenerDecorator {
-
-        private RecognitionResult _result;
-
-        public PrivateRecogListener() {
-            super(null);  // use RecogListenerDecorator as adaptor
-        }
-
-        /* (non-Javadoc)
-         * @see org.speechforge.cairo.server.recog.RecogListener#recognitionComplete(org.speechforge.cairo.server.recog.RecognitionResult)
-         */
-        @Override
-        public synchronized void recognitionComplete(RecognitionResult result) {
-            _result = result;
-            this.notify();
-        }
-        
     }
 }

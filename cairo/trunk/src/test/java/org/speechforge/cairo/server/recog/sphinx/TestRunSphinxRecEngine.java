@@ -29,17 +29,18 @@ import java.net.URL;
 import javax.media.MediaLocator;
 
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import edu.cmu.sphinx.util.props.ConfigurationManager;
 
-import org.apache.log4j.xml.DOMConfigurator;
+import org.apache.log4j.Logger;
 
 /**
- * Unit test for SphinxRecEngine.
+ * Unit test for RunSphinxRecEngine.
  */
-public class TestRunSphinxRecEngine extends TestCase {
+public class TestRunSphinxRecEngine extends AbstractTestCase {
+
+    private static Logger _logger = Logger.getLogger(TestSphinxRecEngineReplicated.class);
 
     private RunSphinxRecEngine _runner = null;
 
@@ -60,70 +61,48 @@ public class TestRunSphinxRecEngine extends TestCase {
     }
 
     public void setUp() throws Exception {
-
-        // configure log4j
-        URL log4jURL = this.getClass().getResource("/log4j.xml");
-        assertNotNull(log4jURL);
-        DOMConfigurator.configure(log4jURL);
-
-/*
-
-        // configure sphinx
-        URL promptURL = new URL(new File(".").toURL(), "src/test/resources/prompts/get_me_a_stock_quoteX2.wav");
-        URL sphinxConfigURL = new URL(new File(".").toURL(), "src/main/resources/config/sphinx-config.xml");
-        ConfigurationManager cm = new ConfigurationManager(sphinxConfigURL);
-        SphinxRecEngine engine = new SphinxRecEngine(cm);
-        _runner = new RunSphinxRecEngine(engine, RunSphinxRecEngine.MICROPHONE);
-//        _runner = new RunSphinxRecEngine(engine, new MediaLocator(promptURL));
-*/
-    }
-
-    public void testDummy() throws Exception {
-        assert(true);
-    }
-
-    public void XtestSphinxRecEngine() throws Exception {
-        /*for (Map.Entry entry : System.getProperties().entrySet()) {
-            System.out.println(entry.getKey().toString() + '=' + entry.getValue().toString());
-        }*/
-
-        assertTrue(_runner != null);
-
-        RecognitionResult result = null;
-
-        result =  _runner.doRecognize();
-        System.out.println(result);
-        assertEquals("weather", result.toString());
-
-        result =  _runner.doRecognize();
-        System.out.println(result);
-        assertEquals("get me sports news", result.toString());
-
-    }
-
-    public void Xtest12345() throws Exception {
-
-        URL audioFileURL = this.getClass().getResource("/prompts/12345.wav");
-        assertNotNull(audioFileURL);
-        String expected = "one two three four five";
+        super.setUp();
 
         // configure sphinx
         URL sphinxConfigURL = this.getClass().getResource("sphinx-config-TIDIGITS.xml");
         assertNotNull(sphinxConfigURL);
-        System.out.println("configURL: " + sphinxConfigURL);
+        _logger.debug("sphinxConfigURL: " + sphinxConfigURL);
 
         ConfigurationManager cm = new ConfigurationManager(sphinxConfigURL);
         SphinxRecEngine engine = new SphinxRecEngine(cm);
-
-        _runner = new RunSphinxRecEngine(engine, new MediaLocator(audioFileURL));
-
-        RecognitionResult result = null;
-
-        result = _runner.doRecognize();
-        System.out.println(result);
-        assertEquals(expected, result.toString());
+        _runner = new RunSphinxRecEngine(engine);
 
     }
 
+    public void test12345() throws Exception {
+        debugTestName(_logger);
+
+        String promptFile = "/prompts/12345.wav";
+        String expected = "one two three four five";
+
+        doRecognize(promptFile, expected);
+    }
+
+    public void test12345Alt2() throws Exception {
+        debugTestName(_logger);
+
+        String promptFile = "/prompts/12345-alt2.wav";
+        String expected = "one two three four five";
+
+        doRecognize(promptFile, expected);
+    }
+
+    private void doRecognize(String promptFile, String expected) throws Exception {
+
+        URL audioFileURL = this.getClass().getResource(promptFile);
+        assertNotNull(audioFileURL);
+
+        assertTrue(_runner != null);
+
+        RecognitionResult result = _runner.doRecognize(new MediaLocator(audioFileURL));
+        _logger.debug(result);
+        assertEquals(expected, result.toString());
+
+    }
 
 }

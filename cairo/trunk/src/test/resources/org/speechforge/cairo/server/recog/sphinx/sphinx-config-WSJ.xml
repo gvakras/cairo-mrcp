@@ -5,7 +5,7 @@
 -->
 
 <!-- ******************************************************** -->
-<!--  tidigits configuration file                             -->
+<!--  WSJ configuration file                                  -->
 <!-- ******************************************************** -->
 
 <config>        
@@ -25,10 +25,12 @@
 
     <property name="recognizer"                  value="recognizer"/>
     <property name="linguist"                    value="flatLinguist"/>
-    <property name="frontend"                    value="frontEnd"/>
+    <property name="frontend"                    value="epFrontEnd"/>
 
     <property name="speechClassifierThreshold"   value="10"/>
     <property name="mergeSpeechSegments"         value="false"/>
+
+    <property name="grammarName"                 value="example"/>
 
     <property name="speechDataLogFileName"       value="speechdata-sphinxrecengine"/>
 
@@ -108,7 +110,7 @@
         <property name="dictionary" value="dictionary"/>
         <property name="grammarLocation" 
              value="resource:/org.speechforge.cairo.server.recog.sphinx.SphinxRecEngine!/grammar/"/>
-        <property name="grammarName" value="digits"/>
+        <property name="grammarName" value="${grammarName}"/>
 	<property name="logMath" value="logMath"/>
     </component>
 
@@ -118,12 +120,11 @@
     <!-- ******************************************************** -->
     
     <component name="dictionary" 
-        type="edu.cmu.sphinx.linguist.dictionary.FullDictionary">
-        <property name="dictionaryPath"
-	    value="resource:/edu.cmu.sphinx.model.acoustic.TIDIGITS_8gau_13dCep_16k_40mel_130Hz_6800Hz.Model!/edu/cmu/sphinx/model/acoustic/TIDIGITS_8gau_13dCep_16k_40mel_130Hz_6800Hz/dictionary"/>
-        <property name="fillerPath"
-	    value="resource:/edu.cmu.sphinx.model.acoustic.TIDIGITS_8gau_13dCep_16k_40mel_130Hz_6800Hz.Model!/edu/cmu/sphinx/model/acoustic/TIDIGITS_8gau_13dCep_16k_40mel_130Hz_6800Hz/fillerdict"/>
+        type="edu.cmu.sphinx.linguist.dictionary.FastDictionary">
+        <property name="dictionaryPath" value="resource:/edu.cmu.sphinx.model.acoustic.WSJ_8gau_13dCep_16k_40mel_130Hz_6800Hz.Model!/edu/cmu/sphinx/model/acoustic/WSJ_8gau_13dCep_16k_40mel_130Hz_6800Hz/dict/cmudict.0.6d"/>
+        <property name="fillerPath" value="resource:/edu.cmu.sphinx.model.acoustic.WSJ_8gau_13dCep_16k_40mel_130Hz_6800Hz.Model!/edu/cmu/sphinx/model/acoustic/WSJ_8gau_13dCep_16k_40mel_130Hz_6800Hz/dict/fillerdict"/>
         <property name="addSilEndingPronunciation" value="false"/>
+        <property name="allowMissingWords" value="false"/>
         <property name="unitManager" value="unitManager"/>
     </component>
     
@@ -133,13 +134,13 @@
     <!-- ******************************************************** -->
 
     <component name="acousticModel" 
-      type="edu.cmu.sphinx.model.acoustic.TIDIGITS_8gau_13dCep_16k_40mel_130Hz_6800Hz.Model">
+      type="edu.cmu.sphinx.model.acoustic.WSJ_8gau_13dCep_16k_40mel_130Hz_6800Hz.Model">
         <property name="loader" value="sphinx3Loader"/>
         <property name="unitManager" value="unitManager"/>
     </component>
 
     <component name="sphinx3Loader"
-	       type="edu.cmu.sphinx.model.acoustic.TIDIGITS_8gau_13dCep_16k_40mel_130Hz_6800Hz.ModelLoader">
+	       type="edu.cmu.sphinx.model.acoustic.WSJ_8gau_13dCep_16k_40mel_130Hz_6800Hz.ModelLoader">
 	<property name="logMath" value="logMath"/>
         <property name="unitManager" value="unitManager"/>
     </component>
@@ -156,30 +157,15 @@
     <!-- ******************************************************** -->
     <!-- The frontend configuration                               -->
     <!-- ******************************************************** -->
-
-    <component name="frontEnd" type="edu.cmu.sphinx.frontend.FrontEnd">
-        <propertylist name="pipeline">
-            <item>primaryInput</item>
-            <!--item>speechDataAssertion</item-->
-            <!--item>speechDataLogger</item-->
-            <item>premphasizer</item>
-            <item>windower</item>
-            <item>fft</item>
-            <item>melFilterBank</item>
-            <item>dct</item>
-            <item>cmn</item>
-            <item>featureExtraction</item>
-        </propertylist>
-    </component>
-
+    
     <component name="epFrontEnd" type="edu.cmu.sphinx.frontend.FrontEnd">
         <propertylist name="pipeline">
             <item>primaryInput</item>
             <!--item>speechDataAssertion</item-->
             <item>speechClassifier</item>
+            <!--item>speechDataLogger</item-->
             <item>speechMarker</item>
             <item>nonSpeechDataFilter</item>
-            <!--item>speechDataLogger</item-->
             <item>premphasizer</item>
             <item>windower</item>
             <item>fft</item>
@@ -215,6 +201,7 @@
     <component name="speechClassifier" 
                type="edu.cmu.sphinx.frontend.endpoint.SpeechClassifierPatch">
         <property name="threshold" value="${speechClassifierThreshold}"/>
+        <property name="debug" value="false"/>
     </component>
 
     <component name="speechMarker" 
@@ -243,8 +230,8 @@
             type="edu.cmu.sphinx.frontend.transform.DiscreteCosineTransform"/>
     
     <component name="cmn" 
-               type="edu.cmu.sphinx.frontend.feature.BatchCMN"/>
-
+               type="edu.cmu.sphinx.frontend.feature.LiveCMN"/>
+    
     <component name="featureExtraction" 
                type="edu.cmu.sphinx.frontend.feature.DeltasFeatureExtractor"/>
     

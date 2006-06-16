@@ -34,7 +34,6 @@ import javax.media.NoProcessorException;
 import javax.media.Processor;
 import javax.media.ProcessorModel;
 import javax.media.format.AudioFormat;
-import javax.media.protocol.ContentDescriptor;
 import javax.media.protocol.DataSource;
 import javax.media.protocol.PushBufferDataSource;
 
@@ -49,7 +48,7 @@ import org.speechforge.cairo.util.jmf.ProcessorStarter;
 import edu.cmu.sphinx.util.props.ConfigurationManager;
 
 /**
- * Provides main method for running SphinxRecEngine in standalone mode using the microphone for input.
+ * Provides main method for running SphinxRecEngine in standalone mode using the microphone or prompt file for input.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  *
@@ -66,11 +65,9 @@ public class RunSphinxRecEngine extends RecogListenerDecorator {
     private RecognitionResult _result;
     private PBDSReplicator _replicator;
 
-    public RunSphinxRecEngine(SphinxRecEngine engine, MediaLocator mediaLocator)
-      throws NoProcessorException, NoDataSourceException, CannotRealizeException, IOException {
+    public RunSphinxRecEngine(SphinxRecEngine engine) {
         super(null);
         _engine = engine;
-        _replicator = createReplicator(mediaLocator);
     }
 
     /* (non-Javadoc)
@@ -82,18 +79,28 @@ public class RunSphinxRecEngine extends RecogListenerDecorator {
         this.notify();
     }
 
-    public RecognitionResult doRecognize() throws IOException, NoProcessorException, CannotRealizeException, InterruptedException {
+    public RecognitionResult doRecognize(MediaLocator mediaLocator)
+      throws IOException, NoProcessorException, CannotRealizeException, InterruptedException, NoDataSourceException {
+
+        Processor processor1 = JMFUtil.createRealizedProcessor(mediaLocator, PREFERRED_MEDIA_FORMATS);
+        processor1.addControllerListener(new ProcessorStarter());
+        PushBufferDataSource pbds1 = (PushBufferDataSource) processor1.getDataOutput();
+        _replicator = new PBDSReplicator(pbds1);
 
         _result = null;
         _engine.activate();
 
-        Processor processor = createReplicatedProcessor(_replicator);
-        processor.addControllerListener(new ProcessorStarter());
+        Processor processor2 = createReplicatedProcessor(_replicator);
+        processor2.addControllerListener(new ProcessorStarter());
 
-        PushBufferDataSource pbds = (PushBufferDataSource) processor.getDataOutput();
-        _engine.startRecognition(pbds, this);
-        processor.start();
-        _logger.debug("Performing recognition...");
+        PushBufferDataSource pbds2 = (PushBufferDataSource) processor2.getDataOutput();
+        _engine.startRecognition(pbds2, this);
+        processor2.start();
+        Thread.sleep(1000);  // give processor2 a chance to start
+        // TODO: find better solution for timing processor starting
+        processor1.start();
+
+        _logger.debug("Starting recog thread...");
         _engine.startRecogThread();
 
         // wait for result
@@ -126,20 +133,9 @@ public class RunSphinxRecEngine extends RecogListenerDecorator {
         Processor processor = Manager.createRealizedProcessor(pm);
         _logger.debug("Processor realized.");
 
-        dataSource.start();
+        //dataSource.start();
 
         return processor;
-    }
-
-    public static PBDSReplicator createReplicator(MediaLocator mediaLocator)
-      throws NoProcessorException, NoDataSourceException, CannotRealizeException, IOException {
-
-        Processor processor = JMFUtil.createRealizedProcessor(mediaLocator, PREFERRED_MEDIA_FORMATS);
-        processor.addControllerListener(new ProcessorStarter());
-        PushBufferDataSource pbds = (PushBufferDataSource) processor.getDataOutput();
-        PBDSReplicator replicator = new PBDSReplicator(pbds);
-        processor.start();
-        return replicator;
     }
 
     public static void main(String[] args) throws Exception {
@@ -162,12 +158,12 @@ public class RunSphinxRecEngine extends RecogListenerDecorator {
 //            System.out.println(engine._jsgfGrammar.getRandomSentence());
 //        }
 
-        RunSphinxRecEngine runner = new RunSphinxRecEngine(engine, MICROPHONE);
+        RunSphinxRecEngine runner = new RunSphinxRecEngine(engine);
         
 
         RecognitionResult result;
         while (true) {
-            result = runner.doRecognize();
+            result = runner.doRecognize(MICROPHONE);
         }
 
 //        RuleParse ruleParse = engine.parse("", "main");

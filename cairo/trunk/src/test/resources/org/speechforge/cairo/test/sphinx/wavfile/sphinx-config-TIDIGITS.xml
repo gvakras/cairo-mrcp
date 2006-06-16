@@ -195,7 +195,7 @@
             type="edu.cmu.sphinx.frontend.transform.DiscreteCosineTransform"/>
     
     <component name="batchCMN" 
-               type="edu.cmu.sphinx.frontend.feature.BatchCMN"/>
+               type="edu.cmu.sphinx.frontend.feature.LiveCMN"/>
     
     <component name="featureExtraction" 
                type="edu.cmu.sphinx.frontend.feature.DeltasFeatureExtractor"/>

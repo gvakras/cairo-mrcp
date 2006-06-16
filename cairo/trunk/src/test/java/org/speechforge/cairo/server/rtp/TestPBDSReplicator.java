@@ -22,6 +22,7 @@
  */
 package org.speechforge.cairo.server.rtp;
 
+import org.speechforge.cairo.server.recog.sphinx.AbstractTestCase;
 import org.speechforge.cairo.server.recog.sphinx.RawAudioProcessor;
 import org.speechforge.cairo.server.recog.sphinx.RawAudioTransferHandler;
 import org.speechforge.cairo.server.recog.sphinx.SourceAudioFormat;
@@ -44,7 +45,6 @@ import javax.media.protocol.PushBufferDataSource;
 import javax.media.protocol.PushBufferStream;
 
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import edu.cmu.sphinx.frontend.Data;
@@ -53,12 +53,11 @@ import edu.cmu.sphinx.frontend.DataStartSignal;
 import edu.cmu.sphinx.frontend.DoubleData;
 
 import org.apache.log4j.Logger;
-import org.apache.log4j.xml.DOMConfigurator;
 
 /**
- * Unit test for SphinxRecEngine.
+ * Unit test for PBDSReplicator.
  */
-public class TestPBDSReplicator extends TestCase {
+public class TestPBDSReplicator extends AbstractTestCase {
 
     private static Logger _logger = Logger.getLogger(TestPBDSReplicator.class);
 
@@ -79,20 +78,10 @@ public class TestPBDSReplicator extends TestCase {
         return new TestSuite(TestPBDSReplicator.class);
     }
 
-    public void setUp() throws Exception {
-
-        // configure log4j
-        URL log4jURL = this.getClass().getResource("/log4j.xml");
-        assertNotNull(log4jURL);
-        DOMConfigurator.configure(log4jURL);
-    }
-
-    public void testDummy() throws Exception {
-        assert(true);
-    }
-
     // TODO: fix timing issue that causes test to fail sometimes
-    public void Xtest12345() throws Exception {
+    public void test12345() throws Exception {
+        debugTestName(_logger);
+
         URL audioFileURL = this.getClass().getResource("/prompts/12345.wav");
         assertNotNull(audioFileURL);
 
@@ -155,7 +144,9 @@ public class TestPBDSReplicator extends TestCase {
 
             double[] values = ((DoubleData) data).getValues();
             for (int i=0; i < values.length; i++) {
-                _logger.trace("expected=" + tokenizer.nval + " actual=" + values[i]);
+                if (_logger.isTraceEnabled()) {
+                    _logger.trace("expected=" + tokenizer.nval + " actual=" + values[i]);
+                }
                 assertEquals(tokenizer.nval, values[i]);
                 ttype = tokenizer.nextToken();
             }
