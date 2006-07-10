@@ -22,14 +22,11 @@
  */
 package org.speechforge.cairo.server.rtp;
 
-import org.speechforge.cairo.util.ObjectPoolUtil;
+import org.speechforge.cairo.util.pool.ObjectPoolUtil;
 
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.commons.configuration.Configuration;
 import org.apache.commons.lang.Validate;
 import org.apache.commons.pool.ObjectPool;
 import org.apache.commons.pool.PoolableObjectFactory;

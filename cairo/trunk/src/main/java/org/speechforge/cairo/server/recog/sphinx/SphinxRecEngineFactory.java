@@ -22,7 +22,7 @@
  */
 package org.speechforge.cairo.server.recog.sphinx;
 
-import org.speechforge.cairo.util.ObjectPoolUtil;
+import org.speechforge.cairo.util.pool.ObjectPoolUtil;
 import org.speechforge.cairo.util.pool.AbstractPoolableObjectFactory;
 import org.speechforge.cairo.util.pool.PoolableObject;
 

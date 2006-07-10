@@ -20,7 +20,7 @@
  * Contact: ngodfredsen@users.sourceforge.net
  *
  */
-package org.speechforge.cairo.util;
+package org.speechforge.cairo.util.pool;
 
 import org.apache.commons.pool.impl.GenericObjectPool;
 

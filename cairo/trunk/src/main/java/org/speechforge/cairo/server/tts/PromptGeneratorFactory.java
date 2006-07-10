@@ -22,8 +22,8 @@
  */
 package org.speechforge.cairo.server.tts;
 
-import org.speechforge.cairo.util.pool.ObjectPoolUtil;
 import org.speechforge.cairo.util.pool.AbstractPoolableObjectFactory;
+import org.speechforge.cairo.util.pool.ObjectPoolUtil;
 import org.speechforge.cairo.util.pool.PoolableObject;
 
 import org.apache.commons.pool.ObjectPool;
