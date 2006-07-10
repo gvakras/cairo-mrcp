@@ -22,7 +22,7 @@
  */
 package org.speechforge.cairo.server.tts;
 
-import org.speechforge.cairo.util.ConfigUtil;
+import org.speechforge.cairo.util.pool.ObjectPoolUtil;
 import org.speechforge.cairo.util.pool.AbstractPoolableObjectFactory;
 import org.speechforge.cairo.util.pool.PoolableObject;
 
@@ -57,7 +57,7 @@ public class PromptGeneratorFactory extends AbstractPoolableObjectFactory {
         PoolableObjectFactory factory = new PromptGeneratorFactory();
 
         // TODO: adapt config to prompt generator constraints
-        GenericObjectPool.Config config = ConfigUtil.getGenericObjectPoolConfig(instances);
+        GenericObjectPool.Config config = ObjectPoolUtil.getGenericObjectPoolConfig(instances);
         ObjectPool objectPool = new GenericObjectPool(factory, config);
         return objectPool;
     }

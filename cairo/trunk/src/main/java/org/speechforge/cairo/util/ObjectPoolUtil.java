@@ -29,12 +29,12 @@ import org.apache.commons.pool.impl.GenericObjectPool;
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  *
  */
-public class ConfigUtil {
+public class ObjectPoolUtil {
 
     /**
      * Make default constructor private to prevent instantiation.
      */
-    private ConfigUtil() {
+    private ObjectPoolUtil() {
         super();
     }
 

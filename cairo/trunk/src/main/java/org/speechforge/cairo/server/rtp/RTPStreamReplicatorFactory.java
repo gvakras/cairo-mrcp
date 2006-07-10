@@ -22,7 +22,7 @@
  */
 package org.speechforge.cairo.server.rtp;
 
-import org.speechforge.cairo.util.ConfigUtil;
+import org.speechforge.cairo.util.ObjectPoolUtil;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -129,7 +129,7 @@ public class RTPStreamReplicatorFactory implements PoolableObjectFactory {
         }
 
         PoolableObjectFactory factory = new RTPStreamReplicatorFactory(rtpBasePort);
-        GenericObjectPool.Config config = ConfigUtil.getGenericObjectPoolConfig(maxConnects);
+        GenericObjectPool.Config config = ObjectPoolUtil.getGenericObjectPoolConfig(maxConnects);
         ObjectPool objectPool = new GenericObjectPool(factory, config);
         return objectPool;
     }

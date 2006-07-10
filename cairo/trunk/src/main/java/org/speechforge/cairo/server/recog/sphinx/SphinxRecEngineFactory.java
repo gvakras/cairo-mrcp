@@ -22,7 +22,7 @@
  */
 package org.speechforge.cairo.server.recog.sphinx;
 
-import org.speechforge.cairo.util.ConfigUtil;
+import org.speechforge.cairo.util.ObjectPoolUtil;
 import org.speechforge.cairo.util.pool.AbstractPoolableObjectFactory;
 import org.speechforge.cairo.util.pool.PoolableObject;
 
@@ -69,7 +69,7 @@ public class SphinxRecEngineFactory extends AbstractPoolableObjectFactory {
         }
 
         PoolableObjectFactory factory = new SphinxRecEngineFactory(sphinxConfigURL);
-        GenericObjectPool.Config config = ConfigUtil.getGenericObjectPoolConfig(instances);
+        GenericObjectPool.Config config = ObjectPoolUtil.getGenericObjectPoolConfig(instances);
 
         ObjectPool objectPool = new GenericObjectPool(factory, config);
         try {
