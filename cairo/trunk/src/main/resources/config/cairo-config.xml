@@ -2,8 +2,8 @@
 
   <resources>
 
-    <resource type="input">
-      <name>input</name>
+    <resource type="receiver">
+      <name>receiver1</name>
       <mrcpPort>32416</mrcpPort>
       <rtpBasePort>42050</rtpBasePort>
       <maxConnects>15</maxConnects>
@@ -14,8 +14,8 @@
       <!-- sphinxConfigURL>file:///myconfigdir/sphinx-config.xml</sphinxConfigURL -->
     </resource>
 
-    <resource type="output">
-      <name>output</name>
+    <resource type="transmitter">
+      <name>transmitter1</name>
       <mrcpPort>32417</mrcpPort>
       <rtpBasePort>42150</rtpBasePort>
       <maxConnects>15</maxConnects>
