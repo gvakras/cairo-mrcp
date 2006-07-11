@@ -64,6 +64,8 @@ public class ReceiverConfig extends ResourceConfig {
                 _sphinxConfigURL = this.getClass().getResource("/config/sphinx-config.xml");
                 if (_sphinxConfigURL == null) {
                     throw new ConfigurationException("Sphinx config URL not found in either cairo config file or cairo classpath!");
+                } else if (_logger.isDebugEnabled()) {
+                    _logger.debug("SphinxConfigURL: " + _sphinxConfigURL);
                 }
             }
             _recEngines = config.getInt("resources.resource(" + index + ").recEngines");

@@ -75,6 +75,6 @@ public class CairoConfig {
                 return i;
             }
         }
-        throw new ConfigurationException("Specified name not found in configuration!");
+        throw new ConfigurationException("Specified name \"" + name + "\" not found in configuration!");
     }
 }

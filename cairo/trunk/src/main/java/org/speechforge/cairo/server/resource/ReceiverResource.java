@@ -31,6 +31,7 @@ import org.speechforge.cairo.server.recorder.MrcpRecorderChannel;
 import org.speechforge.cairo.server.recorder.RTPRecorderChannel;
 import org.speechforge.cairo.server.rtp.RTPStreamReplicator;
 import org.speechforge.cairo.server.rtp.RTPStreamReplicatorFactory;
+import org.speechforge.cairo.util.CairoUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -133,7 +134,11 @@ public class ReceiverResource extends ResourceImpl {
 
 
     public static void main(String[] args) throws Exception {
-        URL configURL = new URL(args[0]);
+        if (args.length < 2) {
+            throw new Exception("Missing command line arguments, expected: <cairo-config-URL> <resource-name>");
+        }
+
+        URL configURL = CairoUtil.argToURL(args[0]);
         String resourceName = args[1];
 
         CairoConfig config = new CairoConfig(configURL);

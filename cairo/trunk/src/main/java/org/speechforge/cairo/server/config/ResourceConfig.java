@@ -26,6 +26,7 @@ import java.io.File;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.log4j.Logger;
 
 /**
  * Base class for specific resource type configurations.
@@ -34,6 +35,8 @@ import org.apache.commons.configuration.XMLConfiguration;
  *
  */
 public abstract class ResourceConfig {
+
+    static Logger _logger = Logger.getLogger(ResourceConfig.class);
 
     private int _mrcpPort;
     private int _rtpBasePort;
