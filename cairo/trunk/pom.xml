@@ -276,6 +276,15 @@
         <artifactId>maven-surefire-report-plugin</artifactId>
       </plugin>
 
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <descriptors>
+            <descriptor>settings/assembly/bin.xml</descriptor>
+          </descriptors>
+        </configuration>
+      </plugin>
+
     </plugins>
 
   </build>
