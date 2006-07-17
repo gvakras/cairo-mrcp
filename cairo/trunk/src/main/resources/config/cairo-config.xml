@@ -6,7 +6,7 @@
       <name>receiver1</name>
       <mrcpPort>32416</mrcpPort>
       <rtpBasePort>42050</rtpBasePort>
-      <maxConnects>15</maxConnects>
+      <maxConnects>3</maxConnects>
       <recEngines>1</recEngines>
       <recordingDir>/temp/cairo/recordingDir</recordingDir>  <!-- TODO: change to baseRecordingDir -->
       <baseGrammarDir>/temp/cairo/baseGrammarDir</baseGrammarDir>
@@ -18,7 +18,7 @@
       <name>transmitter1</name>
       <mrcpPort>32417</mrcpPort>
       <rtpBasePort>42150</rtpBasePort>
-      <maxConnects>15</maxConnects>
+      <maxConnects>3</maxConnects>
       <basePromptDir>/temp/cairo/basePromptDir</basePromptDir>
     </resource>
 

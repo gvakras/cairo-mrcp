@@ -8,7 +8,7 @@ if not "%1" == "" goto chkJavaHome
 
 echo.
 echo ERROR: improper call to launch script
-echo xlaunch.bat should not be executed directly, please see README for
+echo launch.bat should not be executed directly, please see README for
 echo proper application launching instructions.
 echo.
 goto error

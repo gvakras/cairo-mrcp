@@ -20,7 +20,7 @@
         <include>*.bat</include>
       </includes>
       <excludes>
-        <exclude>xlaunch.bat</exclude><!-- specified individually below to allow filtering -->
+        <exclude>launch.bat</exclude><!-- specified individually in "files" section to allow filtering -->
       </excludes>
     </fileSet>
     <fileSet>
@@ -43,13 +43,18 @@
   </fileSets>
   <files>
     <file>
-      <source>bin/xlaunch.bat</source>
+      <source>bin/launch.bat</source>
       <outputDirectory>bin</outputDirectory>
       <filtered>true</filtered>
     </file>
     <file>
       <source>src/main/resources/grammar/example.gram</source>
       <outputDirectory>demo/grammar</outputDirectory>
+    </file>
+    <file>
+      <source>src/main/resources/config/freetts_voices.txt</source>
+      <outputDirectory>lib</outputDirectory>
+      <destName>voices.txt</destName>
     </file>
   </files>
   <!--dependencySets>
