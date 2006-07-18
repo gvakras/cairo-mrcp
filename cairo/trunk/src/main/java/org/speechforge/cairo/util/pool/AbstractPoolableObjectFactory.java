@@ -28,6 +28,7 @@ import java.util.NoSuchElementException;
 
 import org.apache.commons.pool.ObjectPool;
 import org.apache.commons.pool.PoolableObjectFactory;
+import org.apache.log4j.Logger;
 
 /**
  * Generic implementation of a <@link org.apache.commons.pool.PoolableObjectFactory> which makes
@@ -38,6 +39,8 @@ import org.apache.commons.pool.PoolableObjectFactory;
  * @see org.speechforge.cairo.util.pool.PoolableObject
  */
 public abstract class AbstractPoolableObjectFactory implements PoolableObjectFactory {
+
+    private static Logger _logger = Logger.getLogger(AbstractPoolableObjectFactory.class);
 
 
     /* (non-Javadoc)
@@ -81,19 +84,29 @@ public abstract class AbstractPoolableObjectFactory implements PoolableObjectFac
      * Initializes an <@link org.apache.commons.pool.ObjectPool> by borrowing each object from the
      * pool (thereby triggering activation) and then returning all the objects back to the pool. 
      * @param pool the object pool to be initialized.
-     * @throws Exception if borrowing (or returning) an object from the pool triggers an exception.
+     * @throws InstantiationException if borrowing (or returning) an object from the pool triggers an exception.
      */
-    public static void initPool(ObjectPool pool) throws Exception {
-        List<Object> objects = new ArrayList<Object>();
-        while (true) try {
-            objects.add(pool.borrowObject());
-        } catch (NoSuchElementException e){
-            // ignore, max active reached
-            break;
+    public static void initPool(ObjectPool pool) throws InstantiationException {
+        try {
+            List<Object> objects = new ArrayList<Object>();
+            while (true) try {
+                objects.add(pool.borrowObject());
+            } catch (NoSuchElementException e){
+                // ignore, max active reached
+                break;
+            }
+            for (Object obj : objects) {
+                pool.returnObject(obj);
+            }
+        } catch (Exception e) {
+            try {
+                pool.close();
+            } catch (Exception e1) {
+                _logger.warn("Encounter expception while attempting to close object pool!", e1);
+            }
+            throw (InstantiationException) new InstantiationException(e.getMessage()).initCause(e);
         }
-        for (Object obj : objects) {
-            pool.returnObject(obj);
-        }
+
     }
 
 }

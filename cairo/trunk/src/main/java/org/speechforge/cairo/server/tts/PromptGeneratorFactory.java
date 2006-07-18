@@ -48,7 +48,8 @@ public class PromptGeneratorFactory extends AbstractPoolableObjectFactory {
      * @param instances
      * @return
      */
-    public static ObjectPool createObjectPool(int instances) {
+    public static ObjectPool createObjectPool(int instances)
+      throws InstantiationException {
 
         if (_logger.isDebugEnabled()) {
             _logger.debug("creating new prompt generator pool... instances: " + instances);
@@ -59,6 +60,7 @@ public class PromptGeneratorFactory extends AbstractPoolableObjectFactory {
         // TODO: adapt config to prompt generator constraints
         GenericObjectPool.Config config = ObjectPoolUtil.getGenericObjectPoolConfig(instances);
         ObjectPool objectPool = new GenericObjectPool(factory, config);
+        initPool(objectPool);
         return objectPool;
     }
 

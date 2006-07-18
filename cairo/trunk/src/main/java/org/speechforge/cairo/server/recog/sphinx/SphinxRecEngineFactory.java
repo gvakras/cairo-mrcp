@@ -59,7 +59,7 @@ public class SphinxRecEngineFactory extends AbstractPoolableObjectFactory {
      * @param sphinxConfigURL
      * @param instances
      * @return
-     * @throws InstantiationException
+     * @throws InstantiationException if initializing the object pool triggers an exception.
      */
     public static ObjectPool createObjectPool(URL sphinxConfigURL, int instances)
       throws InstantiationException {
@@ -72,16 +72,7 @@ public class SphinxRecEngineFactory extends AbstractPoolableObjectFactory {
         GenericObjectPool.Config config = ObjectPoolUtil.getGenericObjectPoolConfig(instances);
 
         ObjectPool objectPool = new GenericObjectPool(factory, config);
-        try {
-            initPool(objectPool);
-        } catch (Exception e) {
-            try {
-                objectPool.close();
-            } catch (Exception e1) {
-                e1.printStackTrace();
-            }
-            throw (InstantiationException) new InstantiationException(e.getMessage()).initCause(e);
-        }
+        initPool(objectPool);
         return objectPool;
     }
 

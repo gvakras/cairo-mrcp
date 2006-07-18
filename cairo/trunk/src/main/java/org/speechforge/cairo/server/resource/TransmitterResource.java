@@ -60,12 +60,12 @@ public class TransmitterResource extends ResourceImpl {
     private ObjectPool _promptGeneratorPool;
 
     public TransmitterResource(TransmitterConfig config)
-      throws IOException, RemoteException {
+      throws IOException, RemoteException, InstantiationException {
         super(RESOURCE_TYPE);
         _basePromptDir = config.getBasePromptDir();
         _rtpBasePort = config.getRtpBasePort();
         _mrcpServer = new MrcpServerSocket(config.getMrcpPort());
-        _promptGeneratorPool = PromptGeneratorFactory.createObjectPool(15);
+        _promptGeneratorPool = PromptGeneratorFactory.createObjectPool(config.getMaxConnects());
     }
 
     /* (non-Javadoc)
