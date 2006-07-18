@@ -51,8 +51,8 @@ public class RTPStreamReplicatorFactory implements PoolableObjectFactory {
      */
     public RTPStreamReplicatorFactory(int basePort) {
         Validate.isTrue((basePort % 2 == 0), "Base port must be even, invalid port: ", basePort);
-        Validate.isTrue(basePort > 0, "Base port must positive, invalid port: ", basePort);
-        Validate.isTrue(basePort < 65535, "Base port must not exceed 65534, invalid port: ", basePort);
+        Validate.isTrue(basePort >= 0, "Base port must not be less than zero, invalid port: ", basePort);
+        Validate.isTrue(basePort <= RTPConsumer.TCP_PORT_MAX, "Base port exceeds max TCP port value, invalid port: ", basePort);
         _nextPort = basePort;
     }
 

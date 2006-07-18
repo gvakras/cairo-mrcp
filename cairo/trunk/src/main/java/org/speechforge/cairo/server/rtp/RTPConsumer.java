@@ -61,20 +61,31 @@ import org.apache.log4j.Logger;
 public abstract class RTPConsumer implements SessionListener, ReceiveStreamListener {
 
     private static Logger _logger = Logger.getLogger(RTPConsumer.class);
+    
+    public static final int TCP_PORT_MAX = 65536;
 
     protected RTPManager _rtpManager;
     private SessionAddress _localAddress;
     private SessionAddress _targetAddress;
 
     public RTPConsumer(int port) throws IOException {
+        if (port < 0 || port > TCP_PORT_MAX) {
+            throw new IllegalArgumentException("Invalid port value: " + port);
+        }
         _localAddress = new SessionAddress(InetAddress.getLocalHost(), port);
         _targetAddress = _localAddress;
         init();
     }
 
     public RTPConsumer(int localPort, InetAddress remoteAddress, int remotePort) throws IOException {
+        if (localPort < 0 || localPort > TCP_PORT_MAX) {
+            throw new IllegalArgumentException("Invalid local port value: " + localPort);
+        }
+        if (remotePort > TCP_PORT_MAX) {
+            throw new IllegalArgumentException("Invalid remote port value: " + remotePort);
+        }
         _localAddress = new SessionAddress(InetAddress.getLocalHost(), localPort);
-        _targetAddress = new SessionAddress(remoteAddress, remotePort);
+        _targetAddress = remotePort < 0 ? null : new SessionAddress(remoteAddress, remotePort);
         init();
     }
     
@@ -89,7 +100,9 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
 
         try {
             _rtpManager.initialize(_localAddress);
-            _rtpManager.addTarget(_targetAddress);
+            if (_targetAddress != null) {
+                _rtpManager.addTarget(_targetAddress);
+            }
         } catch (InvalidSessionAddressException e) {
             throw (IOException) new IOException(e.getMessage()).initCause(e);
         }
