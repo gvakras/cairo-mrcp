@@ -1,9 +1,21 @@
 @echo off
-@setlocal enableextensions enabledelayedexpansion
 
+if "%OS%"=="Windows_NT" goto init
+
+echo.
+echo ERROR: this script not supported for %OS%.
+echo You will need to modify this script for it to work with
+echo your operating system.
+echo.
+goto error
+
+:init
+
+@setlocal enableextensions enabledelayedexpansion
 set CAIRO_VERSION=${pom.version}
 
-@REM ==== START VALIDATION ====
+:startValidation
+
 if not "%1" == "" goto chkJavaHome
 
 echo.
@@ -25,6 +37,7 @@ echo.
 goto error
 
 :valJavaHome
+
 if exist "%JAVA_HOME%\bin\java.exe" goto chkJMF
 
 echo.
@@ -36,6 +49,7 @@ echo.
 goto error
 
 :chkJMF
+
 if exist "%JAVA_HOME%\jre\lib\ext\jmf.jar" goto chkJSAPI
 
 echo.
@@ -46,8 +60,9 @@ echo.
 goto error
 
 :chkJSAPI
-if exist "%JAVA_HOME%\jre\lib\ext\jsapi.jar" goto init
-if exist "..\lib\jsapi.jar" goto init
+
+if exist "%JAVA_HOME%\jre\lib\ext\jsapi.jar" goto chkCairoHome
+if exist "..\lib\jsapi.jar" goto chkCairoHome
 
 echo.
 echo ERROR: Java Speech API (JSAPI) is not installed.
@@ -59,6 +74,10 @@ echo.
 goto error
 
 :chkCairoHome
+
+if not "%CAIRO_HOME%"=="" goto valCairoHome
+
+if "%OS%"=="Windows_NT" set CAIRO_HOME=%~dp0..
 if not "%CAIRO_HOME%"=="" goto valCairoHome
 
 echo.
@@ -68,41 +87,47 @@ echo location of the Cairo installation
 echo.
 goto error
 
-:valMHome
-if exist "%CAIRO_HOME%\bin\rserver.bat" goto init
+:valCairoHome
+set CAIRO_JAR=%CAIRO_HOME%\cairo-%CAIRO_VERSION%.jar
+if exist "%CAIRO_JAR%" goto setClasspath
 
 echo.
 echo ERROR: CAIRO_HOME is set to an invalid directory.
 echo CAIRO_HOME = %CAIRO_HOME%
+echo %CAIRO_JAR% not found!
 echo Please set the CAIRO_HOME variable in your environment to match the
 echo location of the Cairo installation
 echo.
 goto error
-@REM ==== END VALIDATION ====
 
-:init
-cd ..
+:chkCairoConfig
 
-set CLASSPATH=%CD%\cairo-%CAIRO_VERSION%.jar
-for %%b in (lib\*.jar) do set CLASSPATH=!CLASSPATH!;%CD%\%%b
+if not "%CAIRO_CONFIG%"=="" goto setClasspath
+set CAIRO_CONFIG=file:%CAIRO_HOME%\config\cairo-config.xml
 
-if "%FREETTS_HOME%" == "" goto skipFreeTTS
-for %%b in (%FREETTS_HOME%\lib\*.jar) do set CLASSPATH=!CLASSPATH!;%%b
+:setClasspath
 
-:skipFreeTTS
-set CLASSPATH=%CLASSPATH%;%CD%\config
-@REM 
-echo CLASSPATH=%CLASSPATH%
-goto run
+set CLASSPATH=%CAIRO_JAR%
+for %%b in (%CAIRO_HOME%\lib\*.jar) do set CLASSPATH=!CLASSPATH!;%%b
+
+set CLASSPATH=%CLASSPATH%;%CAIRO_HOME%\config
+@REM echo CLASSPATH=%CLASSPATH%
 
 :run
 %JAVA_HOME%\bin\java -cp "%CLASSPATH%" -Xmx200m -Dlog4j.configuration=log4j.xml %1 %2 %3
 goto exit
 
 :error
+
 if "%OS%"=="Windows_NT" @endlocal
 set ERROR_CODE=1
 pause
+goto eof
 
 :exit
+
 if "%OS%"=="Windows_NT" @endlocal
+
+:eof
+
+@REM === EOF ===
