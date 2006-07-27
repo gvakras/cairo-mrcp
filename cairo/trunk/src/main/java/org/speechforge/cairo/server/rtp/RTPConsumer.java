@@ -24,10 +24,7 @@ package org.speechforge.cairo.server.rtp;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 import javax.media.protocol.DataSource;
 import javax.media.protocol.PushBufferDataSource;
@@ -50,8 +47,6 @@ import javax.media.rtp.event.StreamMappedEvent;
 import javax.media.rtp.rtcp.SourceDescription;
 
 import org.apache.log4j.Logger;
-
-// TODO: convert to abstract base class
 
 /**
  * TODOC
@@ -81,11 +76,14 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
         if (localPort < 0 || localPort > TCP_PORT_MAX) {
             throw new IllegalArgumentException("Invalid local port value: " + localPort);
         }
-        if (remotePort > TCP_PORT_MAX) {
+        if (remoteAddress == null) {
+            throw new IllegalArgumentException("Remote address supplied must not be null!");
+        }
+        if (remotePort < 0 || remotePort > TCP_PORT_MAX) {
             throw new IllegalArgumentException("Invalid remote port value: " + remotePort);
         }
         _localAddress = new SessionAddress(InetAddress.getLocalHost(), localPort);
-        _targetAddress = remotePort < 0 ? null : new SessionAddress(remoteAddress, remotePort);
+        _targetAddress = new SessionAddress(remoteAddress, remotePort);
         init();
     }
     
@@ -100,9 +98,7 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
 
         try {
             _rtpManager.initialize(_localAddress);
-            if (_targetAddress != null) {
-                _rtpManager.addTarget(_targetAddress);
-            }
+            _rtpManager.addTarget(_targetAddress);
         } catch (InvalidSessionAddressException e) {
             throw (IOException) new IOException(e.getMessage()).initCause(e);
         }

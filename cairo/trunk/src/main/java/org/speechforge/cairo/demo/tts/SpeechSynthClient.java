@@ -1,0 +1,201 @@
+/*
+ * Cairo - Open source framework for control of speech media resources.
+ *
+ * Copyright (C) 2005-2006 SpeechForge - http://www.speechforge.org
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * Contact: ngodfredsen@users.sourceforge.net
+ *
+ */
+package org.speechforge.cairo.demo.tts;
+
+import org.speechforge.cairo.demo.util.NativeMediaClient;
+
+import org.speechforge.cairo.server.resource.ResourceChannel;
+import org.speechforge.cairo.server.resource.ResourceMediaStream;
+import org.speechforge.cairo.server.resource.ResourceMessage;
+import org.speechforge.cairo.server.resource.ResourceServer;
+
+import java.awt.Toolkit;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.URL;
+import java.rmi.Naming;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.log4j.Logger;
+import org.mrcp4j.MrcpEventName;
+import org.mrcp4j.MrcpMethodName;
+import org.mrcp4j.MrcpRequestState;
+import org.mrcp4j.MrcpResourceType;
+import org.mrcp4j.client.MrcpChannel;
+import org.mrcp4j.client.MrcpEventListener;
+import org.mrcp4j.client.MrcpFactory;
+import org.mrcp4j.client.MrcpInvocationException;
+import org.mrcp4j.client.MrcpProvider;
+import org.mrcp4j.message.MrcpEvent;
+import org.mrcp4j.message.MrcpResponse;
+import org.mrcp4j.message.header.IllegalValueException;
+import org.mrcp4j.message.request.MrcpRequest;
+
+/**
+ * TODOC
+ *
+ * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
+ */
+public class SpeechSynthClient implements MrcpEventListener {
+
+    private static Logger _logger = Logger.getLogger(SpeechSynthClient.class);
+
+    private static final boolean BEEP = true;
+
+    private static Toolkit _toolkit = BEEP ? Toolkit.getDefaultToolkit() : null;
+
+    private MrcpChannel _ttsChannel;
+
+    /**
+     * TODOC
+     * @param ttsChannel 
+     * @param recogChannel 
+     * @param recordChannel 
+     */
+    public SpeechSynthClient(MrcpChannel ttsChannel) {
+        _ttsChannel = ttsChannel;
+        _ttsChannel.addEventListener(this);
+    }
+
+    /* (non-Javadoc)
+     * @see org.mrcp4j.client.MrcpEventListener#eventReceived(org.mrcp4j.message.MrcpEvent)
+     */
+    public void eventReceived(MrcpEvent event) {
+        if (_logger.isDebugEnabled()) {
+            _logger.debug("MRCP event received:\n" + event.toString());
+        }
+
+        try {
+            switch (event.getChannelIdentifier().getResourceType()) {
+            case SPEECHSYNTH:
+                ttsEventReceived(event);
+                break;
+
+            default:
+                _logger.warn("Unexpected value for event resource type!");
+                break;
+            }
+        } catch (IllegalValueException e) {
+            _logger.warn("Illegal value for event resource type!", e);
+        }
+    }
+
+    private void ttsEventReceived(MrcpEvent event) {
+        // TODO Auto-generated method stub
+    }
+
+
+    public MrcpRequestState playPrompt(String promptText)
+      throws IOException, MrcpInvocationException, InterruptedException {
+
+        // speak request
+        MrcpRequest request = _ttsChannel.createRequest(MrcpMethodName.SPEAK);
+        request.setContent("text/plain", null, promptText);
+        MrcpResponse response = _ttsChannel.sendRequest(request);
+
+        if (BEEP) {
+            _toolkit.beep();
+        }
+
+        if (_logger.isDebugEnabled()) {
+            _logger.debug("MRCP response received:\n" + response.toString());
+        }
+
+        return response.getRequestState();
+    }
+
+    private static ResourceMessage constructResourceMessage(int localRtpPort) {
+        ResourceMessage message = new ResourceMessage();
+
+        List<ResourceChannel> channels = new ArrayList<ResourceChannel>();
+
+        ResourceChannel channel = new ResourceChannel();
+        channel.setResourceType(MrcpResourceType.SPEECHSYNTH);
+        channels.add(channel);
+
+        message.setChannels(channels);
+
+        ResourceMediaStream stream = new ResourceMediaStream();
+        stream.setPort(localRtpPort);
+        message.setMediaStream(stream);
+
+        return message;
+    }
+
+    /**
+     * TODOC
+     * @param args
+     * @throws Exception 
+     */
+    public static void main(String[] args) throws Exception {
+        if (args.length < 1) {
+            throw new Exception("Missing command line arguments, expected: <prompt-text>");
+        }
+
+        String promptText = args[0];
+
+        int localRtpPort = 42046;
+
+        // lookup resource server
+        InetAddress host = InetAddress.getLocalHost();
+        //TODO: allow runtime specification of resource server location (assume localhost for now)
+        String url = "rmi://" + host.getHostAddress() + '/' + ResourceServer.NAME;
+        if (_logger.isDebugEnabled()) {
+            _logger.debug("looking up: " + url);
+        }
+
+        ResourceServer resourceServer = (ResourceServer) Naming.lookup(url);
+
+        ResourceMessage message = constructResourceMessage(localRtpPort);
+        message = resourceServer.invite(message);
+
+        _logger.debug("Starting NativeMediaClient for receive only...");
+        NativeMediaClient mediaClient = new NativeMediaClient(localRtpPort);
+
+        String protocol = MrcpProvider.PROTOCOL_TCP_MRCPv2;
+        MrcpFactory factory = MrcpFactory.newInstance();
+        MrcpProvider provider = factory.createProvider();
+        
+        ResourceChannel channel = message.getChannels().get(0);
+        assert (channel.getResourceType() == MrcpResourceType.SPEECHSYNTH) : channel.getResourceType();
+        MrcpChannel ttsChannel = provider.createChannel(channel.getChannelID(), host, channel.getPort(), protocol);
+
+        SpeechSynthClient client = new SpeechSynthClient(ttsChannel);
+
+        try {
+            client.playPrompt(promptText);
+            if (BEEP) {
+                _toolkit.beep();
+            }
+        } catch (Exception e){
+            if (e instanceof MrcpInvocationException) {
+                MrcpResponse response = ((MrcpInvocationException) e).getResponse();
+                _logger.warn("MRCP response received:\n" + response);
+            }
+            e.printStackTrace();
+            System.exit(1);
+        }
+    }
+
+}

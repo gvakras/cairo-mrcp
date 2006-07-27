@@ -54,7 +54,7 @@ public class NativeMediaClient extends RTPConsumer {
     private RTPPlayer _rtpPlayer;
 
     /**
-     * TODOC
+     * Constructs media client in send/receive mode.
      * @param localPort 
      * @param remoteAddress 
      * @param remotePort 
@@ -65,9 +65,24 @@ public class NativeMediaClient extends RTPConsumer {
         super(localPort, remoteAddress, remotePort);
         _rtpPlayer = new RTPPlayer(_rtpManager);
     }
-    
+
+    /**
+     * Constructs media client in receive only mode.
+     * @param localPort 
+     * @param remoteAddress 
+     * @param remotePort 
+     * @throws IOException 
+     */
+    public NativeMediaClient(int localPort)
+      throws IOException {
+        super(localPort);
+        _rtpPlayer = null;
+    }
+
     public void startTransmit() {
-        new TransmitThread().start();
+        if (_rtpPlayer != null) {
+            new TransmitThread().start();
+        }
     }
 
     private class TransmitThread extends Thread {

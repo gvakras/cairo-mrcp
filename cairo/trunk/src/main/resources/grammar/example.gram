@@ -8,10 +8,10 @@ grammar example;
 
 public <main> = [ <pre> ] ( <weather> {WEATHER} | <sports>  {SPORTS} | <stocks> {STOCKS} );
 
-<pre> = (I would like [ to hear ] ) | ( [please] get [me] );
+<pre> = ( I would like [ to hear ] ) | ( hear ) | ( [ please ] get [ me ] ) | ( look up );
 
 <weather> = [ the ] weather;
 
 <sports> = sports [ news ];
 
-<stocks> = ( [ a ] stock ( quotes | look up ) ) | stocks;
+<stocks> = ( [ a ] stock ( quote | quotes ) ) | stocks;

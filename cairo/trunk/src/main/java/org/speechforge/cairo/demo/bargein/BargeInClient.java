@@ -24,7 +24,6 @@ package org.speechforge.cairo.demo.bargein;
 
 import org.speechforge.cairo.demo.util.NativeMediaClient;
 
-import org.speechforge.cairo.server.resource.ReceiverResource;
 import org.speechforge.cairo.server.resource.ResourceChannel;
 import org.speechforge.cairo.server.resource.ResourceMediaStream;
 import org.speechforge.cairo.server.resource.ResourceMessage;
@@ -111,12 +110,13 @@ public class BargeInClient implements MrcpEventListener {
                 break;
 
             default:
+                _logger.warn("Unexpected value for event resource type!");
                 break;
             }
         } catch (IllegalValueException e) {
-            e.printStackTrace();
+            _logger.warn("Illegal value for event resource type!", e);
         }
-    }
+   }
 
 
     /**
@@ -257,16 +257,18 @@ public class BargeInClient implements MrcpEventListener {
      * @throws Exception 
      */
     public static void main(String[] args) throws Exception {
-        //URL grammarUrl = new URL("file:///work/source/zanzibar/grammar/example.gram");
+        if (args.length < 2) {
+            throw new Exception("Missing command line arguments, expected: <grammar-URL> <prompt-text>");
+        }
+
         URL grammarUrl = new URL(args[0]);
-
+        String prompt = args[1];
+        
         int localRtpPort = 42046;
-
-        String prompt = "You can start speaking any time.  Would you like to hear the weather,"
-            + " get sports news or hear a stock quote?";
 
         // lookup resource server
         InetAddress host = InetAddress.getLocalHost();
+        //TODO: allow runtime specification of resource server location (assume localhost for now)
         String url = "rmi://" + host.getHostAddress() + '/' + ResourceServer.NAME;
         if (_logger.isDebugEnabled()) {
             _logger.debug("looking up: " + url);
