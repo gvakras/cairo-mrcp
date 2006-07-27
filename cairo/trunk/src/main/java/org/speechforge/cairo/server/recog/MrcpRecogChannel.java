@@ -234,6 +234,11 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
                         MrcpEventName.RECOGNITION_COMPLETE,
                         MrcpRequestState.COMPLETE
                 );
+                String content = result.toString();
+                if (content == null || content.trim().length() < 1) {
+                    content = "null";
+                }
+                event.setContent("text/plain", null, content);
                 _session.postEvent(event);
             } catch (IllegalStateException e) {
                 // TODO Auto-generated catch block
