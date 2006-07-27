@@ -46,12 +46,16 @@ import javax.media.rtp.RTPManager;
 import javax.media.rtp.SendStream;
 import javax.media.rtp.SessionAddress;
 
+import org.apache.log4j.Logger;
+
 /**
  * TODOC
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  *
  */
 public class RTPPlayer implements ControllerListener {
+
+    private static Logger _logger = Logger.getLogger(RTPPlayer.class);
 
     private static final ContentDescriptor CONTENT_DESCRIPTOR_RAW_RTP = new ContentDescriptor(ContentDescriptor.RAW_RTP);
 
@@ -235,7 +239,9 @@ public class RTPPlayer implements ControllerListener {
      */
     public void controllerUpdate(ControllerEvent event) {
         synchronized (_lock) {
-            //System.out.println("ControllerEvent received: " + event);
+            if (_logger.isDebugEnabled()) {
+                _logger.debug("ControllerEvent received: " + event);
+            }
     
             if (event instanceof EndOfMediaEvent) {
                 event.getSourceController().close();

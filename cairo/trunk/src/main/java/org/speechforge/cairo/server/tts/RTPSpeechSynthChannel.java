@@ -41,12 +41,16 @@ import javax.media.rtp.InvalidSessionAddressException;
 import javax.media.rtp.RTPManager;
 import javax.media.rtp.SessionAddress;
 
+import org.apache.log4j.Logger;
+
 /**
  * TODOC
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  *
  */
 public class RTPSpeechSynthChannel {
+
+    private static Logger _logger = Logger.getLogger(RTPSpeechSynthChannel.class);
 
     static final ContentDescriptor CONTENT_DESCRIPTOR_RAW_RTP = new ContentDescriptor(ContentDescriptor.RAW_RTP);
     //private static final AudioFormat[] PREFERRED_MEDIA_FORMATS = {SourceAudioFormat.PREFERRED_MEDIA_FORMAT};
@@ -57,7 +61,7 @@ public class RTPSpeechSynthChannel {
 
     volatile short _state = IDLE;
 
-    BlockingQueue<File> _promptQueue = new LinkedBlockingQueue<File>();
+    BlockingQueue<PromptPlay> _promptQueue = new LinkedBlockingQueue<PromptPlay>();
     //RTPManager _rtpManager;
     private Thread _sendThread;
     RTPPlayer _promptPlayer;
@@ -86,11 +90,13 @@ public class RTPSpeechSynthChannel {
         }
     }
 
-    public synchronized int queuePrompt(File promptFile) throws InvalidSessionAddressException, IOException {
+    public synchronized int queuePrompt(File promptFile, PromptPlayListener listener)
+      throws InvalidSessionAddressException, IOException {
+
         init();
         int state = _state;
         try {
-            _promptQueue.put(promptFile);
+            _promptQueue.put(new PromptPlay(promptFile, listener));
             _state = SPEAKING;
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
@@ -125,12 +131,20 @@ public class RTPSpeechSynthChannel {
                 throw new RuntimeException();
             }*/
             while (_run) {
+                PromptPlay promptPlay = null;
                 boolean drainQueue = false;
+                Exception cause = null;
+
                 try {
 
-                    File promptFile = _promptQueue.take();
-                    _promptPlayer.playPrompt(promptFile);
+                    // first clear interrupted status of current thread
+                    Thread.interrupted();
 
+                    // get next prompt to play
+                    promptPlay = _promptQueue.take();
+                    _promptPlayer.playPrompt(promptPlay._promptFile);
+
+                    // drain all prompts in queue if current prompt playback is interrupted (e.g. by STOP request)
                     drainQueue = Thread.interrupted();
 
                 } catch (InterruptedException e) {
@@ -141,6 +155,7 @@ public class RTPSpeechSynthChannel {
                 } catch (Exception e) {
                     e.printStackTrace();
                     //skip and try next prompt...
+                    cause = e;
                 }
 
                 if (drainQueue) {
@@ -154,9 +169,31 @@ public class RTPSpeechSynthChannel {
                             e1.printStackTrace();
                         }
                     }
+                } else if (promptPlay != null) {
+                    if (promptPlay._listener != null) {
+                        if (cause == null) {
+                            promptPlay._listener.playCompleted();
+                        } else {
+                            promptPlay._listener.playFailed(cause);
+                        }
+                    }
+                } else {
+                    _logger.warn("promptPlay is null!", cause);
                 }
+
                 _state = _promptQueue.isEmpty() ? IDLE : SPEAKING;
             }
+        }
+    }
+
+    private static class PromptPlay {
+
+        private File _promptFile;
+        private PromptPlayListener _listener;
+
+        PromptPlay(File promptFile, PromptPlayListener listener) {
+            _promptFile = promptFile;
+            _listener = listener;
         }
     }
 
@@ -176,11 +213,11 @@ public class RTPSpeechSynthChannel {
         RTPSpeechSynthChannel player = new RTPSpeechSynthChannel(localPort, remoteAddress, remotePort);
         
         File prompt = new File(promptDir, "good_morning_rita.wav");
-        player.queuePrompt(prompt);
-        player.queuePrompt(prompt);
-        player.queuePrompt(prompt);
-        player.queuePrompt(prompt);
-        player.queuePrompt(prompt);
+        player.queuePrompt(prompt, null);
+        player.queuePrompt(prompt, null);
+        player.queuePrompt(prompt, null);
+        player.queuePrompt(prompt, null);
+        player.queuePrompt(prompt, null);
     }
 
 }
