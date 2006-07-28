@@ -20,14 +20,14 @@
  * Contact: ngodfredsen@users.sourceforge.net
  *
  */
-package org.speechforge.cairo.server.resource;
+package org.speechforge.cairo.exception;
 
 /**
  * TODOC
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  *
  */
-public class ResourceUnavailableException extends Exception {
+public class ResourceUnavailableException extends CairoException {
 
     /**
      * TODOC

@@ -22,6 +22,8 @@
  */
 package org.speechforge.cairo.server.resource;
 
+import org.speechforge.cairo.exception.ResourceUnavailableException;
+
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 

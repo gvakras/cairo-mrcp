@@ -22,6 +22,7 @@
  */
 package org.speechforge.cairo.server.resource;
 
+import org.speechforge.cairo.exception.ResourceUnavailableException;
 import org.speechforge.cairo.server.config.CairoConfig;
 import org.speechforge.cairo.server.config.ReceiverConfig;
 import org.speechforge.cairo.server.recog.MrcpRecogChannel;

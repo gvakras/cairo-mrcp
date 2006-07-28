@@ -24,7 +24,7 @@ package org.speechforge.cairo.server.recog;
 
 import org.speechforge.cairo.exception.UnsupportedHeaderException;
 import org.speechforge.cairo.server.MrcpGenericChannel;
-import org.speechforge.cairo.server.resource.ResourceUnavailableException;
+import org.speechforge.cairo.exception.ResourceUnavailableException;
 
 import java.io.File;
 import java.io.IOException;

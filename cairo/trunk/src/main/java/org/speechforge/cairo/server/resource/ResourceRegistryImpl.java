@@ -23,6 +23,8 @@
 package org.speechforge.cairo.server.resource;
 
 
+import org.speechforge.cairo.exception.ResourceUnavailableException;
+
 import java.util.List;
 import java.net.InetAddress;
 import java.rmi.Naming;

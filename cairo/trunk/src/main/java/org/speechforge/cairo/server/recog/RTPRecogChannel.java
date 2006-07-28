@@ -23,7 +23,7 @@
 package org.speechforge.cairo.server.recog;
 
 import org.speechforge.cairo.server.recog.sphinx.SphinxRecEngine;
-import org.speechforge.cairo.server.resource.ResourceUnavailableException;
+import org.speechforge.cairo.exception.ResourceUnavailableException;
 import org.speechforge.cairo.server.rtp.RTPStreamReplicator;
 import org.speechforge.cairo.util.jmf.ProcessorStarter;
 
