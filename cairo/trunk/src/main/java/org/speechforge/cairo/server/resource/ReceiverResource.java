@@ -105,10 +105,10 @@ public class ReceiverResource extends ResourceImpl {
                     String channelID = channel.getChannelID();
 
                     switch (channel.getResourceType()) {
-                    case RECORDER:
-                        RTPRecorderChannel recorder = new RTPRecorderChannel(channelID, _baseRecordingDir, replicator);
-                        _mrcpServer.openChannel(channelID, new MrcpRecorderChannel(recorder));
-                        break;
+//                    case RECORDER:
+//                        RTPRecorderChannel recorder = new RTPRecorderChannel(channelID, _baseRecordingDir, replicator);
+//                        _mrcpServer.openChannel(channelID, new MrcpRecorderChannel(recorder));
+//                        break;
 
                     case SPEECHRECOG:
                         RTPRecogChannel recog = new RTPRecogChannel(_recEnginePool, replicator);
@@ -116,7 +116,7 @@ public class ReceiverResource extends ResourceImpl {
                         break;
 
                     default:
-                        throw new ResourceUnavailableException("Unsupported resource type!");
+                        throw new ResourceUnavailableException("Unsupported resource type: " + channel.getResourceType());
                     }
 
                     channel.setPort(_mrcpServer.getPort());
