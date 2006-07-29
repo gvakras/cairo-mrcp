@@ -25,6 +25,7 @@ package org.speechforge.cairo.server.resource;
 import org.speechforge.cairo.exception.ResourceUnavailableException;
 import org.speechforge.cairo.server.config.CairoConfig;
 import org.speechforge.cairo.server.config.TransmitterConfig;
+import org.speechforge.cairo.server.rtp.PortPairPool;
 import org.speechforge.cairo.server.tts.MrcpSpeechSynthChannel;
 import org.speechforge.cairo.server.tts.PromptGeneratorFactory;
 import org.speechforge.cairo.server.tts.RTPSpeechSynthChannel;
@@ -56,17 +57,17 @@ public class TransmitterResource extends ResourceImpl {
     public static final Resource.Type RESOURCE_TYPE = Resource.Type.TRANSMITTER;
 
     private File _basePromptDir;
-    private int _rtpBasePort;
     private MrcpServerSocket _mrcpServer;
     private ObjectPool _promptGeneratorPool;
+    private PortPairPool _portPairPool;
 
     public TransmitterResource(TransmitterConfig config)
       throws IOException, RemoteException, InstantiationException {
         super(RESOURCE_TYPE);
         _basePromptDir = config.getBasePromptDir();
-        _rtpBasePort = config.getRtpBasePort();
         _mrcpServer = new MrcpServerSocket(config.getMrcpPort());
-        _promptGeneratorPool = PromptGeneratorFactory.createObjectPool(config.getMaxConnects());
+        _promptGeneratorPool = PromptGeneratorFactory.createObjectPool(config.getEngines());
+        _portPairPool = new PortPairPool(config.getRtpBasePort(), config.getMaxConnects());
     }
 
     /* (non-Javadoc)
@@ -88,7 +89,7 @@ public class TransmitterResource extends ResourceImpl {
         if (channels.size() > 0) {
             try {
                 ResourceMediaStream stream = request.getMediaStream();
-                int localPort = _rtpBasePort+=2; // TODO: get from pool
+                int localPort = _portPairPool.borrowPort(); // TODO: return to pool
                 InetAddress remoteHost = InetAddress.getLocalHost();  // TODO: get from request
                 int remotePort = stream.getPort();
 

@@ -41,6 +41,7 @@ public abstract class ResourceConfig {
     private int _mrcpPort;
     private int _rtpBasePort;
     private int _maxConnects;
+    private int _engines;
 
     /**
      * TODOC
@@ -51,6 +52,7 @@ public abstract class ResourceConfig {
         _mrcpPort = config.getInt("resources.resource(" + index + ").mrcpPort");
         _rtpBasePort = config.getInt("resources.resource(" + index + ").rtpBasePort");
         _maxConnects = config.getInt("resources.resource(" + index + ").maxConnects");
+        _engines = config.getInt("resources.resource(" + index + ").engines");
     }
 
     /**
@@ -75,6 +77,14 @@ public abstract class ResourceConfig {
      */
     public int getRtpBasePort() {
         return _rtpBasePort;
+    }
+
+    /**
+     * TODOC
+     * @return Returns the recEngines.
+     */
+    public int getEngines() {
+        return _engines;
     }
 
     public static void ensureDir(File dir) throws ConfigurationException {

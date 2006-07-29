@@ -75,7 +75,7 @@ public class ReceiverResource extends ResourceImpl {
         _replicatorPool = RTPStreamReplicatorFactory.createObjectPool(
                 config.getRtpBasePort(), config.getMaxConnects());
         _recEnginePool = SphinxRecEngineFactory.createObjectPool(
-                config.getSphinxConfigURL(), config.getRecEngines());
+                config.getSphinxConfigURL(), config.getEngines());
     }
 
     /* (non-Javadoc)
@@ -97,7 +97,7 @@ public class ReceiverResource extends ResourceImpl {
         if (channels.size() > 0) {
             try {
 
-                RTPStreamReplicator replicator = (RTPStreamReplicator) _replicatorPool.borrowObject();
+                RTPStreamReplicator replicator = (RTPStreamReplicator) _replicatorPool.borrowObject(); // TODO: return object to pool
                 ResourceMediaStream stream = request.getMediaStream();
                 stream.setPort(replicator.getPort());
 

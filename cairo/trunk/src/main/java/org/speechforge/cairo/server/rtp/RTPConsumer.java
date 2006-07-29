@@ -64,7 +64,7 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
     private SessionAddress _targetAddress;
 
     public RTPConsumer(int port) throws IOException {
-        if (port < 0 || port > TCP_PORT_MAX) {
+        if (port < 0 || port >= TCP_PORT_MAX) {
             throw new IllegalArgumentException("Invalid port value: " + port);
         }
         _localAddress = new SessionAddress(InetAddress.getLocalHost(), port);

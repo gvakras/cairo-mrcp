@@ -38,7 +38,6 @@ import org.apache.commons.configuration.XMLConfiguration;
  */
 public class ReceiverConfig extends ResourceConfig {
 
-    private int _recEngines;
     private File _baseGrammarDir;
     private URL _sphinxConfigURL;
     private File _recordingDir;
@@ -68,7 +67,6 @@ public class ReceiverConfig extends ResourceConfig {
                     _logger.debug("SphinxConfigURL: " + _sphinxConfigURL);
                 }
             }
-            _recEngines = config.getInt("resources.resource(" + index + ").recEngines");
             _baseGrammarDir = new File(config.getString("resources.resource(" + index + ").baseGrammarDir"));
             ensureDir(_baseGrammarDir);
             _recordingDir = new File(config.getString("resources.resource(" + index + ").recordingDir"));
@@ -96,15 +94,6 @@ public class ReceiverConfig extends ResourceConfig {
     public File getRecordingDir() {
         return _recordingDir;
     }
-
-    /**
-     * TODOC
-     * @return Returns the recEngines.
-     */
-    public int getRecEngines() {
-        return _recEngines;
-    }
-
 
     /**
      * TODOC

@@ -42,25 +42,25 @@ public class RTPStreamReplicatorFactory implements PoolableObjectFactory {
 
     private static Logger _logger = Logger.getLogger(RTPStreamReplicatorFactory.class);
 
-    private int _nextPort;
-    private List<Integer> _ports = new LinkedList<Integer>();
+    private PortPairPool _portPairPool;
 
     /**
      * TODOC
      * @param basePort 
+     * @param portPairPool 
      */
-    public RTPStreamReplicatorFactory(int basePort) {
+    private RTPStreamReplicatorFactory(int basePort, PortPairPool portPairPool) {
         Validate.isTrue((basePort % 2 == 0), "Base port must be even, invalid port: ", basePort);
         Validate.isTrue(basePort >= 0, "Base port must not be less than zero, invalid port: ", basePort);
         Validate.isTrue(basePort <= RTPConsumer.TCP_PORT_MAX, "Base port exceeds max TCP port value, invalid port: ", basePort);
-        _nextPort = basePort;
+        _portPairPool = portPairPool;
     }
 
     /* (non-Javadoc)
      * @see org.apache.commons.pool.PoolableObjectFactory#makeObject()
      */
     public Object makeObject() throws Exception {
-        return new RTPStreamReplicator(borrowPort());
+        return new RTPStreamReplicator(_portPairPool.borrowPort());
     }
 
     /* (non-Javadoc)
@@ -69,7 +69,7 @@ public class RTPStreamReplicatorFactory implements PoolableObjectFactory {
     public void destroyObject(Object obj) throws Exception {
         RTPStreamReplicator replicator = (RTPStreamReplicator) obj;
         replicator.shutdown();
-        returnPort(replicator.getPort());
+        _portPairPool.returnPort(replicator.getPort());
     }
 
     /* (non-Javadoc)
@@ -94,25 +94,6 @@ public class RTPStreamReplicatorFactory implements PoolableObjectFactory {
         //RTPStreamReplicator replicator = (RTPStreamReplicator) obj;
     }
 
-    private int borrowPort() {
-        int port;
-        synchronized(_ports) {
-            if (_ports.isEmpty()) {
-                port = _nextPort;
-                _nextPort += 2;
-            } else {
-                port = _ports.remove(0).intValue();
-            }
-        }
-        return port;
-    }
-
-    private void returnPort(int port) {
-        synchronized(_ports) {
-            _ports.add(new Integer(port));
-        }
-    }
-
     /**
      * TODOC
      * @param rtpBasePort
@@ -120,12 +101,8 @@ public class RTPStreamReplicatorFactory implements PoolableObjectFactory {
      * @return
      */
     public static ObjectPool createObjectPool(int rtpBasePort, int maxConnects) {
-        int maxPort = rtpBasePort + (maxConnects *2);
-        if (_logger.isDebugEnabled()) {
-            _logger.debug("creating new replicator pool... ports: " + rtpBasePort + '-' + maxPort);
-        }
-
-        PoolableObjectFactory factory = new RTPStreamReplicatorFactory(rtpBasePort);
+        PortPairPool ppp = new PortPairPool(rtpBasePort, maxConnects);
+        PoolableObjectFactory factory = new RTPStreamReplicatorFactory(rtpBasePort, ppp);
         GenericObjectPool.Config config = ObjectPoolUtil.getGenericObjectPoolConfig(maxConnects);
         ObjectPool objectPool = new GenericObjectPool(factory, config);
         return objectPool;
