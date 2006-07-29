@@ -40,7 +40,7 @@ public class ReceiverConfig extends ResourceConfig {
 
     private File _baseGrammarDir;
     private URL _sphinxConfigURL;
-    private File _recordingDir;
+    private File _baseRecordingDir;
 
     /**
      * TODOC
@@ -69,8 +69,8 @@ public class ReceiverConfig extends ResourceConfig {
             }
             _baseGrammarDir = new File(config.getString("resources.resource(" + index + ").baseGrammarDir"));
             ensureDir(_baseGrammarDir);
-            _recordingDir = new File(config.getString("resources.resource(" + index + ").recordingDir"));
-            ensureDir(_recordingDir);
+            _baseRecordingDir = new File(config.getString("resources.resource(" + index + ").baseRecordingDir"));
+            ensureDir(_baseRecordingDir);
         } catch (RuntimeException e) {
             throw new ConfigurationException(e.getMessage(), e);
         } catch (MalformedURLException e) {
@@ -89,10 +89,10 @@ public class ReceiverConfig extends ResourceConfig {
 
     /**
      * TODOC
-     * @return Returns the recordingDir.
+     * @return Returns the baseRecordingDir.
      */
-    public File getRecordingDir() {
-        return _recordingDir;
+    public File getBaseRecordingDir() {
+        return _baseRecordingDir;
     }
 
     /**

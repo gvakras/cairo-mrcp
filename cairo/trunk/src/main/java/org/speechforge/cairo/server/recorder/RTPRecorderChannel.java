@@ -54,7 +54,7 @@ public class RTPRecorderChannel implements DataSinkListener {
     private static final ContentDescriptor CONTENT_DESCRIPTOR_WAVE =
         new FileTypeDescriptor(FileTypeDescriptor.WAVE);
 
-    private File _dir;
+    private File _recordingDir;
     private RTPStreamReplicator _replicator;
 
     private Processor _processor;
@@ -62,17 +62,19 @@ public class RTPRecorderChannel implements DataSinkListener {
 
     /**
      * TODOC
-     * @param dir directory to save recorded files to
+     * @param channelID unique id of the recorder channel
+     * @param baseRecordingDir base directory to save recorded files to
      * @param replicator 
      * @throws IllegalArgumentException if the File specified is not a directory
      */
-    public RTPRecorderChannel(File dir, RTPStreamReplicator replicator) throws IllegalArgumentException {
-        Validate.notNull(dir, "Null directory!");
-        Validate.isTrue(dir.isDirectory(), "File object specified must be a directory: ", dir);
-        // TODO: make subdirectory based on channel ID 
-        Validate.notNull(replicator, "Null replicator!");
+    public RTPRecorderChannel(String channelID, File baseRecordingDir, RTPStreamReplicator replicator) throws IllegalArgumentException {
+        Validate.isTrue(baseRecordingDir.isDirectory(), "baseRecordingDir parameter was not a directory: ", baseRecordingDir);
+        _recordingDir = new File(baseRecordingDir, channelID);
+        if (!_recordingDir.mkdir()) {
+            throw new IllegalArgumentException("Specified directory not valid: " + _recordingDir.getAbsolutePath());
+        }
 
-        _dir = dir;
+        Validate.notNull(replicator, "Null replicator!");
         _replicator = replicator;
     }
 
@@ -96,7 +98,7 @@ public class RTPRecorderChannel implements DataSinkListener {
             throw new IOException("Processor.getDataOutput() returned null!");
         }
 
-        _destination = new File(_dir, new StringBuilder().append(System.currentTimeMillis()).append(".wav").toString());
+        _destination = new File(_recordingDir, new StringBuilder().append(System.currentTimeMillis()).append(".wav").toString());
 
         try {
             DataSink dataSink = Manager.createDataSink(dataSource, new MediaLocator(_destination.toURL()));

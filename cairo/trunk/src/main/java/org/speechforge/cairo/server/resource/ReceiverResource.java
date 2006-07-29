@@ -63,13 +63,13 @@ public class ReceiverResource extends ResourceImpl {
     private ObjectPool _replicatorPool;
     private ObjectPool _recEnginePool;
 
-    private File _recordingDir;
+    private File _baseRecordingDir;
     private File _baseGrammarDir;
 
     public ReceiverResource(ReceiverConfig config)
       throws IOException, RemoteException, InstantiationException {
         super(RESOURCE_TYPE);
-        _recordingDir = config.getRecordingDir();
+        _baseRecordingDir = config.getBaseRecordingDir();
         _baseGrammarDir = config.getBaseGrammarDir();
         _mrcpServer = new MrcpServerSocket(config.getMrcpPort());
         _replicatorPool = RTPStreamReplicatorFactory.createObjectPool(
@@ -106,7 +106,7 @@ public class ReceiverResource extends ResourceImpl {
 
                     switch (channel.getResourceType()) {
                     case RECORDER:
-                        RTPRecorderChannel recorder = new RTPRecorderChannel(_recordingDir, replicator);
+                        RTPRecorderChannel recorder = new RTPRecorderChannel(channelID, _baseRecordingDir, replicator);
                         _mrcpServer.openChannel(channelID, new MrcpRecorderChannel(recorder));
                         break;
 

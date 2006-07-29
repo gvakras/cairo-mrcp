@@ -157,7 +157,7 @@ public class MrcpRecorderChannel extends MrcpGenericChannel implements RecorderR
 
         System.out.println("Starting up MrcpServerSocket...");
         MrcpServerSocket serverSocket = new MrcpServerSocket(mrcpPort);
-        RTPRecorderChannel recorder = new RTPRecorderChannel(dir, replicator);
+        RTPRecorderChannel recorder = new RTPRecorderChannel(channelID, dir, replicator);
         serverSocket.openChannel(channelID, new MrcpRecorderChannel(recorder));
 
         System.out.println("MRCP recorder resource listening on port " + mrcpPort);
