@@ -28,6 +28,7 @@ import org.speechforge.cairo.server.resource.ResourceChannel;
 import org.speechforge.cairo.server.resource.ResourceMediaStream;
 import org.speechforge.cairo.server.resource.ResourceMessage;
 import org.speechforge.cairo.server.resource.ResourceServer;
+import org.speechforge.cairo.server.rtp.RTPConsumer;
 
 import java.awt.Toolkit;
 import java.io.IOException;
@@ -149,13 +150,24 @@ public class SpeechSynthClient implements MrcpEventListener {
      * @throws Exception 
      */
     public static void main(String[] args) throws Exception {
-        if (args.length < 1) {
-            throw new Exception("Missing command line arguments, expected: <prompt-text>");
+        if (args.length < 2) {
+            throw new Exception("Missing command line arguments, expected: <prompt-text> <local-rtp-port>");
         }
 
         String promptText = args[0];
 
-        int localRtpPort = 42046;
+        int localRtpPort = -1;
+
+        try {
+            localRtpPort = Integer.parseInt(args[1]);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (localRtpPort < 0 || localRtpPort >= RTPConsumer.TCP_PORT_MAX || localRtpPort % 2 != 0) {
+            throw new Exception("Improper format for 2nd command line argument <local-rtp-port>," +
+                " should be even integer between 0 and " + RTPConsumer.TCP_PORT_MAX);
+        }
 
         // lookup resource server
         InetAddress host = InetAddress.getLocalHost();

@@ -1,26 +1,8 @@
 @echo off
-set SOURCE_DIR=..\..
-REM set THIRDPARTY=%SOURCE_DIR%\..\..\thirdparty
-set THIRDPARTY=C:\cvs\thirdparty
-set JAVA_HOME=C:\java\jdk1.5.0
 
-set CLASSPATH=.
-set CLASSPATH=%CLASSPATH%;%THIRDPARTY%\gen\cairo-demo.jar
-set CLASSPATH=%CLASSPATH%;%THIRDPARTY%\gen\cairo.jar
-set CLASSPATH=%CLASSPATH%;%THIRDPARTY%\gen\mrcp4j.jar
-set CLASSPATH=%CLASSPATH%;%THIRDPARTY%\commons-collections-3.1.jar
-set CLASSPATH=%CLASSPATH%;%THIRDPARTY%\commons-configuration-1.1.jar
-set CLASSPATH=%CLASSPATH%;%THIRDPARTY%\commons-lang-2.1.jar
-set CLASSPATH=%CLASSPATH%;%THIRDPARTY%\commons-logging-1.0.4.jar
-set CLASSPATH=%CLASSPATH%;%THIRDPARTY%\commons-pool-1.2.jar
-set CLASSPATH=%CLASSPATH%;%THIRDPARTY%\JainSipApi1.1.jar
-set CLASSPATH=%CLASSPATH%;%THIRDPARTY%\jdom.jar
-set CLASSPATH=%CLASSPATH%;%THIRDPARTY%\jmf.jar
-set CLASSPATH=%CLASSPATH%;%THIRDPARTY%\log4j-1.2.12.jar
-set CLASSPATH=%CLASSPATH%;%THIRDPARTY%\mina-0.7.2.jar
-set CLASSPATH=%CLASSPATH%;%THIRDPARTY%\nist-sip-1.2.jar
-set CLASSPATH=%CLASSPATH%;%THIRDPARTY%\servlet-api.jar
+set PACKAGE=org.speechforge.cairo.demo.bargein
+set CLASS=BargeInClient
+set GRAMMAR_URL=file:../grammar/example.gram
+set PROMPT_TEXT=You can start speaking any time.  Would you like to hear the weather, get sports news or hear a stock quote?
 
-set CLASS=org.speechforge.cairo.demo.bargein.BargeInClient
-set ARG1=file:///cvs/sf/cairo/grammar/example.gram
-java -cp %CLASSPATH% -Dlog4j.configuration=log4j.xml %CLASS% "%ARG1%"
+start "%CLASS% - %GRAMMAR%" ..\..\bin\launch %PACKAGE%.%CLASS% "%GRAMMAR_URL%" "%PROMPT_TEXT%"

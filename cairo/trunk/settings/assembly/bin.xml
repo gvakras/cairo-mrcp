@@ -24,6 +24,13 @@
       </excludes>
     </fileSet>
     <fileSet>
+      <directory>bin/demo</directory>
+      <outputDirectory>demo/bin</outputDirectory>
+      <includes>
+        <include>*.bat</include>
+      </includes>
+    </fileSet>
+    <fileSet>
       <directory>target</directory>
       <outputDirectory></outputDirectory>
       <includes>
