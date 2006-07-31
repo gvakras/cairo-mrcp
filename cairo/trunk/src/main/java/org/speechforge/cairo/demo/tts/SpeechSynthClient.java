@@ -103,9 +103,10 @@ public class SpeechSynthClient implements MrcpEventListener {
     }
 
     private void ttsEventReceived(MrcpEvent event) {
-        // TODO Auto-generated method stub
+        if (event.getEventName().equals(MrcpEventName.SPEAK_COMPLETE)) {
+            System.exit(0);
+        }
     }
-
 
     public MrcpRequestState playPrompt(String promptText)
       throws IOException, MrcpInvocationException, InterruptedException {
