@@ -62,11 +62,13 @@ public class SpeechSynthClient implements MrcpEventListener {
 
     private static Logger _logger = Logger.getLogger(SpeechSynthClient.class);
 
-    private static final boolean BEEP = true;
+    private static final boolean BEEP = false;
+    private static final int REPETITIONS = 1;
 
     private static Toolkit _toolkit = BEEP ? Toolkit.getDefaultToolkit() : null;
 
     private MrcpChannel _ttsChannel;
+    private int _rep = 1;
 
     /**
      * TODOC
@@ -103,7 +105,12 @@ public class SpeechSynthClient implements MrcpEventListener {
     }
 
     private void ttsEventReceived(MrcpEvent event) {
-        if (event.getEventName().equals(MrcpEventName.SPEAK_COMPLETE)) {
+        if (event.getEventName().equals(MrcpEventName.SPEAK_COMPLETE) && _rep++ >= REPETITIONS) {
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                _logger.debug("InterruptedException encountered!", e);
+            }
             System.exit(0);
         }
     }
@@ -197,9 +204,8 @@ public class SpeechSynthClient implements MrcpEventListener {
         SpeechSynthClient client = new SpeechSynthClient(ttsChannel);
 
         try {
-            client.playPrompt(promptText);
-            if (BEEP) {
-                _toolkit.beep();
+            for (int i=0; i < REPETITIONS; i++) {
+                client.playPrompt(promptText);
             }
         } catch (Exception e){
             if (e instanceof MrcpInvocationException) {

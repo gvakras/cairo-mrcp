@@ -28,18 +28,9 @@ import java.net.InetAddress;
 import java.net.URL;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.SynchronousQueue;
 
-import javax.media.Format;
-import javax.media.Manager;
-import javax.media.Processor;
-import javax.media.control.TrackControl;
-import javax.media.format.UnsupportedFormatException;
 import javax.media.protocol.ContentDescriptor;
-import javax.media.protocol.DataSource;
 import javax.media.rtp.InvalidSessionAddressException;
-import javax.media.rtp.RTPManager;
-import javax.media.rtp.SessionAddress;
 
 import org.apache.log4j.Logger;
 
@@ -52,6 +43,9 @@ public class RTPSpeechSynthChannel {
 
     private static Logger _logger = Logger.getLogger(RTPSpeechSynthChannel.class);
 
+    // TODO: move to config file
+    private static final File FEEDER_PROMPT_FILE = new File("../prompts/feeder.wav");
+
     static final ContentDescriptor CONTENT_DESCRIPTOR_RAW_RTP = new ContentDescriptor(ContentDescriptor.RAW_RTP);
     //private static final AudioFormat[] PREFERRED_MEDIA_FORMATS = {SourceAudioFormat.PREFERRED_MEDIA_FORMAT};
 
@@ -62,7 +56,6 @@ public class RTPSpeechSynthChannel {
     volatile short _state = IDLE;
 
     BlockingQueue<PromptPlay> _promptQueue = new LinkedBlockingQueue<PromptPlay>();
-    //RTPManager _rtpManager;
     private Thread _sendThread;
     RTPPlayer _promptPlayer;
     private int _localPort;
@@ -81,21 +74,30 @@ public class RTPSpeechSynthChannel {
         _remotePort = remotePort;
     }
 
-    private synchronized void init() throws InvalidSessionAddressException, IOException {
+    private boolean init() throws InvalidSessionAddressException, IOException {
         if (_promptPlayer == null) {
             _promptPlayer = new RTPPlayer(_localPort, _remoteAddress, _remotePort);
-
             (_sendThread = new SendThread()).start();
-
+            return true;
         }
+        return false;
     }
 
     public synchronized int queuePrompt(File promptFile, PromptPlayListener listener)
       throws InvalidSessionAddressException, IOException {
 
-        init();
         int state = _state;
         try {
+            if (init()) {
+                if (FEEDER_PROMPT_FILE.exists()) {
+                    if (_logger.isDebugEnabled()) {
+                        _logger.debug("Queueing feeder prompt: " + FEEDER_PROMPT_FILE.getAbsolutePath());
+                    }
+                    _promptQueue.put(new PromptPlay(FEEDER_PROMPT_FILE, null));
+                } else if (_logger.isDebugEnabled()) {
+                    _logger.debug("Feeder prompt not found: " + FEEDER_PROMPT_FILE.getAbsolutePath());
+                }
+            }
             _promptQueue.put(new PromptPlay(promptFile, listener));
             _state = SPEAKING;
         } catch (InterruptedException e) {
@@ -141,24 +143,26 @@ public class RTPSpeechSynthChannel {
                     Thread.interrupted();
 
                     // get next prompt to play
+                    _logger.debug("taking next prompt from prompt queue...");
                     promptPlay = _promptQueue.take();
+                    _logger.debug("playing next prompt...");
                     _promptPlayer.playPrompt(promptPlay._promptFile);
 
                     // drain all prompts in queue if current prompt playback is interrupted (e.g. by STOP request)
                     drainQueue = Thread.interrupted();
 
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    _logger.debug(e, e);
                     // TODO: cancel current prompt playback
                     drainQueue = true;
 
                 } catch (Exception e) {
-                    e.printStackTrace();
-                    //skip and try next prompt...
+                    _logger.debug(e, e);
                     cause = e;
                 }
 
                 if (drainQueue) {
+                    _logger.debug("draining prompt queue...");
                     while (!_promptQueue.isEmpty()) {
                         try {
                             _promptQueue.take();
@@ -171,11 +175,19 @@ public class RTPSpeechSynthChannel {
                     }
                 } else if (promptPlay != null) {
                     if (promptPlay._listener != null) {
+                        _logger.debug("notifying prompt play listener...");
                         if (cause == null) {
+                            try {
+                                // give rtp stream a chance to catch up...
+                                Thread.sleep(250);
+                            } catch (InterruptedException e) {
+                                _logger.debug("InterruptedException encountered!", e);
+                            }
                             promptPlay._listener.playCompleted();
                         } else {
                             promptPlay._listener.playFailed(cause);
                         }
+                        _logger.debug("prompt play listener notified.");
                     }
                 } else {
                     _logger.warn("promptPlay is null!", cause);

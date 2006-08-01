@@ -111,22 +111,23 @@ public class RTPPlayer implements ControllerListener {
             play();
 
         } catch (InterruptedException e) {
-            e.printStackTrace();
-            try {
-                close();
-            } catch (InterruptedException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-            }
-            throw e;
-        } catch (Exception e) {
-            e.printStackTrace();
+            _logger.debug("playSource() interrupted, closing processor...");
             try {
                 close();
             } catch (InterruptedException ie) {
-                ie.printStackTrace();
-                throw ie;
+                // TODO Auto-generated catch block
+                _logger.debug(ie, ie);
             }
+            throw e;
+        } catch (Exception e) {
+            _logger.warn("playSource(): encountered unexpected exception: ", e);
+            try {
+                close();
+            } catch (InterruptedException ie) {
+                // TODO Auto-generated catch block
+                _logger.debug(ie, ie);
+            }
+            throw new RuntimeException("playSource() encountered unexpected exception", e);
         }
 
     }
@@ -214,6 +215,8 @@ public class RTPPlayer implements ControllerListener {
 //            if (ie != null) {
 //                throw ie;
 //            }
+
+            _logger.debug("play(): completed successfully.");
         }
     }
     

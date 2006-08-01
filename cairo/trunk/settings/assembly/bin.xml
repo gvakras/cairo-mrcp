@@ -74,6 +74,11 @@
       <outputDirectory>lib</outputDirectory>
       <destName>voices.txt</destName>
     </file>
+    <file>
+      <source>src/main/resources/prompts/silence250.wav</source>
+      <outputDirectory>prompts</outputDirectory>
+      <destName>feeder.wav</destName>
+    </file>
   </files>
   <dependencySets>
     <dependencySet>
