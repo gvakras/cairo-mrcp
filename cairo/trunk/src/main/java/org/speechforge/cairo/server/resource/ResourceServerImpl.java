@@ -76,10 +76,10 @@ public class ResourceServerImpl extends UnicastRemoteObject implements ResourceS
         try {
             return invitePrivate(request);
         } catch (RemoteException e) {
-            e.printStackTrace();
+            _logger.debug(e, e);
             throw e;
         } catch (ResourceUnavailableException e) {
-            e.printStackTrace();
+            _logger.debug(e, e);
             throw e;
         }
     }

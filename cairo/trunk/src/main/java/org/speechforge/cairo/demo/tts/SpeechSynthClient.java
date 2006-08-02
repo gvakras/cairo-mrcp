@@ -169,7 +169,7 @@ public class SpeechSynthClient implements MrcpEventListener {
         try {
             localRtpPort = Integer.parseInt(args[1]);
         } catch (Exception e) {
-            e.printStackTrace();
+            _logger.debug(e, e);
         }
 
         if (localRtpPort < 0 || localRtpPort >= RTPConsumer.TCP_PORT_MAX || localRtpPort % 2 != 0) {
@@ -212,7 +212,7 @@ public class SpeechSynthClient implements MrcpEventListener {
                 MrcpResponse response = ((MrcpInvocationException) e).getResponse();
                 _logger.warn("MRCP response received:\n" + response);
             }
-            e.printStackTrace();
+            _logger.warn(e, e);
             System.exit(1);
         }
     }

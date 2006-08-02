@@ -150,12 +150,15 @@ public class RunSphinxRecEngine extends RecogListenerDecorator {
             throw new RuntimeException("Sphinx config file not found!");
         }
 
-        System.out.println("Loading...");
+        _logger.debug("Loading...");
         ConfigurationManager cm = new ConfigurationManager(url);
         SphinxRecEngine engine = new SphinxRecEngine(cm);
 
-//        for (int i=0; i < 12; i++) {
-//            System.out.println(engine._jsgfGrammar.getRandomSentence());
+        // commented out since SphinxRecEngine._jsgfGrammar not visible from this class
+//        if (_logger.isDebugEnabled()) {
+//            for (int i=0; i < 12; i++) {
+//                _logger.debug(engine._jsgfGrammar.getRandomSentence());
+//            }
 //        }
 
         RunSphinxRecEngine runner = new RunSphinxRecEngine(engine);

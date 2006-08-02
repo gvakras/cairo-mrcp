@@ -25,12 +25,16 @@ package org.speechforge.cairo.util;
 import java.io.IOException;
 import java.io.Writer;
 
+import org.apache.log4j.Logger;
+
 /**
  * TODOC
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  *
  */
 public final class ByteHexConverter {
+
+    private static Logger _logger = Logger.getLogger(ByteHexConverter.class);
 
     /**
      * TODOC.
@@ -95,7 +99,9 @@ public final class ByteHexConverter {
             try {
                 byteArray[i] = (byte) Integer.parseInt(hexChar, 16);
             } catch (NumberFormatException e) {
-                System.out.println("hexChar=" + hexChar);
+                if (_logger.isDebugEnabled()) {
+                    _logger.debug("hexChar=" + hexChar);
+                }
                 throw e;
             }
         }

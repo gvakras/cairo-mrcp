@@ -185,12 +185,11 @@ public class RTPPlayer implements ControllerListener {
 
     private void play() throws UnsupportedFormatException, IOException, InterruptedException {
         synchronized (_lock) {
-//            InterruptedException ie = null;
     
             DataSource dataOutput = _processor.getDataOutput();
             SendStream sendStream = _rtpManager.createSendStream(dataOutput, 0);
             sendStream.start();
-            //System.out.println("init(): Waiting 5 seconds for send stream to start...");
+            //_logger.debug("init(): Waiting 5 seconds for send stream to start...");
             //Thread.sleep(5000);
             _processor.start();
     
@@ -198,23 +197,8 @@ public class RTPPlayer implements ControllerListener {
                 checkInterrupted();
                 _lock.wait();
 
-//                try {
-//                } catch (InterruptedException e) {
-//                    if (ie == null) {
-//                        ie = e;
-//                        System.out.println("play(): encountered interrupt while waiting for prompt to complete, stopping playback prematurely...");
-//                        _processor.close();
-//                    } else {
-//                        System.out.println("play(): encountered double interrupt, returning without waiting for ControllerClosedEvent...");
-//                        ie.printStackTrace();
-//                        throw e;
-//                    }
-//                }
             } while(_processor != null);
             
-//            if (ie != null) {
-//                throw ie;
-//            }
 
             _logger.debug("play(): completed successfully.");
         }

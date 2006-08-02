@@ -40,6 +40,7 @@ import javax.media.protocol.DataSource;
 import javax.media.protocol.FileTypeDescriptor;
 
 import org.apache.commons.lang.Validate;
+import org.apache.log4j.Logger;
 
 
 /**
@@ -49,7 +50,7 @@ import org.apache.commons.lang.Validate;
  */
 public class RTPRecorderChannel implements DataSinkListener {
 
-    //private static AudioFormat[] PREFERRED_MEDIA_FORMATS = {SourceAudioFormat.PREFERRED_MEDIA_FORMAT};
+    private static Logger _logger = Logger.getLogger(RTPRecorderChannel.class);
 
     private static final ContentDescriptor CONTENT_DESCRIPTOR_WAVE =
         new FileTypeDescriptor(FileTypeDescriptor.WAVE);
@@ -103,13 +104,15 @@ public class RTPRecorderChannel implements DataSinkListener {
         try {
             DataSink dataSink = Manager.createDataSink(dataSource, new MediaLocator(_destination.toURL()));
             dataSink.addDataSinkListener(this);
-            System.out.println("contentType=" + dataSink.getContentType());
+            if (_logger.isDebugEnabled()) {
+                _logger.debug("contentType=" + dataSink.getContentType());
+            }
             dataSink.open();
-            System.out.println("opened datasink...");
+            _logger.debug("opened datasink...");
             _processor.start();
             dataSink.start();
-            System.out.println("started processor...");
-            System.out.println("started datasink...");
+            _logger.debug("started processor...");
+            _logger.debug("started datasink...");
         } catch (javax.media.NoDataSinkException e){
             throw (IOException) new IOException(e.getMessage()).initCause(e);
         } catch (MalformedURLException e){
@@ -130,9 +133,9 @@ public class RTPRecorderChannel implements DataSinkListener {
         if (_processor == null) {
             throw new IllegalStateException("Recording not in progress!");
         }
-        System.err.println("Closing processor...");
+        _logger.debug("Closing processor...");
         _processor.close();
-        System.err.println("Processor closed.");
+        _logger.debug("Processor closed.");
         _processor = null;
 
         // TODO: wait for EndOfStreamEvent
@@ -144,11 +147,13 @@ public class RTPRecorderChannel implements DataSinkListener {
      * @see javax.media.datasink.DataSinkListener#dataSinkUpdate(javax.media.datasink.DataSinkEvent)
      */
     public void dataSinkUpdate(DataSinkEvent event) {
-        System.out.println("DataSinkEvent received: " + event);
+        if (_logger.isDebugEnabled()) {
+            _logger.debug("DataSinkEvent received: " + event);
+        }
 
         if (event instanceof EndOfStreamEvent) {
             event.getSourceDataSink().close();
-            System.out.println("closed datasink...");
+            _logger.debug("closed datasink...");
         }
     }
 
@@ -159,20 +164,20 @@ public class RTPRecorderChannel implements DataSinkListener {
         public void run() {
             try {
                 Thread.sleep(1000);
-                System.out.println("TestThread: start recording...");
+                _logger.debug("TestThread: start recording...");
                 startRecording(false);
                 Thread.sleep(3000);
-                System.out.println("TestThread: stop recording...");
+                _logger.debug("TestThread: stop recording...");
                 stopRecording();
                 Thread.sleep(1000);
-                System.out.println("TestThread: start recording...");
+                _logger.debug("TestThread: start recording...");
                 startRecording(false);
                 Thread.sleep(2000);
-                System.out.println("TestThread: stop recording...");
+                _logger.debug("TestThread: stop recording...");
                 stopRecording();
-                System.out.println("TestThread: complete.");
+                _logger.debug("TestThread: complete.");
             } catch (Exception e) {
-                e.printStackTrace();
+                _logger.warn(e, e);
             }
         }
         

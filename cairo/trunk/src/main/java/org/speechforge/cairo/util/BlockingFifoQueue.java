@@ -25,6 +25,8 @@ package org.speechforge.cairo.util;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 /**
  * A FIFO queue that blocks on the remove method until an element is available to remove.
  *
@@ -32,6 +34,8 @@ import java.util.List;
  *
  */
 @Deprecated public class BlockingFifoQueue<E> {
+
+    private static Logger _logger = Logger.getLogger(BlockingFifoQueue.class);
 
     private List<E> list;
 
@@ -72,7 +76,7 @@ import java.util.List;
         }
         E data = list.remove(0);
         if (data == null) {
-            System.out.println("BlockingFifoQueue is returning null.");
+            _logger.debug("BlockingFifoQueue is returning null.");
         }
         return data;
     }

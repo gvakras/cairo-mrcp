@@ -71,7 +71,7 @@ import org.apache.log4j.Logger;
  */
 public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEventListener {
 
-    static Logger _logger = Logger.getLogger(SphinxRecEngine.class);
+    private static Logger _logger = Logger.getLogger(SphinxRecEngine.class);
     private static Toolkit _toolkit = _logger.isTraceEnabled()? Toolkit.getDefaultToolkit() : null;
 
     private Recognizer _recognizer;
@@ -397,13 +397,16 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
                 throw new RuntimeException("Sphinx config file not found!");
             }
 
-            System.out.println("Loading...");
+            _logger.info("Loading...");
             ConfigurationManager cm = new ConfigurationManager(url);
             SphinxRecEngine engine = new SphinxRecEngine(cm);
 
-            for (int i=0; i < 12; i++) {
-                System.out.println(engine._jsgfGrammar.getRandomSentence());
+            if (_logger.isDebugEnabled()) {
+                for (int i=0; i < 12; i++) {
+                    _logger.debug(engine._jsgfGrammar.getRandomSentence());
+                }
             }
+
             Test test = new Test(engine);
             
 

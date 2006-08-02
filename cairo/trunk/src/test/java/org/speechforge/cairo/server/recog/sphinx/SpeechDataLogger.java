@@ -130,7 +130,7 @@ public class SpeechDataLogger extends BaseDataProcessor {
 			logData(data);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+            _logger.debug(e, e);
 		}
         return data;
     }

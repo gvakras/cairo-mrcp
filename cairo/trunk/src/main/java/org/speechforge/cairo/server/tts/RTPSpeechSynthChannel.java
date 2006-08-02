@@ -108,6 +108,7 @@ public class RTPSpeechSynthChannel {
     
     public synchronized void stopPlayback() {
         _sendThread.interrupt();
+        //TODO: wait for send thread to complete?  (prevent double interrupt while draining queue)
     }
 
     private class SendThread extends Thread {
@@ -170,7 +171,7 @@ public class RTPSpeechSynthChannel {
                             // (e.g. save and put back in queue if not in cancel list)
                         } catch (InterruptedException e1) {
                             // should not happen since this is the only thread consuming from queue
-                            e1.printStackTrace();
+                            _logger.warn(e1, e1);
                         }
                     }
                 } else if (promptPlay != null) {

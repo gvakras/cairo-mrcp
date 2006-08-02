@@ -139,7 +139,7 @@ public class BargeInClient implements MrcpEventListener {
             try {
                 sendBargeinRequest();
             } catch (Exception e) {
-                e.printStackTrace();
+                _logger.warn(e, e);
             }
         } else if (MrcpEventName.RECOGNITION_COMPLETE.equals(eventName)) {
             if (_recordChannel != null) try {
@@ -149,11 +149,10 @@ public class BargeInClient implements MrcpEventListener {
                     _logger.debug("MRCP response received:\n" + response.toString());
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                _logger.warn(e, e);
             }
             System.exit(0);
         }
-        
     }
 
     /**
@@ -321,7 +320,7 @@ public class BargeInClient implements MrcpEventListener {
                     _logger.debug("MRCP response received:\n" + response.toString());
                 }
             }
-            e.printStackTrace();
+            _logger.warn(e, e);
             System.exit(1);
         }
     }

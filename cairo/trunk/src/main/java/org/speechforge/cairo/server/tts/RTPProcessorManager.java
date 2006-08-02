@@ -36,12 +36,16 @@ import javax.media.protocol.DataSource;
 import javax.media.rtp.RTPManager;
 import javax.media.rtp.SendStream;
 
+import org.apache.log4j.Logger;
+
 /**
  * TODOC
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  *
  */
 @Deprecated public class RTPProcessorManager implements ControllerListener {
+
+    private static Logger _logger = Logger.getLogger(RTPProcessorManager.class);
 
     private /*volatile*/ boolean closed = false;
 
@@ -80,6 +84,7 @@ import javax.media.rtp.SendStream;
     }
 
     public synchronized void play() throws UnsupportedFormatException, IOException, InterruptedException {
+
         InterruptedException ie = null;
 
         DataSource dataOutput = _processor.getDataOutput();
@@ -93,11 +98,10 @@ import javax.media.rtp.SendStream;
             } catch (InterruptedException e) {
                 if (ie == null) {
                     ie = e;
-                    System.out.println("play(): encountered interrupt while waiting for prompt to complete, stopping playback prematurely...");
+                    _logger.debug("play(): encountered interrupt while waiting for prompt to complete, stopping playback prematurely...");
                     _processor.close();
                 } else {
-                    System.out.println("play(): encountered double interrupt, returning without waiting for ControllerClosedEvent...");
-                    ie.printStackTrace();
+                    _logger.debug("play(): encountered double interrupt, returning without waiting for ControllerClosedEvent...", ie);
                     throw e;
                 }
             }
@@ -113,7 +117,9 @@ import javax.media.rtp.SendStream;
      * @see javax.media.ControllerListener#controllerUpdate(javax.media.ControllerEvent)
      */
     public synchronized void controllerUpdate(ControllerEvent event) {
-        System.out.println("ControllerEvent received: " + event);
+        if (_logger.isDebugEnabled()) {
+            _logger.debug("ControllerEvent received: " + event);
+        }
 
         if (event instanceof EndOfMediaEvent) {
             _processor.close();

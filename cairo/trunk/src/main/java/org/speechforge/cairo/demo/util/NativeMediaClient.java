@@ -37,12 +37,16 @@ import javax.media.protocol.PushBufferDataSource;
 import javax.media.rtp.Participant;
 import javax.media.rtp.ReceiveStream;
 
+import org.apache.log4j.Logger;
+
 /**
  * TODOC
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */
 public class NativeMediaClient extends RTPConsumer {
+
+    private static Logger _logger = Logger.getLogger(NativeMediaClient.class);
 
     private static MediaLocator MICROPHONE = new MediaLocator("dsound://");
 
@@ -91,10 +95,10 @@ public class NativeMediaClient extends RTPConsumer {
                 _rtpPlayer.playSource(MICROPHONE);
             } catch (IllegalStateException e) {
                 // TODO Auto-generated catch block
-                e.printStackTrace();
+                _logger.warn(e, e);
             } catch (InterruptedException e) {
                 // TODO Auto-generated catch block
-                e.printStackTrace();
+                _logger.warn(e, e);
             }
         }
     }
@@ -105,7 +109,7 @@ public class NativeMediaClient extends RTPConsumer {
 //        DataSource dataSource = Manager.createDataSource(locator);
 //        ProcessorModel pm = new ProcessorModel(
 //                dataSource, PREFERRED_MEDIA_FORMATS, CONTENT_DESCRIPTOR_RAW_RTP);
-//        System.out.println("Creating realized processor...");
+//        _logger.debug("Creating realized processor...");
 //        _processor = Manager.createRealizedProcessor(pm);
 //
 //    }
@@ -118,17 +122,16 @@ public class NativeMediaClient extends RTPConsumer {
     public synchronized void streamReceived(ReceiveStream stream, PushBufferDataSource dataSource) {
         if (_player == null) {
             try {
-//                System.out.println("Creating player for new stream...");
+                _logger.debug("Creating player for new stream...");
                 _player = Manager.createRealizedPlayer(dataSource);
             } catch (Exception e) {
-                System.out.println("Could not create player for new stream!");
-                e.printStackTrace();
+                _logger.warn("Could not create player for new stream!", e);
                 return;
             }
-//            System.out.println("Starting player...");
+            _logger.debug("Starting player...");
             _player.start();
         } else {
-            System.out.println("Stream already received, ignoring new stream!");
+            _logger.warn("Stream already received, ignoring new stream!");
         }
     }
 
@@ -167,9 +170,9 @@ public class NativeMediaClient extends RTPConsumer {
         client.startTransmit();
 
         BufferedReader consoleReader = new BufferedReader(new InputStreamReader(System.in));
-        System.out.println("Hit <enter> to shutdown...");
+        _logger.info("Hit <enter> to shutdown...");
         String cmd = consoleReader.readLine();
-        System.out.println("Shutting down...");
+        _logger.info("Shutting down...");
         client.shutdown();
 
     }

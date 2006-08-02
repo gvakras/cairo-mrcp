@@ -31,6 +31,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import org.apache.log4j.Logger;
 import org.mrcp4j.MrcpRequestState;
 import org.mrcp4j.message.MrcpResponse;
 import org.mrcp4j.message.header.IllegalValueException;
@@ -48,6 +49,8 @@ import org.mrcp4j.server.provider.RecorderRequestHandler;
  *
  */
 public class MrcpRecorderChannel extends MrcpGenericChannel implements RecorderRequestHandler {
+
+    private static Logger _logger = Logger.getLogger(MrcpRecorderChannel.class);
 
     private RTPRecorderChannel _recorderChannel;
     private boolean _recording = false;
@@ -71,10 +74,10 @@ public class MrcpRecorderChannel extends MrcpGenericChannel implements RecorderR
                 requestState = MrcpRequestState.IN_PROGRESS;
                 _recording = true;
             } catch (IllegalStateException e){
-                e.printStackTrace();
+                _logger.debug(e, e);
                 statusCode = MrcpResponse.STATUS_METHOD_NOT_VALID_IN_STATE;
             } catch (IOException e){
-                e.printStackTrace();
+                _logger.debug(e, e);
                 statusCode = MrcpResponse.STATUS_SERVER_INTERNAL_ERROR;
             }
         }
@@ -134,7 +137,7 @@ public class MrcpRecorderChannel extends MrcpGenericChannel implements RecorderR
         try {
             mrcpPort = Integer.parseInt(args[1]);
         } catch (Exception e){
-            e.printStackTrace();
+            _logger.debug(e, e);
         }
         if (mrcpPort < 0) {
             printUsage();
@@ -144,7 +147,7 @@ public class MrcpRecorderChannel extends MrcpGenericChannel implements RecorderR
         try {
             rtpPort = Integer.parseInt(args[2]);
         } catch (Exception e){
-            e.printStackTrace();
+            _logger.debug(e, e);
         }
         if (rtpPort < 0) {
             printUsage();
@@ -152,21 +155,21 @@ public class MrcpRecorderChannel extends MrcpGenericChannel implements RecorderR
 
         File dir = new File(args[0]);
 
-        System.out.println("Starting up RTPStreamReplicator...");
+        _logger.info("Starting up RTPStreamReplicator...");
         RTPStreamReplicator replicator = new RTPStreamReplicator(rtpPort);
 
-        System.out.println("Starting up MrcpServerSocket...");
+        _logger.info("Starting up MrcpServerSocket...");
         MrcpServerSocket serverSocket = new MrcpServerSocket(mrcpPort);
         RTPRecorderChannel recorder = new RTPRecorderChannel(channelID, dir, replicator);
         serverSocket.openChannel(channelID, new MrcpRecorderChannel(recorder));
 
-        System.out.println("MRCP recorder resource listening on port " + mrcpPort);
+        _logger.info("MRCP recorder resource listening on port " + mrcpPort);
 
-        System.out.println("Hit <enter> to shutdown...");
+        _logger.info("Hit <enter> to shutdown...");
         BufferedReader consoleReader = new BufferedReader(new InputStreamReader(System.in));
         String cmd = consoleReader.readLine();
         Thread.sleep(90000);
-        System.out.println("Shutting down...");
+        _logger.info("Shutting down...");
         replicator.shutdown();
     }
 

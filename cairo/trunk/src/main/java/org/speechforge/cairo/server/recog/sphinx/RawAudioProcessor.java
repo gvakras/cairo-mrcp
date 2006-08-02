@@ -44,30 +44,13 @@ import edu.cmu.sphinx.util.props.Registry;
 
 import org.apache.log4j.Logger;
 
-
 /**
- * <p>
- * A Microphone captures audio data from the system's underlying
- * audio input systems. Converts these audio data into Data
- * objects. When the method <code>startProcessing()</code> is called,
- * a new thread will be created and used to capture
- * audio, and will stop when <code>stopProcessing()</code>
- * is called. Calling <code>getData()</code> returns the captured audio
- * data as Data objects.
- * </p>
- * <p>
- * This Microphone will attempt to obtain an audio device with the format
- * specified in the configuration. If such a device with that format
- * cannot be obtained, it will try to obtain a device with an audio format
- * that has a higher sample rate than the configured sample rate,
- * while the other parameters of the format (i.e., sample size, endianness,
- * sign, and channel) remain the same. If, again, no such device can be
- * obtained, it flags an error, and a call <code>startProcessing</code> 
- * returns false.
- * </p>
+ * Processes raw audio data into a format usable by the Sphinx recognition engine.
+ * 
+ * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
+ *
  */
-public class RawAudioProcessor extends BaseDataProcessor
-  implements /*SessionListener, ReceiveStreamListener, ControllerListener, BufferTransferHandler,*/ Runnable {
+public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
 
     private static Logger _logger = Logger.getLogger(RawAudioProcessor.class);
 
@@ -85,10 +68,8 @@ public class RawAudioProcessor extends BaseDataProcessor
 
     private BlockingFifoQueue<Data> _dataList;
     private BlockingFifoQueue<byte[]> _rawAudioList;
-    private AudioFormat _mediaFormat;
     private SourceAudioFormat _audioFormat;
     private AudioDataTransformer _transformer = null;
-    private Utterance _currentUtterance;
     private volatile boolean _processing = false;
     private volatile boolean _utteranceEndReached = false;
     private volatile byte[] _frame;
@@ -97,9 +78,6 @@ public class RawAudioProcessor extends BaseDataProcessor
 
     // Configuration data
 
-    //private java.util.logging.Logger _logger;
-    //private boolean closeBetweenUtterances;
-    /*private boolean keepDataReference;*/
     private int _msecPerRead;
 
     // Runnable variables
@@ -169,7 +147,6 @@ public class RawAudioProcessor extends BaseDataProcessor
         }
 
 
-        //_mediaFormat = format;
         _audioFormat = SourceAudioFormat.newInstance(_msecPerRead, format);
         if (_logger.isDebugEnabled()) {
             _logger.debug("Frame size: " + _audioFormat.getFrameSizeInBytes() + " bytes");
@@ -224,12 +201,6 @@ public class RawAudioProcessor extends BaseDataProcessor
         _totalSamplesRead = 0;
         _startTime = System.currentTimeMillis();
         _logger.debug("started processing");
-        
-        /*if (keepDataReference) {
-            currentUtterance = new Utterance
-                (this.getName(), audioFormat);
-        }*/
-        
         try {
             Data data = new DataStartSignal();
             _logger.debug("adding DataStartSignal...");
@@ -241,10 +212,6 @@ public class RawAudioProcessor extends BaseDataProcessor
             _logger.warn(e, e);
         } 
 
-        /*long duration = (long)
-            (((double)totalSamplesRead/
-              (double)audioFormat.getSampleRate())*1000.0);*/
-        
         _dataList.add(new DataEndSignal(_audioFormat.calculateDurationMsecs(_totalSamplesRead)));
         _logger.debug("DataEndSignal added");
 
@@ -315,38 +282,6 @@ public class RawAudioProcessor extends BaseDataProcessor
     public Data getData() throws DataProcessingException {
 
         //getTimer().start();
-        /*try {
-            throw new Exception("debugging stack for RawAudioProcessor.getData()");
-        } catch (Exception e){
-            _logger.warn(e, e);
-        }
-
-java.lang.Exception: debugging stack for RawAudioProcessor.getData()
-	at org.speechforge.cairo.server.recog.sphinx.RawAudioProcessor.getData(RawAudioProcessor.java:339)
-	at edu.cmu.sphinx.frontend.endpoint.SpeechClassifier.getData(SpeechClassifier.java:241)
-	at edu.cmu.sphinx.frontend.endpoint.SpeechMarker.readData(SpeechMarker.java:204)
-	at edu.cmu.sphinx.frontend.endpoint.SpeechMarker.getData(SpeechMarker.java:171)
-	at edu.cmu.sphinx.frontend.endpoint.NonSpeechDataFilter.readData(NonSpeechDataFilter.java:344)
-	at edu.cmu.sphinx.frontend.endpoint.NonSpeechDataFilter.getData(NonSpeechDataFilter.java:176)
-	at edu.cmu.sphinx.frontend.filter.Preemphasizer.getData(Preemphasizer.java:103)
-	at edu.cmu.sphinx.frontend.window.RaisedCosineWindower.getData(RaisedCosineWindower.java:201)
-	at edu.cmu.sphinx.frontend.transform.DiscreteFourierTransform.getData(DiscreteFourierTransform.java:304)
-	at edu.cmu.sphinx.frontend.frequencywarp.MelFrequencyFilterBank.getData(MelFrequencyFilterBank.java:361)
-	at edu.cmu.sphinx.frontend.transform.DiscreteCosineTransform.getData(DiscreteCosineTransform.java:123)
-	at edu.cmu.sphinx.frontend.feature.LiveCMN.getData(LiveCMN.java:163)
-	at edu.cmu.sphinx.frontend.feature.DeltasFeatureExtractor.getData(DeltasFeatureExtractor.java:138)
-	at edu.cmu.sphinx.frontend.FrontEnd.getData(FrontEnd.java:241)
-	at edu.cmu.sphinx.decoder.scorer.ThreadedAcousticScorer.calculateScores(ThreadedAcousticScorer.java:234)
-	at edu.cmu.sphinx.decoder.search.SimpleBreadthFirstSearchManager.scoreTokens(SimpleBreadthFirstSearchManager.java:337)
-	at edu.cmu.sphinx.decoder.search.SimpleBreadthFirstSearchManager.recognize(SimpleBreadthFirstSearchManager.java:258)
-	at edu.cmu.sphinx.decoder.search.SimpleBreadthFirstSearchManager.recognize(SimpleBreadthFirstSearchManager.java:226)
-	at edu.cmu.sphinx.decoder.Decoder.decode(Decoder.java:94)
-	at edu.cmu.sphinx.recognizer.Recognizer.recognize(Recognizer.java:116)
-	at edu.cmu.sphinx.recognizer.Recognizer.recognize(Recognizer.java:135)
-	at org.speechforge.cairo.server.recognition.RecServlet.run(RecServlet.java:110)
-	at java.lang.Thread.run(Thread.java:595)
-
-        */
 
         Data output = null;
 
@@ -365,8 +300,6 @@ java.lang.Exception: debugging stack for RawAudioProcessor.getData()
         }
 
         //getTimer().stop();
-
-        // signalCheck(output);
 
         return output;
     }

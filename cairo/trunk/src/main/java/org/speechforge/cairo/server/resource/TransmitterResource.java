@@ -116,10 +116,10 @@ public class TransmitterResource extends ResourceImpl {
                 }
 
             } catch (ResourceUnavailableException e) {
-                e.printStackTrace();
+                _logger.debug(e, e);
                 throw e;
             } catch (Exception e) {
-                e.printStackTrace();
+                _logger.debug(e, e);
                 throw new ResourceUnavailableException(e);
             }
         }
@@ -141,15 +141,15 @@ public class TransmitterResource extends ResourceImpl {
 
         InetAddress host = InetAddress.getLocalHost();
         String url = "rmi://" + host.getHostName() + '/' + ResourceRegistry.NAME;
-        System.out.println("looking up: " + url);
+        _logger.info("looking up: " + url);
         ResourceRegistry resourceRegistry = (ResourceRegistry) Naming.lookup(url);
 
         TransmitterResource impl = new TransmitterResource(resourceConfig);
 
-        System.out.println("binding transmitter resource...");
+        _logger.info("binding transmitter resource...");
         resourceRegistry.register(impl, RESOURCE_TYPE);
 
-        System.out.println("Resource bound and waiting...");
+        _logger.info("Resource bound and waiting...");
     }
 
 }
