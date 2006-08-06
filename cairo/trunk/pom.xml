@@ -74,6 +74,126 @@
     <url>http://www.speechforge.org</url>
   </organization>
 
+  <build>
+    <directory>target</directory>
+    <outputDirectory>target/classes</outputDirectory>
+    <finalName>${artifactId}-${version}</finalName>
+    <testOutputDirectory>target/test-classes</testOutputDirectory>
+    <sourceDirectory>src/main/java</sourceDirectory>
+    <scriptSourceDirectory>src/main/scripts</scriptSourceDirectory>
+    <testSourceDirectory>src/test/java</testSourceDirectory>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+      </resource>
+    </resources>
+    <testResources>
+      <testResource>
+        <directory>src/test/resources</directory>
+      </testResource>
+    </testResources>
+
+    <plugins>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.5</source>
+          <target>1.5</target>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-site-plugin</artifactId>
+        <configuration>
+          <locales>en</locales>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <destDir>${project.build.directory}/site/docs/apidocs</destDir>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <!--debug>true</debug-->
+          <!--forkMode>once</forkMode-->
+          <!--childDelegation>false</childDelegation-->
+          <excludes>
+
+            <!-- not excluded (left here for convenience if need to temporarily disable)
+            <exclude>**/TestRawAudioProcessor.java</exclude>
+            <exclude>**/TestSphinxWavFile.java</exclude>
+            <exclude>**/TestSphinxRecEngineRaw.java</exclude>
+            -->
+
+            <!-- The following tests are disabled since using PBDSReplicator with an audio file causes
+                 timing issues that intermittently cause tests to hang or fail. -->
+            <exclude>**/TestSphinxRecEngineReplicated.java</exclude>
+            <exclude>**/TestPBDSReplicator.java</exclude>
+            <exclude>**/TestRunSphinxRecEngine.java</exclude>
+
+            <!-- The following test is disabled since it requires user input through a microphone. -->
+            <exclude>**/TestSphinxRecEngineMicrophone.java</exclude>
+
+          </excludes>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-report-plugin</artifactId>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <descriptors>
+            <descriptor>settings/assembly/bin.xml</descriptor>
+          </descriptors>
+        </configuration>
+      </plugin>
+
+    </plugins>
+
+  </build>
+
+  <repositories>
+
+    <repository>
+      <id>central</id>
+      <name>Maven Repository Switchboard</name>
+      <layout>default</layout>
+      <!--url>http://www.ibiblio.org/maven2</url-->
+      <url>http://repo1.maven.org/maven2</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+
+    <repository>
+      <id>cairo</id>
+      <name>Cairo Deployment Repository</name>
+      <!--url>file://C:\backup\sourceforge\shell\cairo\htdocs\repository</url-->
+      <url>http://cairo.sourceforge.net/repository</url>
+    </repository>
+
+    <repository>
+      <id>mrcp4j</id>
+      <name>MRCP4J Deployment Repository</name>
+      <url>http://mrcp4j.sourceforge.net/repository</url>
+    </repository>
+
+  </repositories>
+
   <dependencies>
 
     <!-- compile scope dependencies -->
@@ -196,125 +316,5 @@
     </site>
     <downloadUrl>https://sourceforge.net/project/showfiles.php?group_id=149085</downloadUrl>
   </distributionManagement>
-
-  <build>
-    <directory>target</directory>
-    <outputDirectory>target/classes</outputDirectory>
-    <finalName>${artifactId}-${version}</finalName>
-    <testOutputDirectory>target/test-classes</testOutputDirectory>
-    <sourceDirectory>src/main/java</sourceDirectory>
-    <scriptSourceDirectory>src/main/scripts</scriptSourceDirectory>
-    <testSourceDirectory>src/test/java</testSourceDirectory>
-    <resources>
-      <resource>
-        <directory>src/main/resources</directory>
-      </resource>
-    </resources>
-    <testResources>
-      <testResource>
-        <directory>src/test/resources</directory>
-      </testResource>
-    </testResources>
-
-    <plugins>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>1.5</source>
-          <target>1.5</target>
-        </configuration>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-site-plugin</artifactId>
-        <configuration>
-          <locales>en</locales>
-        </configuration>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <configuration>
-          <destDir>${project.build.directory}/site/docs/apidocs</destDir>
-        </configuration>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <!--debug>true</debug-->
-          <!--forkMode>once</forkMode-->
-          <!--childDelegation>false</childDelegation-->
-          <excludes>
-
-            <!-- not excluded (left here for convenience if need to temporarily disable)
-            <exclude>**/TestRawAudioProcessor.java</exclude>
-            <exclude>**/TestSphinxWavFile.java</exclude>
-            <exclude>**/TestSphinxRecEngineRaw.java</exclude>
-            -->
-
-            <!-- The following tests are disabled since using PBDSReplicator with an audio file causes
-                 timing issues that intermittently cause tests to hang or fail. -->
-            <exclude>**/TestSphinxRecEngineReplicated.java</exclude>
-            <exclude>**/TestPBDSReplicator.java</exclude>
-            <exclude>**/TestRunSphinxRecEngine.java</exclude>
-
-            <!-- The following test is disabled since it requires user input through a microphone. -->
-            <exclude>**/TestSphinxRecEngineMicrophone.java</exclude>
-
-          </excludes>
-        </configuration>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-report-plugin</artifactId>
-      </plugin>
-
-      <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <configuration>
-          <descriptors>
-            <descriptor>settings/assembly/bin.xml</descriptor>
-          </descriptors>
-        </configuration>
-      </plugin>
-
-    </plugins>
-
-  </build>
-
-  <repositories>
-
-    <repository>
-      <id>central</id>
-      <name>Maven Repository Switchboard</name>
-      <layout>default</layout>
-      <!--url>http://www.ibiblio.org/maven2</url-->
-      <url>http://repo1.maven.org/maven2</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-
-    <repository>
-      <id>cairo</id>
-      <name>Cairo Deployment Repository</name>
-      <!--url>file://C:\backup\sourceforge\shell\cairo\htdocs\repository</url-->
-      <url>http://cairo.sourceforge.net/repository</url>
-    </repository>
-
-    <repository>
-      <id>mrcp4j</id>
-      <name>MRCP4J Deployment Repository</name>
-      <url>http://mrcp4j.sourceforge.net/repository</url>
-    </repository>
-
-  </repositories>
 
 </project>
