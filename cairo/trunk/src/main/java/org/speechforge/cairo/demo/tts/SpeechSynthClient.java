@@ -25,8 +25,10 @@ package org.speechforge.cairo.demo.tts;
 import org.speechforge.cairo.demo.util.NativeMediaClient;
 
 import org.speechforge.cairo.server.resource.ResourceChannel;
+import org.speechforge.cairo.server.resource.ResourceImpl;
 import org.speechforge.cairo.server.resource.ResourceMediaStream;
 import org.speechforge.cairo.server.resource.ResourceMessage;
+import org.speechforge.cairo.server.resource.ResourceRegistry;
 import org.speechforge.cairo.server.resource.ResourceServer;
 import org.speechforge.cairo.server.rtp.RTPConsumer;
 
@@ -34,10 +36,17 @@ import java.awt.Toolkit;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.rmi.Naming;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
 import org.apache.log4j.Logger;
 import org.mrcp4j.MrcpEventName;
 import org.mrcp4j.MrcpMethodName;
@@ -134,7 +143,12 @@ public class SpeechSynthClient implements MrcpEventListener {
         return response.getRequestState();
     }
 
-    private static ResourceMessage constructResourceMessage(int localRtpPort) {
+
+////////////////////////////////////
+// static methods
+////////////////////////////////////
+
+    private static ResourceMessage constructResourceMessage(int localRtpPort) throws UnknownHostException {
         ResourceMessage message = new ResourceMessage();
 
         List<ResourceChannel> channels = new ArrayList<ResourceChannel>();
@@ -146,20 +160,39 @@ public class SpeechSynthClient implements MrcpEventListener {
         message.setChannels(channels);
 
         ResourceMediaStream stream = new ResourceMediaStream();
+        stream.setHost(InetAddress.getLocalHost().getHostName());
         stream.setPort(localRtpPort);
         message.setMediaStream(stream);
 
         return message;
     }
 
-    /**
-     * TODOC
-     * @param args
-     * @throws Exception 
-     */
+    private static Options getOptions() {
+
+        Options options = ResourceImpl.getOptions();
+
+//        Option option = new Option("b", "beep");
+//        options.addOption(option);
+
+        return options;
+    }
+
+
+////////////////////////////////////
+// main method
+////////////////////////////////////
+
     public static void main(String[] args) throws Exception {
-        if (args.length < 2) {
-            throw new Exception("Missing command line arguments, expected: <prompt-text> <local-rtp-port>");
+
+        CommandLineParser parser = new GnuParser();
+        Options options = getOptions();
+        CommandLine line = parser.parse(options, args, true);
+        args = line.getArgs();
+        
+        if (args.length != 2 || line.hasOption("help")) {
+            HelpFormatter formatter = new HelpFormatter();
+            formatter.printHelp("SpeechSynthClient [options] <prompt-text> <local-rtp-port>", options);
+            return;
         }
 
         String promptText = args[0];
@@ -177,14 +210,12 @@ public class SpeechSynthClient implements MrcpEventListener {
                 " should be even integer between 0 and " + RTPConsumer.TCP_PORT_MAX);
         }
 
-        // lookup resource server
-        InetAddress host = InetAddress.getLocalHost();
-        //TODO: allow runtime specification of resource server location (assume localhost for now)
-        String url = "rmi://" + host.getHostAddress() + '/' + ResourceServer.NAME;
-        if (_logger.isDebugEnabled()) {
-            _logger.debug("looking up: " + url);
-        }
+        InetAddress rserverHost = line.hasOption(ResourceImpl.RSERVERHOST_OPTION) ?
+            InetAddress.getByName(line.getOptionValue(ResourceImpl.RSERVERHOST_OPTION)) : InetAddress.getLocalHost();
 
+        // lookup resource server
+        String url = "rmi://" + rserverHost.getHostAddress() + '/' + ResourceServer.NAME;
+        _logger.info("looking up: " + url);
         ResourceServer resourceServer = (ResourceServer) Naming.lookup(url);
 
         ResourceMessage message = constructResourceMessage(localRtpPort);
@@ -199,7 +230,7 @@ public class SpeechSynthClient implements MrcpEventListener {
         
         ResourceChannel channel = message.getChannels().get(0);
         assert (channel.getResourceType() == MrcpResourceType.SPEECHSYNTH) : channel.getResourceType();
-        MrcpChannel ttsChannel = provider.createChannel(channel.getChannelID(), host, channel.getPort(), protocol);
+        MrcpChannel ttsChannel = provider.createChannel(channel.getChannelID(), rserverHost, channel.getMrcpPort(), protocol);
 
         SpeechSynthClient client = new SpeechSynthClient(ttsChannel);
 

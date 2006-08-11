@@ -43,6 +43,11 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Options;
 import org.apache.commons.pool.ObjectPool;
 import org.apache.log4j.Logger;
 import org.mrcp4j.MrcpResourceType;
@@ -119,7 +124,7 @@ public class ReceiverResource extends ResourceImpl {
                         throw new ResourceUnavailableException("Unsupported resource type: " + channel.getResourceType());
                     }
 
-                    channel.setPort(_mrcpServer.getPort());
+                    channel.setMrcpPort(_mrcpServer.getPort());
                 }
 
             } catch (ResourceUnavailableException e) {
@@ -135,8 +140,16 @@ public class ReceiverResource extends ResourceImpl {
 
 
     public static void main(String[] args) throws Exception {
-        if (args.length < 2) {
-            throw new Exception("Missing command line arguments, expected: <cairo-config-URL> <resource-name>");
+
+        CommandLineParser parser = new GnuParser();
+        Options options = getOptions();
+        CommandLine line = parser.parse(options, args, true);
+        args = line.getArgs();
+        
+        if (args.length != 2 || line.hasOption("help")) {
+            HelpFormatter formatter = new HelpFormatter();
+            formatter.printHelp("ReceiverResource [options] <cairo-config-URL> <resource-name>", options);
+            return;
         }
 
         URL configURL = CairoUtil.argToURL(args[0]);
@@ -145,17 +158,24 @@ public class ReceiverResource extends ResourceImpl {
         CairoConfig config = new CairoConfig(configURL);
         ReceiverConfig resourceConfig = config.getReceiverConfig(resourceName);
 
-        InetAddress host = InetAddress.getLocalHost();
-        String url = "rmi://" + host.getHostName() + '/' + ResourceRegistry.NAME;
-        _logger.info("looking up: " + url);
-        ResourceRegistry resourceRegistry = (ResourceRegistry) Naming.lookup(url);
+        StringBuilder rmiUrl = new StringBuilder("rmi://");
+        if (line.hasOption(RSERVERHOST_OPTION)) {
+            rmiUrl.append(line.getOptionValue(RSERVERHOST_OPTION));
+        } else {
+            rmiUrl.append(InetAddress.getLocalHost().getHostName());
+        }
+        rmiUrl.append('/').append(ResourceRegistry.NAME);
+
+        _logger.info("looking up: " + rmiUrl);
+        ResourceRegistry resourceRegistry = (ResourceRegistry) Naming.lookup(rmiUrl.toString());
 
         ReceiverResource impl = new ReceiverResource(resourceConfig);
 
-        _logger.info("binding resource...");
+        _logger.info("binding receiver resource...");
         resourceRegistry.register(impl, RESOURCE_TYPE);
 
         _logger.info("Resource bound and waiting...");
+
     }
 
 }

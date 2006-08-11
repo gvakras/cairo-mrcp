@@ -128,7 +128,6 @@ public class ResourceServerImpl extends UnicastRemoteObject implements ResourceS
         registry.rebind(ResourceServer.NAME, rs);
 
         _logger.info("Server and registry bound and waiting...");
-        //Thread.sleep(90000);
 
     }
 

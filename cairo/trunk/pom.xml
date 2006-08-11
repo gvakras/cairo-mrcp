@@ -19,6 +19,20 @@
       <!--post>${pom.artifactId}-checkin@lists.sourceforge.net</post-->
       <archive>http://sourceforge.net/mailarchive/forum.php?forum=${pom.artifactId}-checkin</archive>
     </mailingList>
+    <mailingList>
+      <name>${pom.artifactId}-dev</name>
+      <subscribe>http://lists.sourceforge.net/lists/listinfo/${pom.artifactId}-developer</subscribe>
+      <unsubscribe>http://lists.sourceforge.net/lists/listinfo/${pom.artifactId}-developer</unsubscribe>
+      <post>${pom.artifactId}-developer@lists.sourceforge.net</post>
+      <archive>http://www.nabble.com/${pom.artifactId}-developer-f15779.html</archive>
+    </mailingList>
+    <mailingList>
+      <name>${pom.artifactId}-user</name>
+      <subscribe>http://lists.sourceforge.net/lists/listinfo/${pom.artifactId}-user</subscribe>
+      <unsubscribe>http://lists.sourceforge.net/lists/listinfo/${pom.artifactId}-user</unsubscribe>
+      <post>${pom.artifactId}-user@lists.sourceforge.net</post>
+      <archive>http://www.nabble.com/${pom.artifactId}-user-f15778.html</archive>
+    </mailingList>
   </mailingLists>
 
   <developers>
@@ -63,10 +77,10 @@
   </licenses>
 
   <scm>
-    <url>http://cvs.sourceforge.net/viewcvs.py/${pom.artifactId}/${pom.artifactId}</url>
-    <connection>scm:cvs:pserver:anonymous@cvs.sourceforge.net:/cvsroot/${pom.artifactId}:${pom.artifactId}</connection>
-    <developerConnection>scm:cvs:pserver:developername@cvs.sourceforge.net:/cvsroot/${pom.artifactId}:${pom.artifactId}</developerConnection>
+    <connection>scm:svn:https://svn.sourceforge.net/svnroot/${pom.artifactId}/${pom.artifactId}/trunk</connection>
+    <developerConnection>scm:svn:https://svn.sourceforge.net/svnroot/${pom.artifactId}/${pom.artifactId}/trunk</developerConnection>
     <!--tag>HEAD</tag-->
+    <url>http://svn.sourceforge.net/viewvc/${pom.artifactId}</url>
   </scm>
 
   <organization>
@@ -75,6 +89,7 @@
   </organization>
 
   <build>
+
     <directory>target</directory>
     <outputDirectory>target/classes</outputDirectory>
     <finalName>${artifactId}-${version}</finalName>
@@ -82,11 +97,13 @@
     <sourceDirectory>src/main/java</sourceDirectory>
     <scriptSourceDirectory>src/main/scripts</scriptSourceDirectory>
     <testSourceDirectory>src/test/java</testSourceDirectory>
+
     <resources>
       <resource>
         <directory>src/main/resources</directory>
       </resource>
     </resources>
+
     <testResources>
       <testResource>
         <directory>src/test/resources</directory>
@@ -201,7 +218,7 @@
     <dependency>
       <groupId>org.mrcp4j</groupId>
       <artifactId>mrcp4j</artifactId>
-      <version>0.1</version>
+      <version>SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
 
@@ -210,20 +227,6 @@
       <artifactId>sphinx4</artifactId>
       <version>1.0beta</version>
       <scope>compile</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>sphinx</groupId>
-      <artifactId>WSJ_8gau_13dCep_16k_40mel_130Hz_6800Hz</artifactId>
-      <version>1.0beta</version>
-      <scope>runtime</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>sphinx</groupId>
-      <artifactId>TIDIGITS_8gau_13dCep_16k_40mel_130Hz_6800Hz</artifactId>
-      <version>1.0beta</version>
-      <scope>test</scope>
     </dependency>
 
     <!-- Need to install this artifact separately for license reasons! -->
@@ -239,6 +242,13 @@
       <groupId>freetts</groupId>
       <artifactId>freetts</artifactId>
       <version>1.2.1</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-cli</groupId>
+      <artifactId>commons-cli</artifactId>
+      <version>1.0</version>
       <scope>compile</scope>
     </dependency>
 
@@ -266,7 +276,7 @@
     <dependency>
       <groupId>commons-pool</groupId>
       <artifactId>commons-pool</artifactId>
-      <version>1.2</version>
+      <version>1.3</version>
       <scope>compile</scope>
     </dependency>
 
@@ -291,12 +301,28 @@
       <scope>compile</scope>
     </dependency>
 
+    <!-- runtime scope dependencies -->
+
+    <dependency>
+      <groupId>sphinx</groupId>
+      <artifactId>WSJ_8gau_13dCep_16k_40mel_130Hz_6800Hz</artifactId>
+      <version>1.0beta</version>
+      <scope>runtime</scope>
+    </dependency>
+
     <!-- test scope dependencies -->
 
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>3.8.1</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>sphinx</groupId>
+      <artifactId>TIDIGITS_8gau_13dCep_16k_40mel_130Hz_6800Hz</artifactId>
+      <version>1.0beta</version>
       <scope>test</scope>
     </dependency>
 
@@ -314,7 +340,11 @@
       <!--url>scp://shell.sf.net/home/groups/${pom.artifactId.substring(0,1)}/${pom.artifactId.substring(0,2)}/${pom.artifactId}/htdocs/</url-->
       <url>scp://shell.sf.net/home/groups/c/ca/cairo/htdocs</url>
     </site>
-    <downloadUrl>https://sourceforge.net/project/showfiles.php?group_id=149085</downloadUrl>
+    <downloadUrl>https://sourceforge.net/project/showfiles.php?group_id=${project.group.id}</downloadUrl>
   </distributionManagement>
+
+  <properties>
+    <project.group.id>149085</project.group.id>
+  </properties>
 
 </project>

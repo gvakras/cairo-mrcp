@@ -79,12 +79,4 @@ public class ResourceMessage implements Serializable {
         _mediaStream = mediaStream;
     }
 
-    /**
-     * TODOC
-     * /
-    public ResourceMessage() {
-        super();
-        // TODO Auto-generated constructor stub
-    }*/
-
 }

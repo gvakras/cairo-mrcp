@@ -26,6 +26,8 @@ package org.speechforge.cairo.server.resource;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
 import org.apache.log4j.Logger;
 
 /**
@@ -36,6 +38,9 @@ import org.apache.log4j.Logger;
 public abstract class ResourceImpl extends UnicastRemoteObject implements Resource {
 
     private static Logger _logger = Logger.getLogger(ResourceImpl.class);
+
+    public static final String HELP_OPTION = "help";
+    public static final String RSERVERHOST_OPTION = "rserverhost";
 
     private Type _type;
     
@@ -60,5 +65,17 @@ public abstract class ResourceImpl extends UnicastRemoteObject implements Resour
         return type.equals(_type);
     }*/
 
+    public static Options getOptions() {
+        Options options = new Options();
+
+        Option option = new Option(HELP_OPTION, "print this message");
+        options.addOption(option);
+
+        option = new Option(RSERVERHOST_OPTION, true, "location of resource server (if remote)");
+        option.setArgName("host");
+        options.addOption(option);
+
+        return options;
+    }
 
 }

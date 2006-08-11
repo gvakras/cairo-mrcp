@@ -30,31 +30,36 @@ import java.io.Serializable;
  *
  */
 public class ResourceMediaStream implements Serializable {
-    
+
+    private String host = null;
     private int _port = -1;
 
     /**
-     * TODOC
+     * @return Returns the host.
      */
-    public ResourceMediaStream() {
-        super();
-        // TODO Auto-generated constructor stub
+    public String getHost() {
+        return host;
     }
 
     /**
-     * TODOC
-     * @param port The port to set.
+     * @param host The host to set.
      */
-    public void setPort(int port) {
-        _port = port;
+    public void setHost(String host) {
+        this.host = host;
     }
 
     /**
-     * TODOC
      * @return Returns the port.
      */
     public int getPort() {
         return _port;
+    }
+
+    /**
+     * @param port The port to set.
+     */
+    public void setPort(int port) {
+        _port = port;
     }
 
 }

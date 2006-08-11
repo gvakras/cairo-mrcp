@@ -25,18 +25,26 @@ package org.speechforge.cairo.demo.bargein;
 import org.speechforge.cairo.demo.util.NativeMediaClient;
 
 import org.speechforge.cairo.server.resource.ResourceChannel;
+import org.speechforge.cairo.server.resource.ResourceImpl;
 import org.speechforge.cairo.server.resource.ResourceMediaStream;
 import org.speechforge.cairo.server.resource.ResourceMessage;
 import org.speechforge.cairo.server.resource.ResourceServer;
+import org.speechforge.cairo.server.rtp.RTPConsumer;
 
 import java.awt.Toolkit;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.rmi.Naming;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Options;
 import org.apache.log4j.Logger;
 import org.mrcp4j.MrcpEventName;
 import org.mrcp4j.MrcpMethodName;
@@ -50,6 +58,7 @@ import org.mrcp4j.client.MrcpProvider;
 import org.mrcp4j.message.MrcpEvent;
 import org.mrcp4j.message.MrcpResponse;
 import org.mrcp4j.message.header.IllegalValueException;
+import org.mrcp4j.message.header.MrcpHeaderName;
 import org.mrcp4j.message.request.MrcpRequest;
 
 /**
@@ -118,13 +127,18 @@ public class BargeInClient implements MrcpEventListener {
         }
    }
 
-
-    /**
-     * TODOC
-     * @param event
-     */
     private void ttsEventReceived(MrcpEvent event) {
-        // TODO Auto-generated method stub
+        if (BEEP) {
+            _toolkit.beep();
+        }
+
+        if (MrcpEventName.SPEAK_COMPLETE.equals(event.getEventName())) {
+            try {
+                sendStartInputTimersRequest();
+            } catch (Exception e) {
+                _logger.warn(e, e);
+            }
+        }
         
     }
 
@@ -132,7 +146,7 @@ public class BargeInClient implements MrcpEventListener {
         if (BEEP) {
             _toolkit.beep();
         }
-        
+
         MrcpEventName eventName = event.getEventName();
 
         if (MrcpEventName.START_OF_INPUT.equals(eventName)) {
@@ -155,27 +169,65 @@ public class BargeInClient implements MrcpEventListener {
         }
     }
 
-    /**
-     * TODOC
-     * @param event
-     */
     private void recordEventReceived(MrcpEvent event) {
         // TODO Auto-generated method stub
         
     }
 
+    private MrcpRequestState sendStartInputTimersRequest()
+      throws MrcpInvocationException, IOException, InterruptedException {
+
+        // construct request
+        MrcpRequest request = _recogChannel.createRequest(MrcpMethodName.START_INPUT_TIMERS);
+
+        // send request
+        MrcpResponse response = _recogChannel.sendRequest(request);
+
+        if (_logger.isDebugEnabled()) {
+            _logger.debug("MRCP response received:\n" + response.toString());
+        }
+
+        return response.getRequestState();
+    }
+
+    private MrcpRequestState sendBargeinRequest()
+      throws IOException, MrcpInvocationException, InterruptedException {
+
+        // construct request
+        MrcpRequest request = _ttsChannel.createRequest(MrcpMethodName.BARGE_IN_OCCURRED);
+
+        // send request
+        MrcpResponse response = _ttsChannel.sendRequest(request);
+
+        if (_logger.isDebugEnabled()) {
+            _logger.debug("MRCP response received:\n" + response.toString());
+        }
+
+        return response.getRequestState();
+    }
+
+    /**
+     * TODOC
+     * @param prompt
+     * @param grammarUrl
+     * @return
+     * @throws IOException
+     * @throws MrcpInvocationException
+     * @throws InterruptedException
+     */
     public MrcpRequestState playAndRecognize(String prompt, URL grammarUrl)
       throws IOException, MrcpInvocationException, InterruptedException {
 
         // recog request
         MrcpRequest request = _recogChannel.createRequest(MrcpMethodName.RECOGNIZE);
+        request.addHeader(MrcpHeaderName.START_INPUT_TIMERS.constructHeader(Boolean.FALSE));
         request.setContent("application/jsgf", null, grammarUrl);
         MrcpResponse response = _recogChannel.sendRequest(request);
 
         if (_logger.isDebugEnabled()) {
             _logger.debug("MRCP response received:\n" + response.toString());
         }
-        
+
         if (response.getRequestState().equals(MrcpRequestState.COMPLETE)) {
             throw new RuntimeException("Recognition failed to start!");
         }
@@ -206,23 +258,12 @@ public class BargeInClient implements MrcpEventListener {
         return response.getRequestState();
     }
 
-    public MrcpRequestState sendBargeinRequest()
-      throws IOException, MrcpInvocationException, InterruptedException {
 
-        // construct request
-        MrcpRequest request = _ttsChannel.createRequest(MrcpMethodName.BARGE_IN_OCCURRED);
+////////////////////////////////////
+//  static methods
+////////////////////////////////////
 
-        // send request
-        MrcpResponse response = _ttsChannel.sendRequest(request);
-
-        if (_logger.isDebugEnabled()) {
-            _logger.debug("MRCP response received:\n" + response.toString());
-        }
-
-        return response.getRequestState();
-    }
-
-    private static ResourceMessage constructResourceMessage(int localRtpPort) {
+    private static ResourceMessage constructResourceMessage(int localRtpPort) throws UnknownHostException {
         ResourceMessage message = new ResourceMessage();
 
         List<ResourceChannel> channels = new ArrayList<ResourceChannel>();
@@ -244,45 +285,71 @@ public class BargeInClient implements MrcpEventListener {
         message.setChannels(channels);
 
         ResourceMediaStream stream = new ResourceMediaStream();
+        stream.setHost(InetAddress.getLocalHost().getHostName());
         stream.setPort(localRtpPort);
         message.setMediaStream(stream);
 
         return message;
     }
 
-    /**
-     * TODOC
-     * @param args
-     * @throws Exception 
-     */
+    private static Options getOptions() {
+
+        Options options = ResourceImpl.getOptions();
+
+//        Option option = new Option("b", "beep");
+//        options.addOption(option);
+
+        return options;
+    }
+
+
+////////////////////////////////////
+// main method
+////////////////////////////////////
+
     public static void main(String[] args) throws Exception {
-        if (args.length < 2) {
-            throw new Exception("Missing command line arguments, expected: <grammar-URL> <prompt-text>");
+
+        CommandLineParser parser = new GnuParser();
+        Options options = getOptions();
+        CommandLine line = parser.parse(options, args, true);
+        args = line.getArgs();
+        
+        if (args.length != 3 || line.hasOption("help")) {
+            HelpFormatter formatter = new HelpFormatter();
+            formatter.printHelp("BargeInClient [options] <grammar-URL> <prompt-text> <local-rtp-port>", options);
+            return;
         }
 
         URL grammarUrl = new URL(args[0]);
         String prompt = args[1];
         
-        int localRtpPort = 42046;
+        int localRtpPort = -1;
 
-        // lookup resource server
-        InetAddress host = InetAddress.getLocalHost();
-        //TODO: allow runtime specification of resource server location (assume localhost for now)
-        String url = "rmi://" + host.getHostAddress() + '/' + ResourceServer.NAME;
-        if (_logger.isDebugEnabled()) {
-            _logger.debug("looking up: " + url);
+        try {
+            localRtpPort = Integer.parseInt(args[2]);
+        } catch (Exception e) {
+            _logger.debug(e, e);
         }
 
+        if (localRtpPort < 0 || localRtpPort >= RTPConsumer.TCP_PORT_MAX || localRtpPort % 2 != 0) {
+            throw new Exception("Improper format for 3rd command line argument <local-rtp-port>," +
+                " should be even integer between 0 and " + RTPConsumer.TCP_PORT_MAX);
+        }
+
+        // lookup resource server
+        InetAddress rserverHost = line.hasOption(ResourceImpl.RSERVERHOST_OPTION) ?
+            InetAddress.getByName(line.getOptionValue(ResourceImpl.RSERVERHOST_OPTION)) : InetAddress.getLocalHost();
+        String url = "rmi://" + rserverHost.getHostAddress() + '/' + ResourceServer.NAME;
+        _logger.info("looking up: " + url);
         ResourceServer resourceServer = (ResourceServer) Naming.lookup(url);
 
         ResourceMessage message = constructResourceMessage(localRtpPort);
         message = resourceServer.invite(message);
         
         int remoteRtpPort = message.getMediaStream().getPort();
-        //TODO: get remote host address (assume localhost for now)
 
         _logger.debug("Starting NativeMediaClient...");
-        NativeMediaClient mediaClient = new NativeMediaClient(localRtpPort, host, remoteRtpPort);
+        NativeMediaClient mediaClient = new NativeMediaClient(localRtpPort, rserverHost, remoteRtpPort);
         mediaClient.startTransmit();
 
         String protocol = MrcpProvider.PROTOCOL_TCP_MRCPv2;
@@ -293,17 +360,17 @@ public class BargeInClient implements MrcpEventListener {
 
         ResourceChannel channel = message.getChannels().get(i++);
         assert (channel.getResourceType() == MrcpResourceType.SPEECHSYNTH) : channel.getResourceType();
-        MrcpChannel ttsChannel = provider.createChannel(channel.getChannelID(), host, channel.getPort(), protocol);
+        MrcpChannel ttsChannel = provider.createChannel(channel.getChannelID(), rserverHost, channel.getMrcpPort(), protocol);
 
         channel = message.getChannels().get(i++);
         assert (channel.getResourceType() == MrcpResourceType.SPEECHRECOG) : channel.getResourceType();
-        MrcpChannel recogChannel = provider.createChannel(channel.getChannelID(), host, channel.getPort(), protocol);
+        MrcpChannel recogChannel = provider.createChannel(channel.getChannelID(), rserverHost, channel.getMrcpPort(), protocol);
 
         MrcpChannel recordChannel = null;
         if (RECORD) {
             channel = message.getChannels().get(i++);
             assert (channel.getResourceType() == MrcpResourceType.RECORDER) : channel.getResourceType();
-            recordChannel = provider.createChannel(channel.getChannelID(), host, channel.getPort(), protocol);
+            recordChannel = provider.createChannel(channel.getChannelID(), rserverHost, channel.getMrcpPort(), protocol);
         }
 
         BargeInClient client = new BargeInClient(ttsChannel, recogChannel, recordChannel);
