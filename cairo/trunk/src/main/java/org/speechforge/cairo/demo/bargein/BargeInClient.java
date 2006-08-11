@@ -70,30 +70,23 @@ public class BargeInClient implements MrcpEventListener {
 
     private static Logger _logger = Logger.getLogger(BargeInClient.class);
 
-    private static final boolean RECORD = false;
     private static final boolean BEEP = false;
 
     private static Toolkit _toolkit = BEEP ? Toolkit.getDefaultToolkit() : null;
 
     private MrcpChannel _ttsChannel;
     private MrcpChannel _recogChannel;
-    private MrcpChannel _recordChannel;
 
     /**
      * TODOC
      * @param ttsChannel 
      * @param recogChannel 
-     * @param recordChannel 
      */
-    public BargeInClient(MrcpChannel ttsChannel, MrcpChannel recogChannel, MrcpChannel recordChannel) {
+    public BargeInClient(MrcpChannel ttsChannel, MrcpChannel recogChannel) {
         _ttsChannel = ttsChannel;
         _ttsChannel.addEventListener(this);
         _recogChannel = recogChannel;
         _recogChannel.addEventListener(this);
-        if (recordChannel != null) {
-            _recordChannel = recordChannel;
-            _recordChannel.addEventListener(this);
-        }
     }
 
     /* (non-Javadoc)
@@ -112,10 +105,6 @@ public class BargeInClient implements MrcpEventListener {
 
             case SPEECHRECOG:
                 recogEventReceived(event);
-                break;
-
-            case RECORDER:
-                recordEventReceived(event);
                 break;
 
             default:
@@ -156,22 +145,8 @@ public class BargeInClient implements MrcpEventListener {
                 _logger.warn(e, e);
             }
         } else if (MrcpEventName.RECOGNITION_COMPLETE.equals(eventName)) {
-            if (_recordChannel != null) try {
-                MrcpRequest request = _recordChannel.createRequest(MrcpMethodName.STOP);
-                MrcpResponse response = _recordChannel.sendRequest(request);
-                if (_logger.isDebugEnabled()) {
-                    _logger.debug("MRCP response received:\n" + response.toString());
-                }
-            } catch (Exception e) {
-                _logger.warn(e, e);
-            }
             System.exit(0);
         }
-    }
-
-    private void recordEventReceived(MrcpEvent event) {
-        // TODO Auto-generated method stub
-        
     }
 
     private MrcpRequestState sendStartInputTimersRequest()
@@ -232,12 +207,6 @@ public class BargeInClient implements MrcpEventListener {
             throw new RuntimeException("Recognition failed to start!");
         }
 
-        if (_recordChannel != null) {
-            // record request
-            request = _recordChannel.createRequest(MrcpMethodName.RECORD);
-            response = _recordChannel.sendRequest(request);
-        }
-
         if (_logger.isDebugEnabled()) {
             _logger.debug("MRCP response received:\n" + response.toString());
         }
@@ -275,12 +244,6 @@ public class BargeInClient implements MrcpEventListener {
         channel = new ResourceChannel();
         channel.setResourceType(MrcpResourceType.SPEECHRECOG);
         channels.add(channel);
-
-        if (RECORD) {
-            channel = new ResourceChannel();
-            channel.setResourceType(MrcpResourceType.RECORDER);
-            channels.add(channel);
-        }
 
         message.setChannels(channels);
 
@@ -366,14 +329,7 @@ public class BargeInClient implements MrcpEventListener {
         assert (channel.getResourceType() == MrcpResourceType.SPEECHRECOG) : channel.getResourceType();
         MrcpChannel recogChannel = provider.createChannel(channel.getChannelID(), rserverHost, channel.getMrcpPort(), protocol);
 
-        MrcpChannel recordChannel = null;
-        if (RECORD) {
-            channel = message.getChannels().get(i++);
-            assert (channel.getResourceType() == MrcpResourceType.RECORDER) : channel.getResourceType();
-            recordChannel = provider.createChannel(channel.getChannelID(), rserverHost, channel.getMrcpPort(), protocol);
-        }
-
-        BargeInClient client = new BargeInClient(ttsChannel, recogChannel, recordChannel);
+        BargeInClient client = new BargeInClient(ttsChannel, recogChannel);
 
         try {
             client.playAndRecognize(prompt, grammarUrl);
