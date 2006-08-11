@@ -71,10 +71,12 @@ public class SpeechSynthClient implements MrcpEventListener {
 
     private static Logger _logger = Logger.getLogger(SpeechSynthClient.class);
 
-    private static final boolean BEEP = false;
-    private static final int REPETITIONS = 1;
+    private static final String BEEP_OPTION = "beep";
+    private static final String REPETITIONS_OPTION = "reps";
 
-    private static Toolkit _toolkit = BEEP ? Toolkit.getDefaultToolkit() : null;
+    private static boolean _beep = false;
+    private static Toolkit _toolkit = null;
+    private static int _repetitions = 1;
 
     private MrcpChannel _ttsChannel;
     private int _rep = 1;
@@ -114,7 +116,7 @@ public class SpeechSynthClient implements MrcpEventListener {
     }
 
     private void ttsEventReceived(MrcpEvent event) {
-        if (event.getEventName().equals(MrcpEventName.SPEAK_COMPLETE) && _rep++ >= REPETITIONS) {
+        if (event.getEventName().equals(MrcpEventName.SPEAK_COMPLETE) && _rep++ >= _repetitions) {
             try {
                 Thread.sleep(500);
             } catch (InterruptedException e) {
@@ -132,7 +134,7 @@ public class SpeechSynthClient implements MrcpEventListener {
         request.setContent("text/plain", null, promptText);
         MrcpResponse response = _ttsChannel.sendRequest(request);
 
-        if (BEEP) {
+        if (_beep) {
             _toolkit.beep();
         }
 
@@ -168,11 +170,14 @@ public class SpeechSynthClient implements MrcpEventListener {
     }
 
     private static Options getOptions() {
-
         Options options = ResourceImpl.getOptions();
 
-//        Option option = new Option("b", "beep");
-//        options.addOption(option);
+        Option option = new Option(BEEP_OPTION, "play response/event timing beep");
+        options.addOption(option);
+
+        option = new Option(REPETITIONS_OPTION, true, "number of times to repeat the TTS prompt");
+        option.setArgName("repetitions");
+        options.addOption(option);
 
         return options;
     }
@@ -189,10 +194,26 @@ public class SpeechSynthClient implements MrcpEventListener {
         CommandLine line = parser.parse(options, args, true);
         args = line.getArgs();
         
-        if (args.length != 2 || line.hasOption("help")) {
+        if (args.length != 2 || line.hasOption(ResourceImpl.HELP_OPTION)) {
             HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp("SpeechSynthClient [options] <prompt-text> <local-rtp-port>", options);
             return;
+        }
+
+        if (line.hasOption(REPETITIONS_OPTION)) {
+            try {
+                _repetitions = Integer.parseInt(line.getOptionValue(REPETITIONS_OPTION));
+            } catch (NumberFormatException e) {
+                _logger.debug("Could not parse repetitions parameter to int!", e);
+                HelpFormatter formatter = new HelpFormatter();
+                formatter.printHelp("SpeechSynthClient [options] <prompt-text> <local-rtp-port>", options);
+                return;
+            }
+        }
+
+        _beep = line.hasOption(BEEP_OPTION);
+        if (_beep) {
+            _toolkit = Toolkit.getDefaultToolkit();
         }
 
         String promptText = args[0];
@@ -235,7 +256,7 @@ public class SpeechSynthClient implements MrcpEventListener {
         SpeechSynthClient client = new SpeechSynthClient(ttsChannel);
 
         try {
-            for (int i=0; i < REPETITIONS; i++) {
+            for (int i=0; i < _repetitions; i++) {
                 client.playPrompt(promptText);
             }
         } catch (Exception e){

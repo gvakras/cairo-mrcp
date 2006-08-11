@@ -44,6 +44,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.log4j.Logger;
 import org.mrcp4j.MrcpEventName;
@@ -70,8 +71,10 @@ public class RecognitionClient implements MrcpEventListener {
 
     private static Logger _logger = Logger.getLogger(RecognitionClient.class);
 
-    private static final boolean BEEP = false;
-    private static Toolkit _toolkit = BEEP ? Toolkit.getDefaultToolkit() : null;
+    private static final String BEEP_OPTION = "beep";
+
+    private static boolean _beep = false;
+    private static Toolkit _toolkit = null;
 
     private MrcpChannel _recogChannel;
 
@@ -113,7 +116,7 @@ public class RecognitionClient implements MrcpEventListener {
         MrcpEventName eventName = event.getEventName();
 
         if (MrcpEventName.RECOGNITION_COMPLETE.equals(eventName)) {
-            if (BEEP) {
+            if (_beep) {
                 _toolkit.beep();
             }
             System.exit(0);
@@ -129,7 +132,7 @@ public class RecognitionClient implements MrcpEventListener {
         request.setContent("application/jsgf", null, grammarUrl);
         MrcpResponse response = _recogChannel.sendRequest(request);
 
-        if (BEEP) {
+        if (_beep) {
             _toolkit.beep();
         }
 
@@ -169,11 +172,10 @@ public class RecognitionClient implements MrcpEventListener {
     }
 
     public static Options getOptions() {
-
         Options options = ResourceImpl.getOptions();
 
-//        Option option = new Option("b", "beep");
-//        options.addOption(option);
+        Option option = new Option(BEEP_OPTION, "play response/event timing beep");
+        options.addOption(option);
 
         return options;
     }
@@ -189,11 +191,16 @@ public class RecognitionClient implements MrcpEventListener {
         Options options = getOptions();
         CommandLine line = parser.parse(options, args, true);
         args = line.getArgs();
-        
-        if (args.length != 2 || line.hasOption("help")) {
+
+        if (args.length != 2 || line.hasOption(ResourceImpl.HELP_OPTION)) {
             HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp("RecognitionClient [options] <grammar-URL> <local-rtp-port>", options);
             return;
+        }
+
+        _beep = line.hasOption(BEEP_OPTION);
+        if (_beep) {
+            _toolkit = Toolkit.getDefaultToolkit();
         }
 
         URL grammarUrl = new URL(args[0]);

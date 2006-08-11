@@ -71,7 +71,7 @@ public abstract class ResourceImpl extends UnicastRemoteObject implements Resour
         Option option = new Option(HELP_OPTION, "print this message");
         options.addOption(option);
 
-        option = new Option(RSERVERHOST_OPTION, true, "location of resource server (if remote)");
+        option = new Option(RSERVERHOST_OPTION, true, "location of resource server (defaults to localhost)");
         option.setArgName("host");
         options.addOption(option);
 

@@ -44,6 +44,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.log4j.Logger;
 import org.mrcp4j.MrcpEventName;
@@ -70,9 +71,10 @@ public class BargeInClient implements MrcpEventListener {
 
     private static Logger _logger = Logger.getLogger(BargeInClient.class);
 
-    private static final boolean BEEP = false;
+    private static final String BEEP_OPTION = "beep";
 
-    private static Toolkit _toolkit = BEEP ? Toolkit.getDefaultToolkit() : null;
+    private static boolean _beep = false;
+    private static Toolkit _toolkit = null;
 
     private MrcpChannel _ttsChannel;
     private MrcpChannel _recogChannel;
@@ -117,7 +119,7 @@ public class BargeInClient implements MrcpEventListener {
    }
 
     private void ttsEventReceived(MrcpEvent event) {
-        if (BEEP) {
+        if (_beep) {
             _toolkit.beep();
         }
 
@@ -132,11 +134,12 @@ public class BargeInClient implements MrcpEventListener {
     }
 
     private void recogEventReceived(MrcpEvent event) {
-        if (BEEP) {
-            _toolkit.beep();
-        }
 
         MrcpEventName eventName = event.getEventName();
+
+        if (_beep && !MrcpEventName.START_OF_INPUT.equals(eventName)) {
+            _toolkit.beep();
+        }
 
         if (MrcpEventName.START_OF_INPUT.equals(eventName)) {
             try {
@@ -216,7 +219,7 @@ public class BargeInClient implements MrcpEventListener {
         request.setContent("text/plain", null, prompt);
         response = _ttsChannel.sendRequest(request);
 
-        if (BEEP) {
+        if (_beep) {
             _toolkit.beep();
         }
 
@@ -256,11 +259,10 @@ public class BargeInClient implements MrcpEventListener {
     }
 
     private static Options getOptions() {
-
         Options options = ResourceImpl.getOptions();
 
-//        Option option = new Option("b", "beep");
-//        options.addOption(option);
+        Option option = new Option(BEEP_OPTION, "play response/event timing beep");
+        options.addOption(option);
 
         return options;
     }
@@ -276,11 +278,16 @@ public class BargeInClient implements MrcpEventListener {
         Options options = getOptions();
         CommandLine line = parser.parse(options, args, true);
         args = line.getArgs();
-        
-        if (args.length != 3 || line.hasOption("help")) {
+
+        if (args.length != 3 || line.hasOption(ResourceImpl.HELP_OPTION)) {
             HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp("BargeInClient [options] <grammar-URL> <prompt-text> <local-rtp-port>", options);
             return;
+        }
+
+        _beep = line.hasOption(BEEP_OPTION);
+        if (_beep) {
+            _toolkit = Toolkit.getDefaultToolkit();
         }
 
         URL grammarUrl = new URL(args[0]);
@@ -333,9 +340,6 @@ public class BargeInClient implements MrcpEventListener {
 
         try {
             client.playAndRecognize(prompt, grammarUrl);
-            if (BEEP) {
-                _toolkit.beep();
-            }
         } catch (Exception e){
             if (e instanceof MrcpInvocationException) {
                 MrcpResponse response = ((MrcpInvocationException) e).getResponse();
