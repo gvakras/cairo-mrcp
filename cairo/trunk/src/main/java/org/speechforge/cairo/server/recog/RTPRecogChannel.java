@@ -100,6 +100,7 @@ public class RTPRecogChannel {
 
         if (_processor != null) {
             throw new IllegalStateException("Recognition already in progress!");
+            // TODO: cancel or queue request instead (depending upon value of 'cancel-if-queue' header)
         }
 
         _processor = _replicator.createRealizedProcessor(CONTENT_DESCRIPTOR_RAW, 10000); // TODO: specify audio format

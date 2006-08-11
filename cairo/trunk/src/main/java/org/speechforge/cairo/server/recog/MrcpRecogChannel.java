@@ -134,15 +134,19 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
                 } catch (IllegalStateException e) {
                     _logger.debug(e, e);
                     statusCode = MrcpResponse.STATUS_METHOD_NOT_VALID_IN_STATE;
-                    // TODO: add completion cause header
+                    // TODO: cancel or queue request instead (depending upon value of 'cancel-if-queue' header)
                 } catch (IOException e) {
                     _logger.debug(e, e);
                     statusCode = MrcpResponse.STATUS_SERVER_INTERNAL_ERROR;
-                    // TODO: add completion cause header
+                    CompletionCause completionCause = new CompletionCause((short) 6, "recognizer-error");
+                    completionCauseHeader = MrcpHeaderName.COMPLETION_CAUSE.constructHeader(completionCause);
+                    completionReasonHeader = MrcpHeaderName.COMPLETION_REASON.constructHeader(e.getMessage());
                 } catch (ResourceUnavailableException e) {
                     _logger.debug(e, e);
                     statusCode = MrcpResponse.STATUS_SERVER_INTERNAL_ERROR;
-                    // TODO: add completion cause header
+                    CompletionCause completionCause = new CompletionCause((short) 6, "recognizer-error");
+                    completionCauseHeader = MrcpHeaderName.COMPLETION_CAUSE.constructHeader(completionCause);
+                    completionReasonHeader = MrcpHeaderName.COMPLETION_REASON.constructHeader(e.getMessage());
                 } catch (GrammarException e) {
                     _logger.debug(e, e);
                     statusCode = MrcpResponse.STATUS_OPERATION_FAILED;
