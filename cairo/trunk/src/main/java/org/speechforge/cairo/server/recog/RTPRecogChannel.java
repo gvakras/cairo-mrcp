@@ -233,6 +233,7 @@ public class RTPRecogChannel {
                 }
                 if (_noInputTimeoutTask != null) {
                     _noInputTimeoutTask.cancel();
+                    _noInputTimeoutTask = null;
                 }
             }
             super.speechStarted();
