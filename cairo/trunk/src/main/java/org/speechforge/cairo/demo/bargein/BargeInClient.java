@@ -73,15 +73,19 @@ public class BargeInClient implements MrcpEventListener {
 
     private static final String BEEP_OPTION = "beep";
     private static final String LOOP_OPTION = "loop";
+    private static final String PARROT_OPTION = "parrot";
 
     private static boolean _beep = false;
     private static Toolkit _toolkit = null;
     private static boolean _loop = false;
+    private static boolean _parrot = false;
 
     private MrcpChannel _ttsChannel;
     private MrcpChannel _recogChannel;
 
-    private MrcpEvent _recogEvent;
+    private MrcpEvent _mrcpEvent;
+    
+    private volatile boolean _recognize;
 
     /**
      * TODOC
@@ -128,10 +132,17 @@ public class BargeInClient implements MrcpEventListener {
         }
 
         if (MrcpEventName.SPEAK_COMPLETE.equals(event.getEventName())) {
-            try {
-                sendStartInputTimersRequest();
-            } catch (Exception e) {
-                _logger.warn(e, e);
+            if (_recognize) {
+                try {
+                    sendStartInputTimersRequest();
+                } catch (Exception e) {
+                    _logger.warn(e, e);
+                }
+            } else {
+                synchronized (this) {
+                    _mrcpEvent = event;
+                    this.notifyAll();
+                }
             }
         }
         
@@ -153,7 +164,7 @@ public class BargeInClient implements MrcpEventListener {
             }
         } else if (MrcpEventName.RECOGNITION_COMPLETE.equals(eventName)) {
             synchronized (this) {
-                _recogEvent = event;
+                _mrcpEvent = event;
                 this.notifyAll();
             }
         }
@@ -196,16 +207,16 @@ public class BargeInClient implements MrcpEventListener {
      * TODOC
      * @param prompt
      * @param grammarUrl
-     * @param waitForResult
-     * @return recognition result string or null if not waiting for result
+     * @return recognition result string
      * @throws IOException
      * @throws MrcpInvocationException
      * @throws InterruptedException
      */
-    public synchronized String playAndRecognize(String prompt, URL grammarUrl, boolean waitForResult)
+    public synchronized String playAndRecognize(String prompt, URL grammarUrl)
       throws IOException, MrcpInvocationException, InterruptedException {
 
-        _recogEvent = null;
+        _recognize = true;
+        _mrcpEvent = null;
 
         // recog request
         MrcpRequest request = _recogChannel.createRequest(MrcpMethodName.RECOGNIZE);
@@ -221,10 +232,6 @@ public class BargeInClient implements MrcpEventListener {
             throw new RuntimeException("Recognition failed to start!");
         }
 
-        if (_logger.isDebugEnabled()) {
-            _logger.debug("MRCP response received:\n" + response.toString());
-        }
-
         // speak request
         request = _ttsChannel.createRequest(MrcpMethodName.SPEAK);
         request.setContent("text/plain", null, prompt);
@@ -238,11 +245,46 @@ public class BargeInClient implements MrcpEventListener {
             _logger.debug("MRCP response received:\n" + response.toString());
         }
         
-        while (waitForResult  && _recogEvent == null) {
+        while (_mrcpEvent == null) {
             this.wait();
         }
 
-        return (_recogEvent == null) ? null : _recogEvent.getContent();
+        return _mrcpEvent.getContent();
+    }
+
+
+    /**
+     * TODOC
+     * @param prompt
+     * @return recognition result string
+     * @throws IOException
+     * @throws MrcpInvocationException
+     * @throws InterruptedException
+     */
+    public synchronized void play(String prompt)
+      throws IOException, MrcpInvocationException, InterruptedException {
+
+        _recognize = false;
+        _mrcpEvent = null;
+
+        // speak request
+        MrcpRequest request = _ttsChannel.createRequest(MrcpMethodName.SPEAK);
+        request.setContent("text/plain", null, prompt);
+        MrcpResponse response = _ttsChannel.sendRequest(request);
+
+        if (_beep) {
+            _toolkit.beep();
+        }
+
+        if (_logger.isDebugEnabled()) {
+            _logger.debug("MRCP response received:\n" + response.toString());
+        }
+
+        while (_mrcpEvent == null) {
+            this.wait();
+        }
+
+        return;
     }
 
 
@@ -282,6 +324,9 @@ public class BargeInClient implements MrcpEventListener {
         option = new Option(LOOP_OPTION, "loop recognition until quit statement recognized");
         options.addOption(option);
 
+        option = new Option(PARROT_OPTION, "repeat back recognized utterances via TTS");
+        options.addOption(option);
+
         return options;
     }
 
@@ -309,6 +354,7 @@ public class BargeInClient implements MrcpEventListener {
         }
 
         _loop = line.hasOption(LOOP_OPTION);
+        _parrot = line.hasOption(PARROT_OPTION);
 
         URL grammarUrl = new URL(args[0]);
         String prompt = args[1];
@@ -363,13 +409,20 @@ public class BargeInClient implements MrcpEventListener {
             String result = null;
 
             do {
-                result = client.playAndRecognize(prompt, grammarUrl, true);
+                result = client.playAndRecognize(prompt, grammarUrl);
+                if (_parrot) {
+                    prompt = result;
+                }
                 StringBuilder sb = new StringBuilder();
                 sb.append("\n**************************************************************");
                 sb.append("\nRecognition result: ").append(result);
                 sb.append("\n**************************************************************\n");
                 _logger.info(sb);
             } while (_loop && !result.contains("exit") && !result.contains("quit"));
+
+            if (_parrot) {
+                client.play(prompt);
+            }
 
         } catch (Exception e){
             if (e instanceof MrcpInvocationException) {
