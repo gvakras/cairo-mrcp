@@ -87,7 +87,7 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
         _recognizer = (Recognizer) cm.lookup("recognizer");
         _recognizer.allocate();
 
-        _jsgfGrammar = (JSGFGrammar) cm.lookup("jsgfGrammar");
+        _jsgfGrammar = (JSGFGrammar) cm.lookup("grammar");
 
         SpeechDataMonitor speechDataMonitor = (SpeechDataMonitor) cm.lookup("speechDataMonitor");
         if (speechDataMonitor != null) {
