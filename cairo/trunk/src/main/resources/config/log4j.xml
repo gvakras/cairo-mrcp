@@ -10,6 +10,12 @@
      </layout>
   </appender>
 
+  <!-- TODO: fix deadlock in PBDSReplicator -->
+  <!-- until then TRACE level debugging needs to be on to avoid deadlock  -->
+  <category name="org.speechforge.cairo.server.rtp.PBDSReplicator">
+    <priority value="trace"/>
+  </category>
+
   <root>
     <priority value="debug"/>
     <appender-ref ref="Console"/>

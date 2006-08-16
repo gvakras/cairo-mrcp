@@ -187,7 +187,7 @@ public class SpeechClassifierPatch extends BaseDataProcessor {
      * Resets this LevelTracker to a starting state.
      */
     private void reset() {
-        System.out.println("CairoSpeechClassifier.reset()");
+        System.out.println("SpeechClassifierPatch.reset()");
         level = 0;
         background = 100;
     }

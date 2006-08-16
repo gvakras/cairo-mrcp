@@ -120,7 +120,7 @@ public class PBDSReplicator implements BufferTransferHandler {
      * @see javax.media.protocol.BufferTransferHandler#transferData(javax.media.protocol.PushBufferStream)
      */
     public void transferData(PushBufferStream pbs) {
-        _logger.debug("transferData()");
+        _logger.trace("transferData()");
         
         Buffer buffer = new Buffer();
         IOException ioe = null;
@@ -159,7 +159,7 @@ public class PBDSReplicator implements BufferTransferHandler {
          * @param ioe
          */
         public synchronized void newData(Buffer buffer, IOException ioe) {
-            _logger.debug("newData()");
+            _logger.trace("newData()");
             if (_started) {
                 _buffer = buffer;
                 _ioe = ioe;
