@@ -119,6 +119,7 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
         _logger.debug("SphinxRecEngine passivating...");
         stopProcessing();
         _recogListener = null;
+        _logger.debug("passivate(): method complete.");
     }
 
     /**

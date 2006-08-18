@@ -181,6 +181,7 @@ public class RTPRecogChannel {
             _processor = null;
         }
         if (_recEngine != null) {
+            _logger.debug("Returning recengine to pool...");
             try {
                 _recEnginePool.returnObject(_recEngine);
             } catch (Exception e) {
@@ -188,6 +189,8 @@ public class RTPRecogChannel {
                 _logger.debug(e, e);
             }
             _recEngine = null;
+        } else {
+            _logger.warn("No recengine to return to pool!");
         }
     }
 
@@ -227,6 +230,8 @@ public class RTPRecogChannel {
          */
         @Override
         public void speechStarted() {
+            _logger.debug("speechStarted()");
+
             synchronized (RTPRecogChannel.this) {
                 if (_state == WAITING_FOR_SPEECH) {
                     _state = SPEECH_IN_PROGRESS;
@@ -244,15 +249,18 @@ public class RTPRecogChannel {
          */
         @Override
         public void recognitionComplete(RecognitionResult result) {
+            _logger.debug("recognitionComplete()");
+
             boolean doit = false;
             synchronized (RTPRecogChannel.this) {
                 if (_state == SPEECH_IN_PROGRESS) {
                     _state = COMPLETE;
                     doit = true;
+                    closeProcessor();
                 }
             }
+
             if (doit) {
-                closeProcessor();
                 super.recognitionComplete(result);
             }
         }

@@ -158,13 +158,15 @@ public class PBDSReplicator implements BufferTransferHandler {
          * @param buffer
          * @param ioe
          */
-        public synchronized void newData(Buffer buffer, IOException ioe) {
-            _logger.trace("newData()");
+        public void newData(Buffer buffer, IOException ioe) {
             if (_started) {
-                _buffer = buffer;
-                _ioe = ioe;
-                if (_bufferTransferHandler != null) {
-                    _bufferTransferHandler.transferData(this);
+                _logger.trace("newData()");
+                synchronized (this) {
+                    _buffer = buffer;
+                    _ioe = ioe;
+                    if (_bufferTransferHandler != null) {
+                        _bufferTransferHandler.transferData(this);
+                    }
                 }
             }
         }
@@ -174,6 +176,7 @@ public class PBDSReplicator implements BufferTransferHandler {
          */
         @Override
         public PushBufferStream[] getStreams() {
+            _logger.debug("getStreams()");
             return new PushBufferStream[] {this};
         }
 
@@ -182,6 +185,7 @@ public class PBDSReplicator implements BufferTransferHandler {
          */
         @Override
         public String getContentType() {
+            _logger.debug("getContentType()");
             return _pbds.getContentType();
         }
 
@@ -190,6 +194,7 @@ public class PBDSReplicator implements BufferTransferHandler {
          */
         @Override
         public void connect() {
+            _logger.debug("connect()");
             // do nothing, base source is already connected
         }
 
@@ -198,7 +203,8 @@ public class PBDSReplicator implements BufferTransferHandler {
          */
         @Override
         public void disconnect() {
-            stop();
+            _logger.debug("disconnect()");
+            _started = false;
         }
 
         /* (non-Javadoc)
@@ -235,6 +241,7 @@ public class PBDSReplicator implements BufferTransferHandler {
          */
         @Override
         public Object[] getControls() {
+            _logger.debug("getControls()");
             //return EMPTY_CONTROLS_ARRAY;
             return _pbds.getControls();
         }
@@ -244,6 +251,7 @@ public class PBDSReplicator implements BufferTransferHandler {
          */
         @Override
         public Time getDuration() {
+            _logger.debug("getDuration()");
             return Duration.DURATION_UNKNOWN;
         }
 
@@ -251,30 +259,47 @@ public class PBDSReplicator implements BufferTransferHandler {
          * @see javax.media.protocol.PushBufferStream#getFormat()
          */
         public Format getFormat() {
+            _logger.debug("getFormat()");
             return _format;
         }
 
         /* (non-Javadoc)
          * @see javax.media.protocol.PushBufferStream#read(javax.media.Buffer)
          */
-        public synchronized void read(Buffer buffer) throws IOException {
-            if (_ioe != null) {
-                throw _ioe;
+        public void read(Buffer buffer) throws IOException {
+            _logger.trace("read()");
+            synchronized (this) {
+                if (_ioe != null) {
+                    throw _ioe;
+                }
+                buffer.copy(_buffer);
             }
-            buffer.copy(_buffer);
         }
 
         /* (non-Javadoc)
          * @see javax.media.protocol.PushBufferStream#setTransferHandler(javax.media.protocol.BufferTransferHandler)
          */
-        public synchronized void setTransferHandler(BufferTransferHandler bufferTransferHandler) {
-            _bufferTransferHandler = bufferTransferHandler;
+        public void setTransferHandler(BufferTransferHandler bufferTransferHandler) {
+            if (_logger.isDebugEnabled()) {
+                if (bufferTransferHandler == null) {
+                    _logger.debug("setTransferHandler(): bufferTransferHandler is null!");
+                } else {
+                    _logger.debug("setTransferHandler(): bufferTransferHandler.class=" + bufferTransferHandler.getClass());
+                }
+            }
+
+            if (bufferTransferHandler != null) { // TODO: this is a hack to avoid deadlock when processor is closing
+                synchronized (this) {
+                    _bufferTransferHandler = bufferTransferHandler;
+                }
+            }
         }
 
         /* (non-Javadoc)
          * @see javax.media.protocol.SourceStream#getContentDescriptor()
          */
         public ContentDescriptor getContentDescriptor() {
+            _logger.debug("getContentDescriptor()");
             return new ContentDescriptor(_pbds.getContentType());
         }
 
@@ -282,14 +307,18 @@ public class PBDSReplicator implements BufferTransferHandler {
          * @see javax.media.protocol.SourceStream#getContentLength()
          */
         public long getContentLength() {
+            _logger.debug("getContentLength()");
             return LENGTH_UNKNOWN;
         }
 
         /* (non-Javadoc)
          * @see javax.media.protocol.SourceStream#endOfStream()
          */
-        public synchronized boolean endOfStream() {
-            return (_buffer != null && _buffer.isEOM());
+        public boolean endOfStream() {
+            _logger.debug("endOfStream()");
+            synchronized (this) {
+                return (_buffer != null && _buffer.isEOM());
+            }
         }
 
     }

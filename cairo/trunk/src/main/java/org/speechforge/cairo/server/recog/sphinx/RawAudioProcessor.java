@@ -313,6 +313,15 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
     }
 
     public synchronized void addRawData(byte[] data, int offset, int length) {
+        try {
+            addRawDataPrivate(data, offset, length);
+        } catch (RuntimeException e) {
+            _logger.debug("addRawData(): throwing exception", e);
+            throw e;
+        }
+    }
+
+    private synchronized void addRawDataPrivate(byte[] data, int offset, int length) {
         if (!_processing) {
             throw new IllegalStateException("Attempt to add raw data when RawAudioProcessor not in processing state!");
         }

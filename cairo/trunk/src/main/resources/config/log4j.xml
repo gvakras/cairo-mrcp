@@ -10,10 +10,9 @@
      </layout>
   </appender>
 
-  <!-- TODO: fix deadlock in PBDSReplicator -->
-  <!-- until then TRACE level debugging needs to be on to avoid deadlock  -->
+  <!-- Example: switch this priority value to "trace" to see each buffer transferred. -->
   <category name="org.speechforge.cairo.server.rtp.PBDSReplicator">
-    <priority value="trace"/>
+    <priority value="debug"/>
   </category>
 
   <root>
