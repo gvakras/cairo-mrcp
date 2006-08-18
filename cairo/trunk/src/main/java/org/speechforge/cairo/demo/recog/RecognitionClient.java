@@ -143,6 +143,8 @@ public class RecognitionClient implements MrcpEventListener {
         if (response.getRequestState().equals(MrcpRequestState.COMPLETE)) {
             throw new RuntimeException("Recognition failed to start!");
         }
+        
+        _logger.info("Start speaking now...");
 
         return response.getRequestState();
     }

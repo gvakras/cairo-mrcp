@@ -240,9 +240,13 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
                 );
                 String content = result.toString();
                 if (content == null || content.trim().length() < 1) {
-                    content = "null";
+                    CompletionCause completionCause = new CompletionCause((short) 1, "no-match");
+                    event.addHeader(MrcpHeaderName.COMPLETION_CAUSE.constructHeader(completionCause));
+                } else {
+                    CompletionCause completionCause = new CompletionCause((short) 0, "success");
+                    event.addHeader(MrcpHeaderName.COMPLETION_CAUSE.constructHeader(completionCause));
+                    event.setContent("text/plain", null, content);
                 }
-                event.setContent("text/plain", null, content);
                 _session.postEvent(event);
             } catch (IllegalStateException e) {
                 // TODO Auto-generated catch block

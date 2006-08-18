@@ -58,7 +58,9 @@ import org.mrcp4j.client.MrcpInvocationException;
 import org.mrcp4j.client.MrcpProvider;
 import org.mrcp4j.message.MrcpEvent;
 import org.mrcp4j.message.MrcpResponse;
+import org.mrcp4j.message.header.CompletionCause;
 import org.mrcp4j.message.header.IllegalValueException;
+import org.mrcp4j.message.header.MrcpHeader;
 import org.mrcp4j.message.header.MrcpHeaderName;
 import org.mrcp4j.message.request.MrcpRequest;
 
@@ -211,9 +213,10 @@ public class BargeInClient implements MrcpEventListener {
      * @throws IOException
      * @throws MrcpInvocationException
      * @throws InterruptedException
+     * @throws IllegalValueException 
      */
     public synchronized String playAndRecognize(String prompt, URL grammarUrl)
-      throws IOException, MrcpInvocationException, InterruptedException {
+      throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException {
 
         _recognize = true;
         _mrcpEvent = null;
@@ -249,7 +252,10 @@ public class BargeInClient implements MrcpEventListener {
             this.wait();
         }
 
-        return _mrcpEvent.getContent();
+        MrcpHeader completionCauseHeader = _mrcpEvent.getHeader(MrcpHeaderName.COMPLETION_CAUSE);
+        CompletionCause completionCause = (CompletionCause) completionCauseHeader.getValueObject();
+
+        return (completionCause.getCauseCode() == 0) ? _mrcpEvent.getContent() : null ;
     }
 
 
@@ -411,7 +417,10 @@ public class BargeInClient implements MrcpEventListener {
             do {
                 result = client.playAndRecognize(prompt, grammarUrl);
                 if (_parrot) {
-                    prompt = result;
+                    prompt = (result == null) ? "I'm sorry, I could not understand." : result ;
+                }
+                if (result == null) {
+                    result = "null";
                 }
                 StringBuilder sb = new StringBuilder();
                 sb.append("\n**************************************************************");
