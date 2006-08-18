@@ -416,22 +416,25 @@ public class BargeInClient implements MrcpEventListener {
 
             do {
                 result = client.playAndRecognize(prompt, grammarUrl);
-                if (_parrot) {
-                    prompt = (result == null) ? "I'm sorry, I could not understand." : result ;
+
+                if (_logger.isInfoEnabled()) {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("\n**************************************************************");
+                    sb.append("\nRecognition result: ").append(result);
+                    sb.append("\n**************************************************************\n");
+                    _logger.info(sb);
                 }
+
                 if (result == null) {
-                    result = "null";
+                    result = "I'm sorry, I could not understand.";
                 }
-                StringBuilder sb = new StringBuilder();
-                sb.append("\n**************************************************************");
-                sb.append("\nRecognition result: ").append(result);
-                sb.append("\n**************************************************************\n");
-                _logger.info(sb);
+
+                if (_parrot) {
+                    client.play(result);
+                }
+
             } while (_loop && !result.contains("exit") && !result.contains("quit"));
 
-            if (_parrot) {
-                client.play(prompt);
-            }
 
         } catch (Exception e){
             if (e instanceof MrcpInvocationException) {
