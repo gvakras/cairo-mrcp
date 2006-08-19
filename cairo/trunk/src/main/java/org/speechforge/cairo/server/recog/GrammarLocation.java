@@ -22,6 +22,7 @@
  */
 package org.speechforge.cairo.server.recog;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
@@ -45,6 +46,23 @@ public class GrammarLocation {
         _baseURL = baseURL;
         _grammarName = grammarName;
         _extension = extension;
+    }
+
+    public GrammarLocation(URL grammarURL) {
+        String location = grammarURL.toExternalForm().replace('\\', '/');
+        int indexExtension = location.lastIndexOf('.');
+        int indexName = location.lastIndexOf('/');
+        if (indexExtension < 1 || indexExtension <= indexName) {
+            throw new IllegalArgumentException("Improperly specified grammar url: " + location);
+        }
+
+        try {
+            _baseURL = new URL(location.substring(0, indexName));
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException("Improperly specified grammar url: " + location, e);
+        }
+        _grammarName = location.substring(indexName+1, indexExtension);
+        _extension = location.substring(+1);
     }
 
     /**

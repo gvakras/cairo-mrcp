@@ -108,7 +108,7 @@ public class RawAudioTransferHandler implements BufferTransferHandler {
                             _logger.debug("transferData(): buffer length is zero!");
                         }
                     } else {
-                        _logger.debug("transferData(): _rawAudioProcessor is null, discarding data.");
+                        _logger.trace("transferData(): _rawAudioProcessor is null, discarding data.");
                     }
                 }
             } catch (IOException e){
