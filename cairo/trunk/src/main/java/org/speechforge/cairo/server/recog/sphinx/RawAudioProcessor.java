@@ -36,7 +36,6 @@ import edu.cmu.sphinx.frontend.Data;
 import edu.cmu.sphinx.frontend.DataEndSignal;
 import edu.cmu.sphinx.frontend.DataProcessingException;
 import edu.cmu.sphinx.frontend.DataStartSignal;
-import edu.cmu.sphinx.frontend.util.Utterance;
 import edu.cmu.sphinx.util.props.PropertyException;
 import edu.cmu.sphinx.util.props.PropertySheet;
 import edu.cmu.sphinx.util.props.PropertyType;
@@ -112,8 +111,8 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
 
     }
 
-    /**
-     * Constructs a Microphone with the given InputStream.
+    /* (non-Javadoc)
+     * @see edu.cmu.sphinx.frontend.DataProcessor#initialize()
      */
     public void initialize() {
         super.initialize();
@@ -122,16 +121,18 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
     }
 
     /**
-     * Returns true if this Microphone is processing.
+     * Whether this processor is currently processing audio.
      *
-     * @return true if this Microphone is processing, false otherwise
+     * @return true if this processor is currently in the processing state.
      */
     public synchronized boolean isProcessing() {
         return _processing;
     }
 
     /**
-     * Starts processing the audio data being added to the addRawData method.
+     * Starts processing any audio data being added via this processors
+     * {@link org.speechforge.cairo.server.recog.sphinx.RawAudioProcessor#addRawData(byte[], int, int)} method.
+     * 
      * @param format format of the audio being passed to this processor
      * @throws UnsupportedEncodingException if the specified format cannot be supported
      */
@@ -194,8 +195,7 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
     }
 
     /**
-     * Implements the run() method of the Thread class.
-     * Records audio, and cache them in the audio buffer.
+     * Processes all audio data to be tra.
      */
     public void run() {            
         _totalSamplesRead = 0;
@@ -206,7 +206,7 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
             _logger.debug("adding DataStartSignal...");
             do {
                 _dataList.add(data);
-                data = readData(null);//currentUtterance);
+                data = transformNextRawAudio();
             } while (data != null);
         } catch (InterruptedException e) {
             _logger.warn(e, e);
@@ -220,19 +220,14 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
         }*/
     }
 
-    /**
-     * Reads one frame of audio data, and adds it to the given Utterance.
-     *
-     * @return an Data object containing the audio data
-     */
-    private Data readData(Utterance utterance) throws InterruptedException {
+    private Data transformNextRawAudio() throws InterruptedException {
 
-        _logger.trace("readData(): retrieving data from raw audio list...");
+        _logger.trace("transformNextRawAudio(): retrieving data from raw audio list...");
 
         byte[] data = _rawAudioList.remove();
 
         if (_logger.isTraceEnabled()) {
-            _logger.trace("readData(): data from raw audio list, bytes=" + data.length);
+            _logger.trace("transformNextRawAudio(): data from raw audio list, bytes=" + data.length);
         }
 
         long firstSampleNumber = _totalSamplesRead / _audioFormat.getChannels();
@@ -257,27 +252,12 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
                 throw new Error("Incomplete sample read.");
             }
         }
-        
-        /*if (keepDataReference) {
-            utterance.add(data);
-        }*/
 
         return _transformer.toDoubleData(data, collectTime, firstSampleNumber);
     }
 
-
-    /**
-     * Reads and returns the next Data object from this
-     * Microphone, return null if there is no more audio data.
-     * All audio data captured in-between <code>startRecording()</code>
-     * and <code>stopRecording()</code> is cached in an Utterance
-     * object. Calling this method basically returns the next
-     * chunk of audio data cached in this Utterance.
-     *
-     * @return the next Data or <code>null</code> if none is
-     *         available
-     *
-     * @throws DataProcessingException if there is a data processing error
+    /* (non-Javadoc)
+     * @see edu.cmu.sphinx.frontend.DataProcessor#getData()
      */
     public Data getData() throws DataProcessingException {
 
@@ -304,14 +284,22 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
         return output;
     }
 
-
-    /* (non-Javadoc)
-     * @see org.speechforge.cairo.server.recog.sphinx.RawAudioListener#addRawData(byte[])
+    /**
+     * After processing is started on this processor this will add raw audio data to be processed.
+     * 
+     * @param data buffer of raw audio data to be processed
      */
     public synchronized void addRawData(byte[] data) {
         addRawData(data, 0, data.length);
     }
 
+    /**
+     * After processing is started on this processor this will add raw audio data to be processed.
+     * 
+     * @param data buffer of raw audio data to be processed
+     * @param offset starting point in buffer to process data from
+     * @param length number of bytes to be processed from buffer
+     */
     public synchronized void addRawData(byte[] data, int offset, int length) {
         try {
             addRawDataPrivate(data, offset, length);

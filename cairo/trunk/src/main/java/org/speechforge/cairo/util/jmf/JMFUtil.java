@@ -22,6 +22,8 @@
  */
 package org.speechforge.cairo.util.jmf;
 
+import static org.speechforge.cairo.server.recog.sphinx.SourceAudioFormat.PREFERRED_MEDIA_FORMATS;
+
 import java.io.IOException;
 
 import javax.media.CannotRealizeException;
@@ -57,6 +59,20 @@ public class JMFUtil {
     public static final ContentDescriptor CONTENT_DESCRIPTOR_RAW = new ContentDescriptor(ContentDescriptor.RAW);
 
     /**
+     * RAW RTP content type. This is similar to the RAW content type but only
+     * carries buffers that contain packetized data formats supported by RTP.
+     * 
+     * @see javax.media.protocol.ContentDescriptor#RAW_RTP
+     */
+
+    public static final ContentDescriptor CONTENT_DESCRIPTOR_RAW_RTP = new ContentDescriptor(ContentDescriptor.RAW_RTP);
+
+    /**
+     * MediaLocator specifying the attached microphone.
+     */
+    public static final MediaLocator MICROPHONE = new MediaLocator("dsound://");
+
+    /**
      * @param mediaLocator
      * @param mediaFormat
      * @return
@@ -71,6 +87,15 @@ public class JMFUtil {
         return createRealizedProcessor(mediaLocator, new AudioFormat[] {preferredMediaFormat});
     }
 
+    /**
+     * @param mediaLocator
+     * @param preferredMediaFormats
+     * @return
+     * @throws NoDataSourceException
+     * @throws IOException
+     * @throws NoProcessorException
+     * @throws CannotRealizeException
+     */
     public static Processor createRealizedProcessor(MediaLocator mediaLocator, AudioFormat[] preferredMediaFormats)
       throws NoDataSourceException, IOException, NoProcessorException, CannotRealizeException {
 
@@ -80,6 +105,30 @@ public class JMFUtil {
         Processor processor = Manager.createRealizedProcessor(pm);
         _logger.debug("Processor realized.");
         return processor;
-  }
+    }
+
+    /**
+     * @param dataSource
+     * @return
+     * @throws NoProcessorException
+     * @throws CannotRealizeException
+     * @throws IOException
+     */
+    public static Processor createRealizedProcessor(DataSource dataSource)
+      throws NoProcessorException, CannotRealizeException, IOException {
+        
+        ProcessorModel pm = new ProcessorModel(
+            dataSource,
+            PREFERRED_MEDIA_FORMATS,
+            JMFUtil.CONTENT_DESCRIPTOR_RAW
+        );
+        
+        _logger.debug("Creating realized processor...");
+        Processor processor = Manager.createRealizedProcessor(pm);
+        _logger.debug("Processor realized.");
+        
+        return processor;
+    }
+
 
 }

@@ -22,26 +22,17 @@
  */
 package org.speechforge.cairo.server.rtp;
 
-import org.speechforge.cairo.server.recog.sphinx.SourceAudioFormat;
-import org.speechforge.cairo.server.rtp.PBDSReplicator;
+import static org.speechforge.cairo.server.recog.sphinx.SourceAudioFormat.PREFERRED_MEDIA_FORMATS;
+import static org.speechforge.cairo.util.jmf.JMFUtil.CONTENT_DESCRIPTOR_RAW;
+
 import org.speechforge.cairo.util.jmf.ProcessorStarter;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 
-import javax.media.DataSink;
 import javax.media.Manager;
-import javax.media.MediaLocator;
 import javax.media.Processor;
 import javax.media.ProcessorModel;
-import javax.media.datasink.DataSinkEvent;
-import javax.media.datasink.DataSinkListener;
-import javax.media.datasink.EndOfStreamEvent;
-import javax.media.format.AudioFormat;
 import javax.media.protocol.ContentDescriptor;
-import javax.media.protocol.DataSource;
-import javax.media.protocol.FileTypeDescriptor;
 import javax.media.protocol.PushBufferDataSource;
 import javax.media.rtp.Participant;
 import javax.media.rtp.ReceiveStream;
@@ -57,11 +48,6 @@ import org.apache.log4j.Logger;
 public class RTPStreamReplicator extends RTPConsumer {
 
     private static Logger _logger = Logger.getLogger(RTPStreamReplicator.class);
-
-    private static AudioFormat[] PREFERRED_MEDIA_FORMATS = {SourceAudioFormat.PREFERRED_MEDIA_FORMAT};
-
-    private static final ContentDescriptor CONTENT_DESCRIPTOR_RAW =
-        new ContentDescriptor(ContentDescriptor.RAW);
 
     private PBDSReplicator _replicator;
     private Processor _processor;

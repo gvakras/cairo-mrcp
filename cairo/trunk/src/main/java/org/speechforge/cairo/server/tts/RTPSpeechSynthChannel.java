@@ -25,11 +25,9 @@ package org.speechforge.cairo.server.tts;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.URL;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import javax.media.protocol.ContentDescriptor;
 import javax.media.rtp.InvalidSessionAddressException;
 
 import org.apache.log4j.Logger;
@@ -45,9 +43,6 @@ public class RTPSpeechSynthChannel {
 
     // TODO: move to config file
     private static final File FEEDER_PROMPT_FILE = new File("../prompts/feeder.wav");
-
-    static final ContentDescriptor CONTENT_DESCRIPTOR_RAW_RTP = new ContentDescriptor(ContentDescriptor.RAW_RTP);
-    //private static final AudioFormat[] PREFERRED_MEDIA_FORMATS = {SourceAudioFormat.PREFERRED_MEDIA_FORMAT};
 
     static final short IDLE = 0;
     static final short SPEAKING = 1;

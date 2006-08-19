@@ -24,12 +24,18 @@ package org.speechforge.cairo.server.recog.sphinx;
 
 import java.io.UnsupportedEncodingException;
 
-import javax.media.format.AudioFormat;
-
-//import javax.sound.sampled.AudioFormat;
-//import javax.media.format.AudioFormat;
-
 public class SourceAudioFormat {
+
+    /**
+     * Preferred media format for generating audio streams for recognition.
+     */
+    public static final javax.media.format.AudioFormat PREFERRED_MEDIA_FORMAT = getPreferredMediaFormatTwo();
+
+    /**
+     * Single element array containing {@link PREFERRED_MEDIA_FORMAT}.
+     */
+    public static final javax.media.format.AudioFormat[] PREFERRED_MEDIA_FORMATS = { PREFERRED_MEDIA_FORMAT };
+
 
     private javax.sound.sampled.AudioFormat _soundFormat;
     private javax.media.format.AudioFormat _mediaFormat;
@@ -265,8 +271,6 @@ public class SourceAudioFormat {
 
         //(String encoding, double sampleRate, int sampleSizeInBits, int channels, int endian, int signed)
     }
-
-    public static javax.media.format.AudioFormat PREFERRED_MEDIA_FORMAT = getPreferredMediaFormatTwo();
 
     private static javax.media.format.AudioFormat getPreferredMediaFormatOne() {
 

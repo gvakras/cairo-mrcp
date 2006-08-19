@@ -22,6 +22,8 @@
  */
 package org.speechforge.cairo.server.recog.sphinx;
 
+import static org.speechforge.cairo.util.jmf.JMFUtil.MICROPHONE;
+
 import org.speechforge.cairo.server.recog.RecognitionResult;
 import org.speechforge.cairo.test.sphinx.util.RecogNotifier;
 import org.speechforge.cairo.util.jmf.JMFUtil;
@@ -29,7 +31,6 @@ import org.speechforge.cairo.util.jmf.ProcessorStarter;
 
 import java.net.URL;
 
-import javax.media.MediaLocator;
 import javax.media.Processor;
 import javax.media.protocol.PushBufferDataSource;
 
@@ -46,8 +47,6 @@ import org.apache.log4j.Logger;
 public class TestSphinxRecEngineMicrophone extends AbstractTestCase {
 
     private static Logger _logger = Logger.getLogger(TestSphinxRecEngineMicrophone.class);
-
-    private static final MediaLocator MICROPHONE = new MediaLocator("dsound://");
 
     private static final String PROP_FRONTEND =     "frontend";
     private static final String EP_FRONTEND =       "epFrontEnd";

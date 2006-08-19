@@ -22,6 +22,10 @@
  */
 package org.speechforge.cairo.server.recog.sphinx;
 
+import static org.speechforge.cairo.server.recog.sphinx.SourceAudioFormat.PREFERRED_MEDIA_FORMATS;
+import static org.speechforge.cairo.util.jmf.JMFUtil.CONTENT_DESCRIPTOR_RAW;
+import static org.speechforge.cairo.util.jmf.JMFUtil.MICROPHONE;
+
 import org.speechforge.cairo.server.recog.GrammarLocation;
 import org.speechforge.cairo.server.recog.RecogListener;
 import org.speechforge.cairo.server.recog.RecogListenerDecorator;
@@ -38,17 +42,11 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 
 import javax.media.CannotRealizeException;
-import javax.media.ControllerEvent;
-import javax.media.ControllerListener;
 import javax.media.Manager;
-import javax.media.MediaLocator;
 import javax.media.NoDataSourceException;
 import javax.media.NoProcessorException;
 import javax.media.Processor;
 import javax.media.ProcessorModel;
-import javax.media.StartEvent;
-import javax.media.format.AudioFormat;
-import javax.media.protocol.ContentDescriptor;
 import javax.media.protocol.DataSource;
 import javax.media.protocol.PushBufferDataSource;
 import javax.media.protocol.PushBufferStream;
@@ -81,7 +79,7 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
     private RawAudioTransferHandler _rawAudioTransferHandler;
     RecogListener _recogListener;
 
-    protected SphinxRecEngine(ConfigurationManager cm)
+    public SphinxRecEngine(ConfigurationManager cm)
       throws IOException, PropertyException, InstantiationException {
 
         _recognizer = (Recognizer) cm.lookup("recognizer");
@@ -294,10 +292,6 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
      * Provides main method for testing SphinxRecEngine in standalone mode using the microphone for input.
      */
     public static class Test extends RecogListenerDecorator {
-
-        private static MediaLocator MICROPHONE = new MediaLocator("dsound://");
-        private static AudioFormat[] PREFERRED_MEDIA_FORMATS = {SourceAudioFormat.PREFERRED_MEDIA_FORMAT};
-        private static final ContentDescriptor CONTENT_DESCRIPTOR_RAW = new ContentDescriptor(ContentDescriptor.RAW);
 
         private SphinxRecEngine _engine;
         private RecognitionResult _result;

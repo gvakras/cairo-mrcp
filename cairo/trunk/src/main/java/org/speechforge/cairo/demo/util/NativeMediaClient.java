@@ -22,6 +22,8 @@
  */
 package org.speechforge.cairo.demo.util;
 
+import static org.speechforge.cairo.util.jmf.JMFUtil.MICROPHONE;
+
 import org.speechforge.cairo.server.rtp.RTPConsumer;
 import org.speechforge.cairo.server.tts.RTPPlayer;
 
@@ -31,7 +33,6 @@ import java.io.InputStreamReader;
 import java.net.InetAddress;
 
 import javax.media.Manager;
-import javax.media.MediaLocator;
 import javax.media.Player;
 import javax.media.protocol.PushBufferDataSource;
 import javax.media.rtp.Participant;
@@ -47,12 +48,6 @@ import org.apache.log4j.Logger;
 public class NativeMediaClient extends RTPConsumer {
 
     private static Logger _logger = Logger.getLogger(NativeMediaClient.class);
-
-    private static MediaLocator MICROPHONE = new MediaLocator("dsound://");
-
-//    private static AudioFormat[] PREFERRED_MEDIA_FORMATS = {SourceAudioFormat.PREFERRED_MEDIA_FORMAT};
-//    private static final ContentDescriptor CONTENT_DESCRIPTOR_RAW_RTP =
-//        new ContentDescriptor(ContentDescriptor.RAW_RTP);
 
     private Player _player;
     private RTPPlayer _rtpPlayer;
@@ -102,18 +97,6 @@ public class NativeMediaClient extends RTPConsumer {
             }
         }
     }
-
-//    private void createProcessor()
-//      throws NoDataSourceException, IOException, NoProcessorException, CannotRealizeException {
-//        MediaLocator locator = new MediaLocator("dsound://");
-//        DataSource dataSource = Manager.createDataSource(locator);
-//        ProcessorModel pm = new ProcessorModel(
-//                dataSource, PREFERRED_MEDIA_FORMATS, CONTENT_DESCRIPTOR_RAW_RTP);
-//        _logger.debug("Creating realized processor...");
-//        _processor = Manager.createRealizedProcessor(pm);
-//
-//    }
-
 
     /* (non-Javadoc)
      * @see org.speechforge.cairo.server.rtp.RTPConsumer#streamReceived(javax.media.rtp.ReceiveStream, javax.media.protocol.PushBufferDataSource)

@@ -22,6 +22,8 @@
  */
 package org.speechforge.cairo.server.tts;
 
+import static org.speechforge.cairo.util.jmf.JMFUtil.CONTENT_DESCRIPTOR_RAW_RTP;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -39,7 +41,6 @@ import javax.media.MediaLocator;
 import javax.media.Processor;
 import javax.media.control.TrackControl;
 import javax.media.format.UnsupportedFormatException;
-import javax.media.protocol.ContentDescriptor;
 import javax.media.protocol.DataSource;
 import javax.media.rtp.InvalidSessionAddressException;
 import javax.media.rtp.RTPManager;
@@ -56,8 +57,6 @@ import org.apache.log4j.Logger;
 public class RTPPlayer implements ControllerListener {
 
     private static Logger _logger = Logger.getLogger(RTPPlayer.class);
-
-    private static final ContentDescriptor CONTENT_DESCRIPTOR_RAW_RTP = new ContentDescriptor(ContentDescriptor.RAW_RTP);
 
     private Object _lock = new Object();
     private Processor _processor;

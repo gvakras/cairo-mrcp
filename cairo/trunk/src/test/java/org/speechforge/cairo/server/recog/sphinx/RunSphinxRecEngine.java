@@ -22,6 +22,15 @@
  */
 package org.speechforge.cairo.server.recog.sphinx;
 
+import static org.speechforge.cairo.server.recog.sphinx.SourceAudioFormat.PREFERRED_MEDIA_FORMATS;
+import static org.speechforge.cairo.util.jmf.JMFUtil.MICROPHONE;
+
+import org.speechforge.cairo.server.recog.RecogListenerDecorator;
+import org.speechforge.cairo.server.recog.RecognitionResult;
+import org.speechforge.cairo.server.rtp.PBDSReplicator;
+import org.speechforge.cairo.util.jmf.JMFUtil;
+import org.speechforge.cairo.util.jmf.ProcessorStarter;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -33,19 +42,12 @@ import javax.media.NoDataSourceException;
 import javax.media.NoProcessorException;
 import javax.media.Processor;
 import javax.media.ProcessorModel;
-import javax.media.format.AudioFormat;
 import javax.media.protocol.DataSource;
 import javax.media.protocol.PushBufferDataSource;
 
-import org.apache.log4j.Logger;
-
-import org.speechforge.cairo.server.recog.RecogListenerDecorator;
-import org.speechforge.cairo.server.recog.RecognitionResult;
-import org.speechforge.cairo.server.rtp.PBDSReplicator;
-import org.speechforge.cairo.util.jmf.JMFUtil;
-import org.speechforge.cairo.util.jmf.ProcessorStarter;
-
 import edu.cmu.sphinx.util.props.ConfigurationManager;
+
+import org.apache.log4j.Logger;
 
 /**
  * Provides main method for running SphinxRecEngine in standalone mode using the microphone or prompt file for input.
@@ -56,10 +58,6 @@ import edu.cmu.sphinx.util.props.ConfigurationManager;
 public class RunSphinxRecEngine extends RecogListenerDecorator {
 
     private static Logger _logger = Logger.getLogger(RunSphinxRecEngine.class);
-
-    public static final MediaLocator MICROPHONE = new MediaLocator("dsound://");
-
-    private static final AudioFormat[] PREFERRED_MEDIA_FORMATS = {SourceAudioFormat.PREFERRED_MEDIA_FORMAT};
 
     private SphinxRecEngine _engine;
     private RecognitionResult _result;
@@ -90,7 +88,7 @@ public class RunSphinxRecEngine extends RecogListenerDecorator {
         _result = null;
         _engine.activate();
 
-        Processor processor2 = createReplicatedProcessor(_replicator);
+        Processor processor2 = JMFUtil.createRealizedProcessor(_replicator.replicate());
         processor2.addControllerListener(new ProcessorStarter());
 
         PushBufferDataSource pbds2 = (PushBufferDataSource) processor2.getDataOutput();
@@ -116,26 +114,6 @@ public class RunSphinxRecEngine extends RecogListenerDecorator {
         _engine.passivate();
 
         return result;
-    }
-
-    public static Processor createReplicatedProcessor(PBDSReplicator replicator)
-      throws IOException, IllegalStateException, NoProcessorException, CannotRealizeException {
-
-        DataSource dataSource = replicator.replicate();
-
-        ProcessorModel pm = new ProcessorModel(
-                dataSource,
-                PREFERRED_MEDIA_FORMATS,
-                JMFUtil.CONTENT_DESCRIPTOR_RAW
-        );
-        
-        _logger.debug("Creating realized processor...");
-        Processor processor = Manager.createRealizedProcessor(pm);
-        _logger.debug("Processor realized.");
-
-        //dataSource.start();
-
-        return processor;
     }
 
     public static void main(String[] args) throws Exception {

@@ -22,8 +22,10 @@
  */
 package org.speechforge.cairo.server.recog;
 
-import org.speechforge.cairo.server.recog.sphinx.SphinxRecEngine;
+import static org.speechforge.cairo.util.jmf.JMFUtil.CONTENT_DESCRIPTOR_RAW;
+
 import org.speechforge.cairo.exception.ResourceUnavailableException;
+import org.speechforge.cairo.server.recog.sphinx.SphinxRecEngine;
 import org.speechforge.cairo.server.rtp.RTPStreamReplicator;
 import org.speechforge.cairo.util.jmf.ProcessorStarter;
 
@@ -32,7 +34,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import javax.media.Processor;
-import javax.media.protocol.ContentDescriptor;
 import javax.media.protocol.PushBufferDataSource;
 import javax.speech.recognition.GrammarException;
 
@@ -52,12 +53,6 @@ public class RTPRecogChannel {
     public static final short COMPLETE = 2;
 
     static Logger _logger = Logger.getLogger(RTPRecogChannel.class);
-
-    /**
-     * Content descriptor for raw audio content.
-     */
-    private static final ContentDescriptor CONTENT_DESCRIPTOR_RAW =
-        new ContentDescriptor(ContentDescriptor.RAW);
 
     private /*static*/ Timer _timer = new Timer();
 
