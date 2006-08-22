@@ -103,6 +103,7 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
         short statusCode = -1;
 
         if (_state == RECOGNIZING) {
+            // TODO: cancel or queue request instead (depending upon value of 'cancel-if-queue' header)
             statusCode = MrcpResponse.STATUS_METHOD_NOT_VALID_IN_STATE;
         } else {
             GrammarLocation grammarLocation = null;
@@ -230,10 +231,10 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
          * @see org.speechforge.cairo.server.recog.RecogListener#recognitionComplete()
          */
         public void recognitionComplete(RecognitionResult result) {
+            synchronized (MrcpRecogChannel.this) {
+                _state = RECOGNIZED;
+            }
             try {
-                synchronized (MrcpRecogChannel.this) {
-                    _state = RECOGNIZED;
-                }
                 MrcpEvent event = _session.createEvent(
                         MrcpEventName.RECOGNITION_COMPLETE,
                         MrcpRequestState.COMPLETE
@@ -261,8 +262,11 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
          * @see org.speechforge.cairo.server.recog.RecogListener#speechStarted()
          */
         public void speechStarted() {
-            try {
-                //TODO: check state before posting event
+            short state;
+            synchronized (MrcpRecogChannel.this) {
+                state = _state;
+            }
+            if (state == RECOGNIZING) try {
                 MrcpEvent event = _session.createEvent(
                         MrcpEventName.START_OF_INPUT,
                         MrcpRequestState.IN_PROGRESS
@@ -281,8 +285,12 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
          * @see org.speechforge.cairo.server.recog.RecogListener#noInputTimeout()
          */
         public void noInputTimeout() {
-            try {
-                //TODO: check state before posting event
+            short state;
+            synchronized (MrcpRecogChannel.this) {
+                state = _state;
+                _state = IDLE;
+            }
+            if (state == RECOGNIZING) try {
                 MrcpEvent event = _session.createEvent(
                         MrcpEventName.RECOGNITION_COMPLETE,
                         MrcpRequestState.COMPLETE
