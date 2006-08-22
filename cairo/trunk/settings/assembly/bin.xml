@@ -47,7 +47,7 @@
         <exclude>sphinx-config.xml</exclude>
       </excludes>
     </fileSet>
-    <!--fileSet>
+    <fileSet>
       <directory>${FREETTS_HOME}/lib</directory>
       <outputDirectory>lib</outputDirectory>
       <includes>
@@ -57,7 +57,7 @@
         <include>jsapi.exe</include>
         <include>jsapi.sh</include>
       </includes>
-    </fileSet-->
+    </fileSet>
   </fileSets>
   <files>
     <file>
@@ -81,12 +81,12 @@
     </file>
   </files>
   <dependencySets>
-    <!--dependencySet>
+    <dependencySet>
       <outputDirectory>/lib</outputDirectory>
       <scope>runtime</scope>
       <excludes>
         <exclude>org.speechforge:cairo</exclude>
       </excludes>
-    </dependencySet-->
+    </dependencySet>
   </dependencySets>
 </assembly>
