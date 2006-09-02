@@ -25,7 +25,7 @@ package org.speechforge.cairo.util.pool;
 import org.apache.log4j.Logger;
 
 /**
- * Provides default implementations for methods defined by <@code PoolableObject>.
+ * Provides default implementations for methods defined by {@link org.speechforge.cairo.util.pool.PoolableObject}.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */

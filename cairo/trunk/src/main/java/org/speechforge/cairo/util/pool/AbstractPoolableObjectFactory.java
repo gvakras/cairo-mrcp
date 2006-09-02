@@ -31,8 +31,8 @@ import org.apache.commons.pool.PoolableObjectFactory;
 import org.apache.log4j.Logger;
 
 /**
- * Generic implementation of a <@link org.apache.commons.pool.PoolableObjectFactory> which makes
- * <@link org.speechforge.cairo.util.pool.PoolableObject> instances and delegates all object pool
+ * Generic implementation of {@code org.apache.commons.pool.PoolableObjectFactory} which constructs
+ * {@link org.speechforge.cairo.util.pool.PoolableObject} instances and delegates all object pool
  * life-cycle methods to the pooled objects themselves.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
@@ -81,7 +81,7 @@ public abstract class AbstractPoolableObjectFactory implements PoolableObjectFac
     }
 
     /**
-     * Initializes an <@link org.apache.commons.pool.ObjectPool> by borrowing each object from the
+     * Initializes an {@link org.apache.commons.pool.ObjectPool} by borrowing each object from the
      * pool (thereby triggering activation) and then returning all the objects back to the pool. 
      * @param pool the object pool to be initialized.
      * @throws InstantiationException if borrowing (or returning) an object from the pool triggers an exception.

@@ -25,7 +25,7 @@ package org.speechforge.cairo.server.recog;
 import org.apache.log4j.Logger;
 
 /**
- * Delegates method calls to an underlying <@code RecogListener> implementation. Can be subclassed to intercept calls to the decorated object.
+ * Delegates method calls to an underlying {@code RecogListener} implementation. Can be subclassed to intercept calls to the decorated object.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */

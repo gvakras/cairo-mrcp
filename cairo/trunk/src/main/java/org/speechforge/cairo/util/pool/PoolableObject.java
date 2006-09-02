@@ -23,7 +23,7 @@
 package org.speechforge.cairo.util.pool;
 
 /**
- * Defines methods required for an object to be pooled using <@link org.speechforge.cairo.util.pool.AbstractPoolableObjectFactory>.
+ * Defines methods required for an object to be pooled using {@link org.speechforge.cairo.util.pool.AbstractPoolableObjectFactory}.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  * @see org.speechforge.cairo.util.pool.AbstractPoolableObjectFactory
@@ -45,7 +45,7 @@ public interface PoolableObject {
 
     /**
      * Ensures that the instance is safe to be returned by the pool.  Returns false if this object should be destroyed.
-     * @return <@code false> if this instance is not valid and should be dropped from the pool, <@code true> otherwise.
+     * @return {@code false} if this instance is not valid and should be dropped from the pool, {@code true} otherwise.
      */
     boolean validate();
 

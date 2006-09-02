@@ -146,7 +146,7 @@ public class RTPRecogChannel {
     /**
      * Starts the input timers which trigger no-input-timeout if speech has not started after the specified time.
      * @param noInputTimeout the amount of time to wait, in milliseconds, before triggering a no-input-timeout. 
-     * @return <@code true> if input timers were started or <@code false> if speech has already started.
+     * @return {@code true} if input timers were started or {@code false} if speech has already started.
      * @throws IllegalStateException if recognition is not in progress or if the input timers have already been started.
      */
     public synchronized boolean startInputTimers(long noInputTimeout) throws IllegalStateException {
