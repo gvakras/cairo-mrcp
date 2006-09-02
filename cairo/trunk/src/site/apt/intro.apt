@@ -1,0 +1,48 @@
+                       -----
+                 Cairo - Getting Started
+                       -----
+                  Niels Godfredsen
+                       -----
+
+{Getting Started}
+
+  If you have not yet installed Cairo please see the {{{install.html}Cairo Installation Guide}} for instructions on downloading and installing the Cairo software.
+
+  Once Cairo is successfully installed you can follow the instructions below to start the various Cairo server processes and run the demo MRCPv2 clients.
+
+{Starting the Cairo Server}
+
+*Server Architecture
+
+  Rather than being architected as a single monolithic server, Cairo is composed of a number of separate components, each performing a specific function and running in its own process space (i.e. JVM).
+
+  Cairo can be started up in a variety of configurations depending upon the capabilities required of the individual deployment.  Out of the box, Cairo is configured to be run with one instance of each component type: a Resource Server, a Receiver Resource, and a Transmitter Resource.
+
+  The Cairo server components have the following functions:
+
+*----------------------+--------------------------------------------------------------------------------------------------------------+
+| <Component>          | <Function>
+*----------------------+--------------------------------------------------------------------------------------------------------------+
+| Resource Server      | Manages client connections with resources (only be one of these should be running per deployment).
+*----------------------+--------------------------------------------------------------------------------------------------------------+
+| Transmitter Resource | Responsible for all functions that produce audio data to be streamed to the client (e.g. speech synthesis).
+*----------------------+--------------------------------------------------------------------------------------------------------------+
+| Receiver Resource    | Responsible for all functions that process audio data streamed from the client (e.g. speech recognition).
+*----------------------+--------------------------------------------------------------------------------------------------------------+
+
+*Launching Server Processes
+
+  Server process are started by passing appropriate parameters to the <<<launch.bat>>> script in the <<<bin>>> directory of your Cairo installation.  However the <<<launch.bat>>> script should not be invoked directly.  Instead batch files are supplied for each of the server processes present in the default configuration.
+
+  The resource server (<<<rserver.bat>>>) should always be started first since the resources must register with the resource server when they become available.  Once the resource server has completed initialization you should see a message on the console that says <"Server and registry bound and waiting...">
+  
+  Then the individual resources (<<<transmitter1.bat>>> and <<<receiver1.bat>>>) can be started in any order.  When ready, each of the resources should display a <"Resource bound and waiting..."> message.
+
+  Once all three server processes have completed initialization and display a waiting message, the server cluster is ready to accept MRCPv2 client requests.
+
+
+{Running the Demo MRCPv2 Clients}
+
+  A number of demo clients are supplied with the Cairo installation...
+
+

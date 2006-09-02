@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<faqs id="General FAQ">
+  <part id="General">
+    <faq id="nofaqs">
+      <question>Where are the FAQs?</question>
+      <answer>
+        <p>
+          Rather than start guessing at which will be the most frequently asked questions we have opted to wait for actual questions from the community and then post the most common ones here as they get answered.  If you have any questions regarding Cairo please post a message to the Cairo user list: <a href="mailto:cairo-user@lists.sourceforge.net">cairo-user@lists.sourceforge.net</a>
+        </p>
+      </answer>
+    </faq>
+  </part>
+</faqs>
