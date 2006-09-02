@@ -31,6 +31,10 @@ import org.apache.commons.pool.PoolableObjectFactory;
 import org.apache.commons.pool.impl.GenericObjectPool;
 import org.apache.log4j.Logger;
 
+/**
+ *
+ * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
+ */
 public class PromptGeneratorFactory extends AbstractPoolableObjectFactory {
 
     private static Logger _logger = Logger.getLogger(PromptGeneratorFactory.class);

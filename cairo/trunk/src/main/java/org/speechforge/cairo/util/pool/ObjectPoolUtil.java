@@ -25,9 +25,8 @@ package org.speechforge.cairo.util.pool;
 import org.apache.commons.pool.impl.GenericObjectPool;
 
 /**
- * TODOC
- * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  *
+ * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */
 public class ObjectPoolUtil {
 

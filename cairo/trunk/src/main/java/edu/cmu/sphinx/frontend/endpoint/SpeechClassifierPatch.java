@@ -41,6 +41,12 @@ import edu.cmu.sphinx.util.props.Registry;
 
 /**
  * 
+ * Provides a patch to fix a bug in {@code edu.cmu.sphinx.frontend.endpoint.SpeechClassifier}.
+ *
+ * <p>Please see <a href="http://sourceforge.net/tracker/index.php?func=detail&aid=1501329&group_id=1904&atid=101904"
+ * target="_blank">http://sourceforge.net/tracker/index.php?func=detail&aid=1501329&group_id=1904&atid=101904</a>
+ * for details of the bug.<hr>
+ *
  * Implements a level tracking endpointer invented by Bent Schmidt Nielsen.
  *
  * <p>This endpointer is composed of three main steps.
@@ -64,10 +70,6 @@ import edu.cmu.sphinx.util.props.Registry;
  *
  * @see SpeechMarker
  *
- * NOTE: This file provides a patch to fix a bug in edu.cmu.sphinx.frontend.endpoint.SpeechClassifier.
- * Please see https://sourceforge.net/tracker/index.php?func=detail&aid=1501329&group_id=1904&atid=101904
- * for details of the bug.
- * 
  */
 public class SpeechClassifierPatch extends BaseDataProcessor {
 

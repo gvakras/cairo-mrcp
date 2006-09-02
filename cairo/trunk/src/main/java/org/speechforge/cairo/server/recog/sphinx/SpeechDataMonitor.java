@@ -33,9 +33,8 @@ import edu.cmu.sphinx.frontend.endpoint.SpeechStartSignal;
 import org.apache.log4j.Logger;
 
 /**
- * TODOC
- * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  *
+ * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */
 public class SpeechDataMonitor extends BaseDataProcessor {
 

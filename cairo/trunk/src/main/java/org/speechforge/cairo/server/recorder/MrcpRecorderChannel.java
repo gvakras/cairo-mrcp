@@ -44,9 +44,8 @@ import org.mrcp4j.server.MrcpSession;
 import org.mrcp4j.server.provider.RecorderRequestHandler;
 
 /**
- * TODOC
- * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  *
+ * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */
 public class MrcpRecorderChannel extends MrcpGenericChannel implements RecorderRequestHandler {
 
