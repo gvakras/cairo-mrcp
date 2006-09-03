@@ -65,6 +65,8 @@ import org.mrcp4j.message.header.MrcpHeaderName;
 import org.mrcp4j.message.request.MrcpRequest;
 
 /**
+ * Demo MRCPv2 client application that plays a TTS prompt while performing speech recognition on
+ * microphone input.  Prompt playback is cancelled as soon as start of speech is detected.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */

@@ -63,6 +63,7 @@ import org.mrcp4j.message.header.IllegalValueException;
 import org.mrcp4j.message.request.MrcpRequest;
 
 /**
+ * Demo MRCPv2 client application that utilizes a {@code speechsynth} resource to play a TTS prompt.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */

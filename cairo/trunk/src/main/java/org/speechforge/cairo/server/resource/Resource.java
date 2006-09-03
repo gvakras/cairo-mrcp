@@ -30,6 +30,7 @@ import java.rmi.RemoteException;
 import org.mrcp4j.MrcpResourceType;
 
 /**
+ * Defines the methods required for establishing and managing connections to resource implementations.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */
@@ -40,7 +41,7 @@ public interface Resource extends Remote {
     public ResourceMessage invite(ResourceMessage request) throws ResourceUnavailableException, RemoteException;
 
     /**
-     * Whether the resource receives audio input or transmits audio output.
+     * Defines whether a resource receives audio input or transmits audio output.
      * 
      * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
      *

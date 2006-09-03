@@ -33,6 +33,8 @@ import edu.cmu.sphinx.frontend.endpoint.SpeechStartSignal;
 import org.apache.log4j.Logger;
 
 /**
+
+ * Monitors a stream of speech data being processed and broadcasts start-of-speech and end-of-speech events.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */

@@ -32,6 +32,7 @@ import org.apache.commons.pool.impl.GenericObjectPool;
 import org.apache.log4j.Logger;
 
 /**
+ * Serves to create a pool of {@link org.speechforge.cairo.server.tts.PromptGenerator} instances.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */

@@ -25,6 +25,7 @@ package org.speechforge.cairo.server.resource;
 import java.io.Serializable;
 
 /**
+ * Encapsulates the parameters required for establishing the media stream between MRCPv2 clients and MRCPv2 resources.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */

@@ -33,6 +33,7 @@ import java.util.Map;
 import org.apache.commons.lang.Validate;
 
 /**
+ * Manages the storage and retrieval of temporary grammar files on the file system.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */

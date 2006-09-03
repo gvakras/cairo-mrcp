@@ -41,6 +41,8 @@ import javax.media.rtp.ReceiveStream;
 import org.apache.log4j.Logger;
 
 /**
+ * Reusable media client that plays audio received from an RTP media stream through the system speakers
+ * while simultaneously streaming audio from the system microphone to an RTP destination.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */

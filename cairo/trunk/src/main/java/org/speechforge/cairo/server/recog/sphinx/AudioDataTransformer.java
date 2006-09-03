@@ -27,6 +27,11 @@ import edu.cmu.sphinx.frontend.util.DataUtil;
 
 import org.apache.log4j.Logger;
 
+/**
+ * Transforms audio data of a specified format to {@code edu.cmu.sphinx.frontend.DoubleData}.
+ *
+ * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
+ */
 public class AudioDataTransformer {
 
     private static Logger _logger = Logger.getLogger(AudioDataTransformer.class);

@@ -34,6 +34,8 @@ import javax.media.protocol.DataSource;
 import org.apache.log4j.Logger;
 
 /**
+ * Provides a standard implementation of a {@code javax.media.ControllerListener} that can be used
+ * for starting (and optionally closing) {@code javax.media.Processor} instances.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */

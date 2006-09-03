@@ -33,6 +33,8 @@ import org.apache.log4j.Logger;
 import org.mrcp4j.MrcpResourceType;
 
 /**
+ * Implements a {@link org.speechforge.cairo.server.resource.ResourceServer} that can be utilized by
+ * MRCPv2 clients for establishing and managing connections to MRCPv2 resource implementations.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */

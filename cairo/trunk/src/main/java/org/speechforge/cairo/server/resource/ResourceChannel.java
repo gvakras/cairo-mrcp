@@ -27,6 +27,7 @@ import java.io.Serializable;
 import org.mrcp4j.MrcpResourceType;
 
 /**
+ * Encapsulates the parameters required for establishing and managing connections to resource implementations.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */

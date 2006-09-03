@@ -48,7 +48,7 @@ import org.mrcp4j.server.MrcpSession;
 import org.mrcp4j.server.provider.SpeechSynthRequestHandler;
 
 /**
- * MRCP channel implementation for "speechsynth" resource.
+ * Handles MRCPv2 speech synthesis requests by delegating to a dedicated {@link org.speechforge.cairo.server.tts.RTPSpeechSynthChannel}.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */

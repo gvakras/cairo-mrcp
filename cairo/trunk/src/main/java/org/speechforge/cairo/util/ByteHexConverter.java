@@ -28,6 +28,7 @@ import java.io.Writer;
 import org.apache.log4j.Logger;
 
 /**
+ * Provides utility methods for conversion between byte arrays and hex strings.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */

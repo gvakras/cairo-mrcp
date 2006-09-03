@@ -39,6 +39,9 @@ import javax.media.protocol.PushBufferStream;
 import org.apache.log4j.Logger;
 
 /**
+ * Serves to replicate a {@code javax.media.protocol.PushBufferDataSource} so that it may be
+ * consumed by multiple destinations at varying time intervals without starting or stopping
+ * the underlying data source.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */

@@ -29,7 +29,7 @@ import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.XMLConfiguration;
 
 /**
- * Class encapsulating all configuration information for a Cairo installation.
+ * Class encapsulating configuration information for a Cairo deployment.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  *

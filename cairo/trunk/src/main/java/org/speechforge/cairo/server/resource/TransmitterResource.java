@@ -53,6 +53,8 @@ import org.mrcp4j.MrcpResourceType;
 import org.mrcp4j.server.MrcpServerSocket;
 
 /**
+ * Implements a {@link org.speechforge.cairo.server.resource.Resource} for handling MRCPv2 requests
+ * that require generation of audio data to be streamed to the MRCPv2 client.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */

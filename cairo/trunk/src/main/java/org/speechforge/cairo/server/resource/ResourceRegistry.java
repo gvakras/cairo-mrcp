@@ -27,6 +27,7 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 
 /**
+ * Defines the methods required to register a resource with the resource server.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */

@@ -28,6 +28,8 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 
 /**
+ * Defines the methods an MRCPv2 client can use for establishing and managing
+ * connections to MRCPv2 resource implementations.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */

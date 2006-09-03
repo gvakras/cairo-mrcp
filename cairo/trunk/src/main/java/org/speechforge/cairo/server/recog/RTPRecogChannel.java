@@ -42,6 +42,7 @@ import org.apache.commons.pool.ObjectPool;
 import org.apache.log4j.Logger;
 
 /**
+ * Handles recognition requests against an incoming RTP audio stream.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */

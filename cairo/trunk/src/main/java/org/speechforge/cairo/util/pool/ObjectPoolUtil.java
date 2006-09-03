@@ -25,6 +25,7 @@ package org.speechforge.cairo.util.pool;
 import org.apache.commons.pool.impl.GenericObjectPool;
 
 /**
+ * Provides utility methods for working with the Jakarta {@code commons-pool} library.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */

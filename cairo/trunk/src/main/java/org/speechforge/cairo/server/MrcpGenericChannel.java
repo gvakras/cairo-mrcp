@@ -41,7 +41,7 @@ import org.mrcp4j.server.MrcpSession;
 import org.mrcp4j.server.provider.GenericRequestHandler;
 
 /**
- * Abstract base class for all specific MRCP channel implementations.
+ * Abstract base class for specific MRCPv2 channel implementations.
  * 
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */

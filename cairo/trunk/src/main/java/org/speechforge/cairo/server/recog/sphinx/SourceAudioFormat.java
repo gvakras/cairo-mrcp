@@ -24,6 +24,11 @@ package org.speechforge.cairo.server.recog.sphinx;
 
 import java.io.UnsupportedEncodingException;
 
+/**
+ * Encapsulates the properties representing the format of an audio source.
+ *
+ * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
+ */
 public class SourceAudioFormat {
 
     /**

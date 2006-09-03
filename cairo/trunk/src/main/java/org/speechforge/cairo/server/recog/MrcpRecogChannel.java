@@ -50,6 +50,7 @@ import org.mrcp4j.server.MrcpSession;
 import org.mrcp4j.server.provider.RecogOnlyRequestHandler;
 
 /**
+ * Handles MRCPv2 recognition requests by delegating to a dedicated {@link org.speechforge.cairo.server.recog.RTPRecogChannel}.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */

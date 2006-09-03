@@ -23,6 +23,7 @@
 package org.speechforge.cairo.exception;
 
 /**
+ * Thrown when a requested MRCPv2 resource is not available. 
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */
@@ -33,7 +34,6 @@ public class ResourceUnavailableException extends CairoException {
      */
     public ResourceUnavailableException() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     /**
@@ -42,7 +42,6 @@ public class ResourceUnavailableException extends CairoException {
      */
     public ResourceUnavailableException(String message) {
         super(message);
-        // TODO Auto-generated constructor stub
     }
 
     /**
@@ -52,7 +51,6 @@ public class ResourceUnavailableException extends CairoException {
      */
     public ResourceUnavailableException(String message, Throwable cause) {
         super(message, cause);
-        // TODO Auto-generated constructor stub
     }
 
     /**
@@ -61,7 +59,6 @@ public class ResourceUnavailableException extends CairoException {
      */
     public ResourceUnavailableException(Throwable cause) {
         super(cause);
-        // TODO Auto-generated constructor stub
     }
 
 }

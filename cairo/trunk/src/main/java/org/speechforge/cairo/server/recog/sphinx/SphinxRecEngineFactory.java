@@ -35,6 +35,11 @@ import org.apache.commons.pool.PoolableObjectFactory;
 import org.apache.commons.pool.impl.GenericObjectPool;
 import org.apache.log4j.Logger;
 
+/**
+ * Serves to create a pool of {@link org.speechforge.cairo.server.recog.sphinx.SphinxRecEngine} instances.
+ *
+ * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
+ */
 public class SphinxRecEngineFactory extends AbstractPoolableObjectFactory {
 
     private static Logger _logger = Logger.getLogger(SphinxRecEngineFactory.class);

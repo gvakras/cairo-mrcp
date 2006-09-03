@@ -26,6 +26,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
+ * Encapsulates the parameters that specify the location of a grammar file.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */

@@ -33,6 +33,7 @@ import javax.media.rtp.InvalidSessionAddressException;
 import org.apache.log4j.Logger;
 
 /**
+ * Handle requests for speech synthesis (TTS) to be streamed through an outbound RTP channel.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */

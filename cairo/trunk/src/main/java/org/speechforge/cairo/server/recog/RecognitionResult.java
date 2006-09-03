@@ -25,6 +25,7 @@ package org.speechforge.cairo.server.recog;
 import edu.cmu.sphinx.result.Result;
 
 /**
+ * Represents the result of a completed recognition request.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */

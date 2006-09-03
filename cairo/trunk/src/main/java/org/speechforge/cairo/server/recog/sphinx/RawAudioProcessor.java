@@ -44,7 +44,7 @@ import edu.cmu.sphinx.util.props.Registry;
 import org.apache.log4j.Logger;
 
 /**
- * Processes raw audio data into a format usable by the Sphinx recognition engine.
+ * Processes raw audio data input and feeds it to the frontend of the Sphinx recognition engine.
  * 
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  *

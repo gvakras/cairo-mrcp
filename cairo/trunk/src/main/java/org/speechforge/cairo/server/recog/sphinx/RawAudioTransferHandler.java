@@ -34,6 +34,10 @@ import javax.media.protocol.PushBufferStream;
 import org.apache.log4j.Logger;
 
 /**
+ * Transfers raw audio data from a {@code javax.media.protocol.PushBufferStream} to a
+ * {@link org.speechforge.cairo.server.recog.sphinx.RawAudioProcessor}.
+ *
+ * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */
 public class RawAudioTransferHandler implements BufferTransferHandler {
 

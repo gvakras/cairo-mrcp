@@ -49,6 +49,7 @@ import javax.media.rtp.rtcp.SourceDescription;
 import org.apache.log4j.Logger;
 
 /**
+ * Manages connection with and consumption from an incoming RTP audio stream.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */

@@ -43,6 +43,7 @@ import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
 
 /**
+ * Manages recording requests against an RTP audio stream being received.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */

@@ -34,7 +34,7 @@ import com.sun.speech.freetts.audio.AudioPlayer;
 import com.sun.speech.freetts.audio.SingleFileAudioPlayer;
 
 /**
- * Generates speech prompt files using text-to-speech (TTS).
+ * Generates speech prompt files using the FreeTTS text-to-speech engine.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */

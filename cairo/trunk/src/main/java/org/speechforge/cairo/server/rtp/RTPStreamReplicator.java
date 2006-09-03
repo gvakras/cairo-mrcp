@@ -40,6 +40,9 @@ import javax.media.rtp.ReceiveStream;
 import org.apache.log4j.Logger;
 
 /**
+ * Serves to replicate an incoming RTP audio stream so that it may be consumed by multiple
+ * destinations at varying time intervals without starting or stopping the underlying data
+ * source.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */

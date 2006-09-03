@@ -63,6 +63,7 @@ import edu.cmu.sphinx.util.props.PropertyException;
 import org.apache.log4j.Logger;
 
 /**
+ * Provides a poolable recognition engine that takes raw audio data as input.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */
@@ -288,7 +289,8 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
     }
 
     /**
-     * Provides main method for testing SphinxRecEngine in standalone mode using the microphone for input.
+     * Provides a client for testing {@link org.speechforge.cairo.server.recog.sphinx.SphinxRecEngine}
+     * in standalone mode using the microphone for input.
      */
     public static class Test extends RecogListenerDecorator {
 

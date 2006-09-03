@@ -28,6 +28,7 @@ import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
 
 /**
+ * Manages pooling of TCP port pairs that are required for each RTP channel.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */

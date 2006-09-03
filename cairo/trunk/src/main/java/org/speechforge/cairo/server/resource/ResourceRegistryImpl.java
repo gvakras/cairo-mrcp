@@ -39,6 +39,8 @@ import java.util.ArrayList;
 import org.apache.log4j.Logger;
 
 /**
+ * Implements a {@link org.speechforge.cairo.server.resource.ResourceRegistry} that can be
+ * used to register resources with the resource server.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */
@@ -174,6 +176,11 @@ public class ResourceRegistryImpl extends UnicastRemoteObject implements Resourc
         Thread.sleep(90000);
     }
 
+    /**
+     * Provides a client for testing {@link org.speechforge.cairo.server.resource.ResourceRegistryImpl}.
+     *
+     * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
+     */
     public static class TestClient {
 
         public static void main(String[] args) throws Exception {

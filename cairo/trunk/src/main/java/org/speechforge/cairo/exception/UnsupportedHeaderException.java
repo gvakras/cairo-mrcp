@@ -23,7 +23,7 @@
 package org.speechforge.cairo.exception;
 
 /**
- * Thrown when a MRCP header is encountered that is not supported by the resource. 
+ * Thrown when an MRCPv2 header is encountered that is not supported by the resource. 
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */
@@ -34,7 +34,6 @@ public class UnsupportedHeaderException extends CairoException {
      */
     public UnsupportedHeaderException() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     /**
@@ -43,7 +42,6 @@ public class UnsupportedHeaderException extends CairoException {
      */
     public UnsupportedHeaderException(String message, Throwable cause) {
         super(message, cause);
-        // TODO Auto-generated constructor stub
     }
 
     /**
@@ -51,7 +49,6 @@ public class UnsupportedHeaderException extends CairoException {
      */
     public UnsupportedHeaderException(String message) {
         super(message);
-        // TODO Auto-generated constructor stub
     }
 
     /**
@@ -59,7 +56,6 @@ public class UnsupportedHeaderException extends CairoException {
      */
     public UnsupportedHeaderException(Throwable cause) {
         super(cause);
-        // TODO Auto-generated constructor stub
     }
 
 }

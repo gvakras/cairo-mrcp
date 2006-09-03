@@ -23,6 +23,7 @@
 package org.speechforge.cairo.server.recog;
 
 /**
+ * Defines the methods required for handling speech processing events.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */

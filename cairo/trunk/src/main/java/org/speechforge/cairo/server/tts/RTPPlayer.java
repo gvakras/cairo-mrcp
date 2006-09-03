@@ -50,6 +50,7 @@ import javax.media.rtp.SessionAddress;
 import org.apache.log4j.Logger;
 
 /**
+ * Handles playing of audio prompt files over an RTP output stream.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */

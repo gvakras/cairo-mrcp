@@ -34,9 +34,9 @@ import org.apache.commons.pool.impl.GenericObjectPool;
 import org.apache.log4j.Logger;
 
 /**
- * TODOC
- * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
+ * Serves to create a pool of {@link org.speechforge.cairo.server.rtp.RTPStreamReplicator} instances.
  *
+ * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */
 public class RTPStreamReplicatorFactory implements PoolableObjectFactory {
 
