@@ -1,7 +1,7 @@
                        -----
-                 Cairo - Installation
+                    Installation
                        -----
-                  Niels Godfredsen
+                  Cairo Project Team
                        -----
 
 {Downloads}
@@ -11,6 +11,8 @@
 {Prerequisites}
 
   Cairo requires Java Runtime Environment (JRE) 5.0 or higher which can be downloaded {{{http://java.sun.com/javase/downloads/index.jsp}here}}.
+
+  If you have not already, you will need to set your JAVA_HOME environment variable to point to the installed location of your JRE/JDK.
 
 {Installation}
 

@@ -1,16 +1,20 @@
                        -----
-                 Cairo - Getting Started
+                  Getting Started
                        -----
-                  Niels Godfredsen
+                  Cairo Project Team
                        -----
 
-{Getting Started}
+Getting Started
 
   If you have not yet installed Cairo please see the {{{install.html}Cairo Installation Guide}} for instructions on downloading and installing the Cairo software.
 
-  Once Cairo is successfully installed you can follow the instructions below to start the various Cairo server processes and run the demo MRCPv2 clients.
+  Once Cairo is successfully installed you can follow the instructions below to launch the various Cairo server processes and run the demo MRCPv2 clients.
 
-{Starting the Cairo Server}
+*------------------+
+| <Note: These instructions and the batch files provided in the Cairo distribution are geared towards a deployment of Cairo on Windows.  Since Cairo is 100% Java it should work on any operating system, however it has, as of yet, only been verified on Windows.  If you are interested in deploying Cairo on another operating system please post a message to the {{{http://www.nabble.com/cairo-user-f15778.html}cairo-user}} forum to get assistance in this process.>
+*------------------+
+
+Starting the Cairo Server
 
 *Server Architecture
 
@@ -34,15 +38,34 @@
 
   Server process are started by passing appropriate parameters to the <<<launch.bat>>> script in the <<<bin>>> directory of your Cairo installation.  However the <<<launch.bat>>> script should not be invoked directly.  Instead batch files are supplied for each of the server processes present in the default configuration.
 
-  The resource server (<<<rserver.bat>>>) should always be started first since the resources must register with the resource server when they become available.  Once the resource server has completed initialization you should see a message on the console that says <"Server and registry bound and waiting...">
+  The resource server (<<<rserver.bat>>>) should always be started first since the resources must register with the resource server when they become available.  Once the resource server has completed initialization you will see a message on the console that says <"Server and registry bound and waiting...">
   
-  Then the individual resources (<<<transmitter1.bat>>> and <<<receiver1.bat>>>) can be started in any order.  When ready, each of the resources should display a <"Resource bound and waiting..."> message.
+  Then the individual resources (<<<transmitter1.bat>>> and <<<receiver1.bat>>>) can be started in any order.  When ready, each of the resources will display a <"Resource bound and waiting..."> message.
 
   Once all three server processes have completed initialization and display a waiting message, the server cluster is ready to accept MRCPv2 client requests.
 
 
-{Running the Demo MRCPv2 Clients}
+Running the Demo MRCPv2 Clients
 
-  A number of demo clients are supplied with the Cairo installation...
+  A number of demo clients are supplied with the Cairo installation.  They can either be run directly or the code may be used as an example to write your own MRCPv2 client.
 
+  Each client can be started by running the appropriate batch script found in the <<<demo/bin>>> directory of your Cairo installation.  Source code for the demos is found in the <<<demo/src/java>>> directory.
+
+*------------------------+--------------------------------------------------------------------------------------------------------------+
+| <Client>               | <Description>
+*------------------------+--------------------------------------------------------------------------------------------------------------+
+| <<<demo-recog>>>       | MRCPv2 client application that performs speech recognition on microphone input.
+*------------------------+--------------------------------------------------------------------------------------------------------------+
+| <<<demo-speechsynth>>> | MRCPv2 client application that utilizes a <<<speechsynth>>> resource to play a TTS prompt.
+*------------------------+--------------------------------------------------------------------------------------------------------------+
+| <<<demo-bargein>>>     | MRCPv2 client application that plays a TTS prompt while performing speech recognition on
+|                        | microphone input.  Prompt playback is cancelled as soon as start of speech is detected.
+*------------------------+--------------------------------------------------------------------------------------------------------------+
+| <<<demo-parrot>>>      | Like <<<demo-bargein>>> but run in <<<-parrot>>> mode so that recognized utterances
+|                        | are read back to the user using TTS.
+*------------------------+--------------------------------------------------------------------------------------------------------------+
+| <<<demo-standalone>>>  | Standalone application that performs speech recognition on microphone input using an embedded
+|                        | <<<org.speechforge.cairo.server.recog.sphinx.SphinxRecEngine>>> instance directly
+|                        | (instead of by streaming audio to an MRCPv2 recognition resource).
+*------------------------+--------------------------------------------------------------------------------------------------------------+
 

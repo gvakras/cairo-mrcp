@@ -23,14 +23,16 @@
       <name>${pom.artifactId}-dev</name>
       <subscribe>http://lists.sourceforge.net/lists/listinfo/${pom.artifactId}-developer</subscribe>
       <unsubscribe>http://lists.sourceforge.net/lists/listinfo/${pom.artifactId}-developer</unsubscribe>
-      <post>${pom.artifactId}-developer@lists.sourceforge.net</post>
+      <!--post>${pom.artifactId}-developer@lists.sourceforge.net</post-->
+      <post>http://www.nabble.com/${pom.artifactId}-developer-f15779.html</post>
       <archive>http://www.nabble.com/${pom.artifactId}-developer-f15779.html</archive>
     </mailingList>
     <mailingList>
       <name>${pom.artifactId}-user</name>
       <subscribe>http://lists.sourceforge.net/lists/listinfo/${pom.artifactId}-user</subscribe>
       <unsubscribe>http://lists.sourceforge.net/lists/listinfo/${pom.artifactId}-user</unsubscribe>
-      <post>${pom.artifactId}-user@lists.sourceforge.net</post>
+      <!--post>${pom.artifactId}-user@lists.sourceforge.net</post-->
+      <post>http://www.nabble.com/${pom.artifactId}-user-f15778.html</post>
       <archive>http://www.nabble.com/${pom.artifactId}-user-f15778.html</archive>
     </mailingList>
   </mailingLists>
@@ -218,7 +220,7 @@
     <dependency>
       <groupId>org.mrcp4j</groupId>
       <artifactId>mrcp4j</artifactId>
-      <version>SNAPSHOT</version>
+      <version>0.2</version>
       <scope>compile</scope>
     </dependency>
 
@@ -327,6 +329,28 @@
     </dependency>
 
   </dependencies>
+
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>dependencies</report>
+              <report>mailing-list</report>
+              <report>license</report>
+              <report>project-team</report>
+              <report>scm</report>
+              <!--report>cim</report-->
+              <!--report>issue-tracking</report-->
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+    </plugins>
+  </reporting>
 
   <distributionManagement>
     <repository>
