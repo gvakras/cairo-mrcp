@@ -63,7 +63,8 @@ import org.mrcp4j.message.header.MrcpHeaderName;
 import org.mrcp4j.message.request.MrcpRequest;
 
 /**
- * Demo MRCPv2 client application that performs speech recognition on microphone input.
+ * Demo MRCPv2 client application that utilizes a {@code speechrecog} resource to perform
+ * speech recognition on microphone input.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */
