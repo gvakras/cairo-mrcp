@@ -31,6 +31,13 @@
       </includes>
     </fileSet>
     <fileSet>
+      <directory>src/main/java/org/speechforge/cairo/demo</directory>
+      <outputDirectory>demo/src/java/org/speechforge/cairo/demo</outputDirectory>
+      <includes>
+        <include>**/*.java</include>
+      </includes>
+    </fileSet>
+    <fileSet>
       <directory>target</directory>
       <outputDirectory></outputDirectory>
       <includes>
