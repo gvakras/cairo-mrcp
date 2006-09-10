@@ -29,7 +29,15 @@
       <item name="API Documentation" href="docs/apidocs/index.html?overview-summary.html"/>
     </menu>
 
-    ${reports}
+    <menu name="Project Documentation">
+      <item name="Project Info" href="project-info.html" collapse="false">
+        <item name="Dependencies" href="dependencies.html"/>
+        <item name="Mailing Lists" href="mail-lists.html"/>
+        <item name="Project License" href="license.html"/>
+        <item name="Project Team" href="team-list.html"/>
+        <item name="Source Repository" href="source-repository.html"/>
+      </item>
+    </menu>
 
   </body>
 
