@@ -177,6 +177,7 @@
         <configuration>
           <descriptors>
             <descriptor>settings/assembly/bin.xml</descriptor>
+            <descriptor>settings/assembly/src.xml</descriptor>
           </descriptors>
         </configuration>
       </plugin>

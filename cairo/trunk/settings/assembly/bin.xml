@@ -5,6 +5,7 @@
     <format>tar.bz2</format>
     <format>zip</format>
   </formats>
+  <includeBaseDirectory>true</includeBaseDirectory>
   <fileSets>
     <fileSet>
       <directory>bin</directory>
