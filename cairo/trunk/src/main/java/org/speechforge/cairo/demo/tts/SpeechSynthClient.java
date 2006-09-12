@@ -23,19 +23,16 @@
 package org.speechforge.cairo.demo.tts;
 
 import org.speechforge.cairo.demo.util.NativeMediaClient;
-
 import org.speechforge.cairo.server.resource.ResourceChannel;
 import org.speechforge.cairo.server.resource.ResourceImpl;
 import org.speechforge.cairo.server.resource.ResourceMediaStream;
 import org.speechforge.cairo.server.resource.ResourceMessage;
-import org.speechforge.cairo.server.resource.ResourceRegistry;
 import org.speechforge.cairo.server.resource.ResourceServer;
 import org.speechforge.cairo.server.rtp.RTPConsumer;
 
 import java.awt.Toolkit;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.URL;
 import java.net.UnknownHostException;
 import java.rmi.Naming;
 import java.util.ArrayList;
@@ -196,7 +193,7 @@ public class SpeechSynthClient implements MrcpEventListener {
         
         if (args.length != 2 || line.hasOption(ResourceImpl.HELP_OPTION)) {
             HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp("SpeechSynthClient [options] <prompt-text> <local-rtp-port>", options);
+            formatter.printHelp("SpeechSynthClient [options] <local-rtp-port> <prompt-text>", options);
             return;
         }
 
@@ -216,20 +213,20 @@ public class SpeechSynthClient implements MrcpEventListener {
             _toolkit = Toolkit.getDefaultToolkit();
         }
 
-        String promptText = args[0];
-
         int localRtpPort = -1;
 
         try {
-            localRtpPort = Integer.parseInt(args[1]);
+            localRtpPort = Integer.parseInt(args[0]);
         } catch (Exception e) {
             _logger.debug(e, e);
         }
 
         if (localRtpPort < 0 || localRtpPort >= RTPConsumer.TCP_PORT_MAX || localRtpPort % 2 != 0) {
-            throw new Exception("Improper format for 2nd command line argument <local-rtp-port>," +
+            throw new Exception("Improper format for first command line argument <local-rtp-port>," +
                 " should be even integer between 0 and " + RTPConsumer.TCP_PORT_MAX);
         }
+
+        String promptText = args[1];
 
         InetAddress rserverHost = line.hasOption(ResourceImpl.RSERVERHOST_OPTION) ?
             InetAddress.getByName(line.getOptionValue(ResourceImpl.RSERVERHOST_OPTION)) : InetAddress.getLocalHost();

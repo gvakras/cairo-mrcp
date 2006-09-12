@@ -6,7 +6,7 @@
 
 grammar example;
 
-public <main> = ( [ <pre> ] ( <weather> {WEATHER} | <sports>  {SPORTS} | <stocks> {STOCKS} ) ) | <quit> {QUIT} ;
+public <main> = [ <pre> ] ( <weather> {WEATHER} | <sports>  {SPORTS} | <stocks> {STOCKS} ) ;
 
 <pre> = ( I would like [ to hear ] ) | ( hear ) | ( [ please ] get [ me ] ) | ( look up );
 
@@ -15,5 +15,3 @@ public <main> = ( [ <pre> ] ( <weather> {WEATHER} | <sports>  {SPORTS} | <stocks
 <sports> = sports [ news ];
 
 <stocks> = ( [ a ] stock ( quote | quotes ) ) | stocks;
-
-<quit> = exit | quit;

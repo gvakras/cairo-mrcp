@@ -23,7 +23,6 @@
 package org.speechforge.cairo.demo.bargein;
 
 import org.speechforge.cairo.demo.util.NativeMediaClient;
-
 import org.speechforge.cairo.server.resource.ResourceChannel;
 import org.speechforge.cairo.server.resource.ResourceImpl;
 import org.speechforge.cairo.server.resource.ResourceMediaStream;
@@ -351,7 +350,7 @@ public class BargeInClient implements MrcpEventListener {
 
         if (args.length != 3 || line.hasOption(ResourceImpl.HELP_OPTION)) {
             HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp("BargeInClient [options] <grammar-URL> <prompt-text> <local-rtp-port>", options);
+            formatter.printHelp("BargeInClient [options] <local-rtp-port> <grammar-URL> <prompt-text>", options);
             return;
         }
 
@@ -363,22 +362,22 @@ public class BargeInClient implements MrcpEventListener {
         _loop = line.hasOption(LOOP_OPTION);
         _parrot = line.hasOption(PARROT_OPTION);
 
-        URL grammarUrl = new URL(args[0]);
-        String prompt = args[1];
-        
         int localRtpPort = -1;
 
         try {
-            localRtpPort = Integer.parseInt(args[2]);
+            localRtpPort = Integer.parseInt(args[0]);
         } catch (Exception e) {
             _logger.debug(e, e);
         }
 
         if (localRtpPort < 0 || localRtpPort >= RTPConsumer.TCP_PORT_MAX || localRtpPort % 2 != 0) {
-            throw new Exception("Improper format for 3rd command line argument <local-rtp-port>," +
+            throw new Exception("Improper format for first command line argument <local-rtp-port>," +
                 " should be even integer between 0 and " + RTPConsumer.TCP_PORT_MAX);
         }
 
+        URL grammarUrl = new URL(args[1]);
+        String prompt = args[2];
+        
         // lookup resource server
         InetAddress rserverHost = line.hasOption(ResourceImpl.RSERVERHOST_OPTION) ?
             InetAddress.getByName(line.getOptionValue(ResourceImpl.RSERVERHOST_OPTION)) : InetAddress.getLocalHost();

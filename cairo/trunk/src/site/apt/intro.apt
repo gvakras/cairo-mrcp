@@ -74,9 +74,9 @@ Running the Demo MRCPv2 Clients
 *------------------------+--------------------------------------------------------------------------------------------------------------+
 | <Client>               | <Description>
 *------------------------+--------------------------------------------------------------------------------------------------------------+
-| <<<demo-recog>>>       | MRCPv2 client application that utilizes a <<<speechrecog>>> resource to perform speech recognition on microphone input.
-*------------------------+--------------------------------------------------------------------------------------------------------------+
 | <<<demo-speechsynth>>> | MRCPv2 client application that utilizes a <<<speechsynth>>> resource to play a TTS prompt.
+*------------------------+--------------------------------------------------------------------------------------------------------------+
+| <<<demo-recog>>>       | MRCPv2 client application that utilizes a <<<speechrecog>>> resource to perform speech recognition on microphone input.
 *------------------------+--------------------------------------------------------------------------------------------------------------+
 | <<<demo-bargein>>>     | MRCPv2 client application that plays a TTS prompt while performing speech recognition on microphone input.  Prompt playback is cancelled as soon as start of speech is detected.
 *------------------------+--------------------------------------------------------------------------------------------------------------+

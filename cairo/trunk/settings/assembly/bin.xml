@@ -77,6 +77,10 @@
       <outputDirectory>demo/grammar</outputDirectory>
     </file>
     <file>
+      <source>src/main/resources/grammar/example-loop.gram</source>
+      <outputDirectory>demo/grammar</outputDirectory>
+    </file>
+    <file>
       <source>src/main/resources/config/freetts_voices.txt</source>
       <outputDirectory>lib</outputDirectory>
       <destName>voices.txt</destName>

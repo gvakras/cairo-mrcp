@@ -62,7 +62,7 @@ import org.apache.log4j.Logger;
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */
-public class StandaloneRecogClient  extends RecogListenerDecorator {
+public class StandaloneRecogClient extends RecogListenerDecorator {
 
     private static Logger _logger = Logger.getLogger(StandaloneRecogClient.class);
 
@@ -107,7 +107,7 @@ public class StandaloneRecogClient  extends RecogListenerDecorator {
      * @throws InterruptedException
      * @throws NoDataSourceException
      */
-    public RecognitionResult doRecognize(MediaLocator mediaLocator)
+    public synchronized RecognitionResult doRecognize(MediaLocator mediaLocator, String examplePhrase)
       throws IOException, NoProcessorException, CannotRealizeException, InterruptedException, NoDataSourceException {
 
         Processor processor1 = JMFUtil.createRealizedProcessor(mediaLocator, PREFERRED_MEDIA_FORMATS);
@@ -130,25 +130,27 @@ public class StandaloneRecogClient  extends RecogListenerDecorator {
 
         _logger.debug("Starting recog thread...");
         _engine.startRecogThread();
-        
-        _logger.info("\nStart speaking now...");
+
+        if (_logger.isInfoEnabled()) {
+            if (examplePhrase == null) {
+                _logger.info("\nStart speaking now...");
+            } else {
+                _logger.info("\nStart speaking now... (e.g. \"" + examplePhrase + "\")");
+            }
+        }
+
         if (_beep) {
             _toolkit.beep();
         }
 
         // wait for result
-        RecognitionResult result = null;
-        synchronized (this) {
-            while (_result == null) {
-                this.wait(1000);
-            }
-            result = _result;
-            _result = null;
+        while (_result == null) {
+            this.wait();
         }
-
+ 
         _engine.passivate();
 
-        return result;
+        return _result;
     }
 
 
@@ -181,9 +183,9 @@ public class StandaloneRecogClient  extends RecogListenerDecorator {
         CommandLine line = parser.parse(options, args, true);
         args = line.getArgs();
 
-        if (args.length != 1 || line.hasOption(HELP_OPTION)) {
+        if (args.length < 1 || args.length > 2 || line.hasOption(HELP_OPTION)) {
             HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp("StandaloneRecogClient [options] <grammar-URL>", options);
+            formatter.printHelp("StandaloneRecogClient [options] <grammar-URL> <example-phrase>", options);
             return;
         }
 
@@ -193,7 +195,8 @@ public class StandaloneRecogClient  extends RecogListenerDecorator {
         }
 
         GrammarLocation grammarLocation = new GrammarLocation(new URL(args[0]));
-        
+        String examplePhrase = (args.length > 1) ? args[1] : null;
+
         URL sphinxConfigUrl = SphinxRecEngine.class.getResource("/config/sphinx-config.xml");
         if (sphinxConfigUrl == null) {
             throw new RuntimeException("Sphinx config file not found!");
@@ -209,13 +212,22 @@ public class StandaloneRecogClient  extends RecogListenerDecorator {
             engine.loadJSGF(grammarLocation);
 
             StandaloneRecogClient client = new StandaloneRecogClient(engine);
-            client.doRecognize(MICROPHONE);
-            System.exit(0);
+            RecognitionResult result = client.doRecognize(MICROPHONE, examplePhrase);
+
+            if (_logger.isInfoEnabled()) {
+                StringBuilder sb = new StringBuilder();
+                sb.append("\n**************************************************************");
+                sb.append("\nRecognition result: ").append(result);
+                sb.append("\n**************************************************************\n");
+                _logger.info(sb);
+            }
 
         } catch (Exception e){
             _logger.warn(e, e);
             System.exit(1);
         }
+
+        System.exit(0);
     }
 
 }

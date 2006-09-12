@@ -12,11 +12,11 @@
 
   <!-- Example: switch this priority value to "trace" to see each buffer transferred. -->
   <category name="org.speechforge.cairo.server.rtp.PBDSReplicator">
-    <priority value="debug"/>
+    <priority value="info"/>
   </category>
 
   <root>
-    <priority value="debug"/>
+    <priority value="info"/>
     <appender-ref ref="Console"/>
   </root>
 

@@ -23,7 +23,6 @@
 package org.speechforge.cairo.demo.recog;
 
 import org.speechforge.cairo.demo.util.NativeMediaClient;
-
 import org.speechforge.cairo.server.resource.ResourceChannel;
 import org.speechforge.cairo.server.resource.ResourceImpl;
 import org.speechforge.cairo.server.resource.ResourceMediaStream;
@@ -58,7 +57,9 @@ import org.mrcp4j.client.MrcpInvocationException;
 import org.mrcp4j.client.MrcpProvider;
 import org.mrcp4j.message.MrcpEvent;
 import org.mrcp4j.message.MrcpResponse;
+import org.mrcp4j.message.header.CompletionCause;
 import org.mrcp4j.message.header.IllegalValueException;
+import org.mrcp4j.message.header.MrcpHeader;
 import org.mrcp4j.message.header.MrcpHeaderName;
 import org.mrcp4j.message.request.MrcpRequest;
 
@@ -78,6 +79,7 @@ public class RecognitionClient implements MrcpEventListener {
     private static Toolkit _toolkit = null;
 
     private MrcpChannel _recogChannel;
+    private MrcpEvent _mrcpEvent;
 
     /**
      * TODOC
@@ -120,16 +122,21 @@ public class RecognitionClient implements MrcpEventListener {
             if (_beep) {
                 _toolkit.beep();
             }
-            System.exit(0);
+            synchronized (this) {
+                _mrcpEvent = event;
+                this.notifyAll();
+            }
         }
     }
 
-    public MrcpRequestState startRecognize(URL grammarUrl)
-      throws IOException, MrcpInvocationException, InterruptedException {
+    public synchronized String doRecognize(URL grammarUrl, String examplePhrase)
+      throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException {
+
+        _mrcpEvent = null;
 
         // recog request
         MrcpRequest request = _recogChannel.createRequest(MrcpMethodName.RECOGNIZE);
-//        request.addHeader(MrcpHeaderName.NO_INPUT_TIMEOUT.constructHeader(new Long(30000)));
+        request.addHeader(MrcpHeaderName.NO_INPUT_TIMEOUT.constructHeader(new Long(30000)));
         request.setContent("application/jsgf", null, grammarUrl);
         MrcpResponse response = _recogChannel.sendRequest(request);
 
@@ -145,9 +152,23 @@ public class RecognitionClient implements MrcpEventListener {
             throw new RuntimeException("Recognition failed to start!");
         }
         
-        _logger.info("Start speaking now...");
+        if (_logger.isInfoEnabled()) {
+            if (examplePhrase == null) {
+                _logger.info("\nStart speaking now...");
+            } else {
+                _logger.info("\nStart speaking now... (e.g. \"" + examplePhrase + "\")");
+            }
+        }
 
-        return response.getRequestState();
+        while (_mrcpEvent == null) {
+            this.wait();
+        }
+
+        MrcpHeader completionCauseHeader = _mrcpEvent.getHeader(MrcpHeaderName.COMPLETION_CAUSE);
+        CompletionCause completionCause = (CompletionCause) completionCauseHeader.getValueObject();
+
+        return (completionCause.getCauseCode() == 0) ? _mrcpEvent.getContent() : null ;
+
     }
 
 
@@ -195,9 +216,9 @@ public class RecognitionClient implements MrcpEventListener {
         CommandLine line = parser.parse(options, args, true);
         args = line.getArgs();
 
-        if (args.length != 2 || line.hasOption(ResourceImpl.HELP_OPTION)) {
+        if (args.length < 2 || args.length > 3 || line.hasOption(ResourceImpl.HELP_OPTION)) {
             HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp("RecognitionClient [options] <grammar-URL> <local-rtp-port>", options);
+            formatter.printHelp("RecognitionClient [options] <local-rtp-port> <grammar-URL> <example-phrase>", options);
             return;
         }
 
@@ -206,19 +227,22 @@ public class RecognitionClient implements MrcpEventListener {
             _toolkit = Toolkit.getDefaultToolkit();
         }
 
-        URL grammarUrl = new URL(args[0]);
-        
         int localRtpPort = -1;
+
         try {
-            localRtpPort = Integer.parseInt(args[1]);
+            localRtpPort = Integer.parseInt(args[0]);
         } catch (Exception e) {
             _logger.debug(e, e);
         }
 
         if (localRtpPort < 0 || localRtpPort >= RTPConsumer.TCP_PORT_MAX || localRtpPort % 2 != 0) {
-            throw new Exception("Improper format for 3rd command line argument <local-rtp-port>," +
+            throw new Exception("Improper format for first command line argument <local-rtp-port>," +
                 " should be even integer between 0 and " + RTPConsumer.TCP_PORT_MAX);
         }
+
+        URL grammarUrl = new URL(args[1]);
+
+        String examplePhrase = (args.length > 2) ? args[2] : null;
 
         // lookup resource server
         InetAddress rserverHost = line.hasOption(ResourceImpl.RSERVERHOST_OPTION) ?
@@ -247,7 +271,14 @@ public class RecognitionClient implements MrcpEventListener {
         RecognitionClient client = new RecognitionClient(recogChannel);
 
         try {
-            client.startRecognize(grammarUrl);
+            String result = client.doRecognize(grammarUrl, examplePhrase);
+            if (_logger.isInfoEnabled()) {
+                StringBuilder sb = new StringBuilder();
+                sb.append("\n**************************************************************");
+                sb.append("\nRecognition result: ").append(result);
+                sb.append("\n**************************************************************\n");
+                _logger.info(sb);
+            }
         } catch (Exception e){
             if (e instanceof MrcpInvocationException) {
                 MrcpResponse response = ((MrcpInvocationException) e).getResponse();
@@ -258,6 +289,8 @@ public class RecognitionClient implements MrcpEventListener {
             _logger.warn(e, e);
             System.exit(1);
         }
+
+        System.exit(0);
     }
 
 }
