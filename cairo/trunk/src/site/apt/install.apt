@@ -14,7 +14,7 @@
 
   Cairo requires Java Runtime Environment (JRE) 5.0 or higher which can be downloaded here:
 
-  {{http://java.sun.com/javase/downloads/}}.
+  {{http://java.sun.com/javase/downloads/}}
 
   If you have not already, you will need to set your JAVA_HOME environment variable to point to the installed location of your JRE/JDK.
 

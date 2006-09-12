@@ -55,17 +55,19 @@ Running the Demo MRCPv2 Clients
 
 * Example Grammar
 
-  All demo clients that include speech recognition functionality are configured by default to use the grammar file <<<demo/grammar/example.gram>>>.   This grammar is in Java Speech Grammar Format (JSGF).  If you are familiar with JSGF you can look at the grammar file to find out what some valid utterances are that the demos will recognize.  Also some examples are listed below.
+  Most of the demo clients that include speech recognition functionality are configured by default to use the grammar file <<<demo/grammar/example.gram>>>.   This grammar is in Java Speech Grammar Format (JSGF).  If you are familiar with JSGF you can examine the grammar file to find out what some valid utterances are that the demos will recognize.  Here are some examples of valid utterances from the <<<example.gram>>> grammar file:
 
-  Here are some examples of some valid utterances from the <<<example.gram>>> grammar file:
+    * <"I would like sports news.">
 
-  * <"I would like sports news.">
+    * <"Get me the weather.">
 
-  * <"Get me the weather.">
+    * <"I would like to hear a stock quote.">
 
-  * <"I would like to hear a stock quote.">
+  Demo clients that run in <<<-loop>>> mode use the grammar file <<<demo/grammar/example-loop.gram>>> instead.  This grammar extends <<<example.gram>>> by adding voice commands for exiting a looping demo.  The <<<example-loop.gram>>> grammar file adds the following recognized utterances:
 
-  * <"Quit.">
+    * <"Exit.">
+
+    * <"Quit.">
 
 * Available Clients
 

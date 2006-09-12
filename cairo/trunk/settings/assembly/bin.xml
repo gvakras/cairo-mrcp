@@ -1,18 +1,11 @@
 <assembly>
   <id>bin</id>
   <formats>
-    <!--format>tar.gz</format>
-    <format>tar.bz2</format-->
+    <format>tar.gz</format>
+    <format>tar.bz2</format>
     <format>zip</format>
   </formats>
   <fileSets>
-    <fileSet>
-      <includes>
-        <include>README*</include>
-        <include>LICENSE*</include>
-        <include>NOTICE*</include>
-      </includes>
-    </fileSet>
     <fileSet>
       <directory>bin</directory>
       <outputDirectory>bin</outputDirectory>
@@ -38,13 +31,6 @@
       </includes>
     </fileSet>
     <fileSet>
-      <directory>target</directory>
-      <outputDirectory></outputDirectory>
-      <includes>
-        <include>*.jar</include>
-      </includes>
-    </fileSet>
-    <fileSet>
       <directory>src/main/resources/config</directory>
       <outputDirectory>config</outputDirectory>
       <includes>
@@ -65,8 +51,32 @@
         <include>jsapi.sh</include>
       </includes>
     </fileSet>
+    <fileSet>
+      <directory>target/site/docs</directory>
+      <outputDirectory>docs</outputDirectory>
+      <includes>
+        <include>**/*</include>
+      </includes>
+      <excludes>
+        <exclude>apidocs/files</exclude>
+        <exclude>apidocs/options</exclude>
+      </excludes>
+    </fileSet>
   </fileSets>
   <files>
+    <file>
+      <source>target/${pom.artifactId}-${pom.version}.jar</source>
+    </file>
+    <file>
+      <source>README.txt</source>
+      <filtered>true</filtered>
+    </file>
+    <file>
+      <source>LICENSE.txt</source>
+    </file>
+    <file>
+      <source>NOTICE.txt</source>
+    </file>
     <file>
       <source>bin/launch.bat</source>
       <outputDirectory>bin</outputDirectory>

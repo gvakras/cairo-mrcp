@@ -10,7 +10,7 @@ Welcome to Project Cairo
 
 ~~{{{faq.html#WhatIsMRCPv2}MRCPv2}}
 
-  The purpose of Cairo is not to replace existing open source speech projects such as {{{http://freetts.sourceforge.net}FreeTTS}} and {{{http://cmusphinx.sourceforge.net/sphinx4/}Sphinx-4}}, but rather to build upon them and provide additional functionality such as clustering, load balancing and failover support in order to meet the requirements necessary for them to be used in enterprise scale deployments of speech/telephony applications.
+  The purpose of Cairo is not to replace existing open source speech projects such as {{{http://freetts.sourceforge.net}FreeTTS}} and {{{http://cmusphinx.sourceforge.net/sphinx4/}Sphinx}}, but rather to build upon them and provide additional functionality such as clustering, load balancing and failover support in order to meet the requirements necessary for them to be used in enterprise scale deployments of speech/telephony applications.
 
 ~~Cairo is still in the early stages.  The current release includes basic speech recognition and speech synthesis capabilities accessible via MRCPv2...
 
@@ -27,4 +27,4 @@ Get Cairo
 
   The latest version of Cairo can be downloaded {{{http://sourceforge.net/project/showfiles.php?group_id=149085}here}}.
 
-  After {{{install.html}installing}} Cairo please see the {{{intro.html}Getting Started Guide}} for instructions on starting up the Cairo server processes and running the MRCPv2 client demos.
+  After {{{install.html}installation}} of Cairo please see the {{{intro.html}Getting Started Guide}} for instructions on starting up the Cairo server processes and running the MRCPv2 client demos.
