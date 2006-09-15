@@ -16,14 +16,12 @@
       <name>${pom.artifactId}-checkin</name>
       <subscribe>http://lists.sourceforge.net/lists/listinfo/${pom.artifactId}-checkin</subscribe>
       <unsubscribe>http://lists.sourceforge.net/lists/listinfo/${pom.artifactId}-checkin</unsubscribe>
-      <!--post>${pom.artifactId}-checkin@lists.sourceforge.net</post-->
       <archive>http://sourceforge.net/mailarchive/forum.php?forum=${pom.artifactId}-checkin</archive>
     </mailingList>
     <mailingList>
       <name>${pom.artifactId}-dev</name>
       <subscribe>http://lists.sourceforge.net/lists/listinfo/${pom.artifactId}-developer</subscribe>
       <unsubscribe>http://lists.sourceforge.net/lists/listinfo/${pom.artifactId}-developer</unsubscribe>
-      <!--post>${pom.artifactId}-developer@lists.sourceforge.net</post-->
       <post>http://www.nabble.com/${pom.artifactId}-developer-f15779.html</post>
       <archive>http://www.nabble.com/${pom.artifactId}-developer-f15779.html</archive>
     </mailingList>
@@ -31,7 +29,6 @@
       <name>${pom.artifactId}-user</name>
       <subscribe>http://lists.sourceforge.net/lists/listinfo/${pom.artifactId}-user</subscribe>
       <unsubscribe>http://lists.sourceforge.net/lists/listinfo/${pom.artifactId}-user</unsubscribe>
-      <!--post>${pom.artifactId}-user@lists.sourceforge.net</post-->
       <post>http://www.nabble.com/${pom.artifactId}-user-f15778.html</post>
       <archive>http://www.nabble.com/${pom.artifactId}-user-f15778.html</archive>
     </mailingList>
@@ -202,7 +199,6 @@
     <repository>
       <id>cairo</id>
       <name>Cairo Deployment Repository</name>
-      <!--url>file://C:\backup\sourceforge\shell\cairo\htdocs\repository</url-->
       <url>http://cairo.sourceforge.net/repository</url>
     </repository>
 
