@@ -13,11 +13,11 @@ The purpose of Cairo is not to replace existing open source speech projects such
 Limitations for Cairo v${pom.version}
 --------------------------
 
-This is the first release for the Cairo project.  This release provides support for basic speech synthesis and speech recognition functionality using the Media Resource Control Protocol Version 2 (MRCPv2) for the control channel between the speech client and the speech resource and the Real-time Transport Protocol (RTP) for streaming audio to and from the media sink/source.
+This is the first release for the Cairo project.  This release provides support for basic speech synthesis and speech recognition functionality using Media Resource Control Protocol Version 2 (MRCPv2) for the control channel between the speech client and the speech resource and Real-time Transport Protocol (RTP) for streaming audio to and from the media sink/source.
 
 General limitations of this release:
 
-  * This release uses Java Remote Method Invocation (RMI) to support session negotitation instead of the Session Initiation Protocol (SIP) as specified by MRCPv2.  Support for session negotitation using SIP is planned and will be added in a subsequent release.
+  * This release uses Java Remote Method Invocation (RMI) to support session negotitation instead of Session Initiation Protocol (SIP) as specified by MRCPv2.  Support for session negotitation using SIP is planned and will be added in a subsequent release.
 
   * No facility for closure of resource sessions is currently provided.  This will be added in conjunction with implementation of SIP support.
 
@@ -40,7 +40,7 @@ Limitations for the speechrecog resource:
 
   * Recognition results are provided in plain text only.  Natural Language Semantics Markup Language (NLSML) is not yet supported.
 
-  * Only the Java Speech Grammar Format (JSGF) is supported for specifying grammars to be used for recognition. Speech Recognition Grammar Specification (SRGS) is not yet supported.
+  * Only Java Speech Grammar Format (JSGF) is supported for specifying grammars to be used for recognition. Speech Recognition Grammar Specification (SRGS) is not yet supported.
 
   * Due to signal degradation experienced when an RTP channel encounters increased latency, speech recognition success may decrease in this circumstance.  This may happen infrequently to frequently depending upon the environment the server (and client) are executing in (bandwidth available, CPU load, memory available, etc.)
 
