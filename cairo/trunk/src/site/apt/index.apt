@@ -6,7 +6,7 @@
 
 Welcome to Project Cairo
 
-  Cairo provides an open source speech resource server written entirely in the Java programming language.  To achieve maximum compatibility with existing and future speech clients the Cairo server has been designed from the ground up to comply with the {{{http://www.ietf.org/internet-drafts/draft-ietf-speechsc-mrcpv2-11.txt}MRCPv2}} standard.
+  Cairo provides an open source speech resource server written entirely in the Java programming language.  To achieve maximum compatibility with existing and future speech clients the Cairo server has been designed from the ground up to comply with the {{{http://www.ietf.org/internet-drafts/draft-ietf-speechsc-mrcpv2-12.txt}MRCPv2}} standard.
 
 ~~{{{faq.html#WhatIsMRCPv2}MRCPv2}}
 
