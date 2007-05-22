@@ -6,13 +6,9 @@
 
 Welcome to Project Cairo
 
-  Cairo provides an open source speech resource server written entirely in the Java programming language.  To achieve maximum compatibility with existing and future speech clients the Cairo server has been designed from the ground up to comply with the {{{http://www.ietf.org/internet-drafts/draft-ietf-speechsc-mrcpv2-12.txt}MRCPv2}} standard.
+  Cairo provides an open source speech resource server written entirely in the Java programming language.  To achieve maximum compatibility with existing and future speech clients the Cairo server has been designed from the ground up to comply with the {{{faq.html#WhatIsMRCPv2}MRCPv2}} standard.
 
-~~{{{faq.html#WhatIsMRCPv2}MRCPv2}}
-
-  The purpose of Cairo is not to replace existing open source speech projects such as {{{http://freetts.sourceforge.net}FreeTTS}} and {{{http://cmusphinx.sourceforge.net/sphinx4/}Sphinx}}, but rather to build upon them and provide additional functionality such as clustering, load balancing and failover support in order to meet the requirements necessary for them to be used in enterprise scale deployments of speech/telephony applications.
-
-~~Cairo is still in the early stages.  The current release includes basic speech recognition and speech synthesis capabilities accessible via MRCPv2...
+  The purpose of Cairo is not to duplicate functionality provided by existing open source speech projects such as {{{http://freetts.sourceforge.net}FreeTTS}} and {{{http://cmusphinx.sourceforge.net/sphinx4/}Sphinx}}, but rather to build upon them and provide additional functionality such as clustering, load balancing and failover support in order to meet the requirements necessary for use in enterprise scale deployments of speech/telephony applications.
 
 Latest News
 
