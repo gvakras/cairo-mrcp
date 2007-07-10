@@ -66,7 +66,7 @@
   </fileSets>
   <files>
     <file>
-      <source>target/${pom.artifactId}-${pom.version}.jar</source>
+      <source>target/${pom.artifactId}-${project.version}.jar</source>
     </file>
     <file>
       <source>README.txt</source>

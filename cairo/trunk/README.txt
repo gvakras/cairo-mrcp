@@ -1,5 +1,5 @@
 ===================================
-Readme for Cairo Speech Server v${pom.version}
+Readme for Cairo Speech Server v${project.version}
 ===================================
 
 Overview
@@ -10,7 +10,7 @@ Cairo provides an open source speech resource server written entirely in the Jav
 The purpose of Cairo is not to replace existing open source speech projects such as FreeTTS and Sphinx, but rather to build upon them and provide additional functionality such as clustering, load balancing and failover support in order to meet the requirements necessary for them to be used in enterprise scale deployments of speech/telephony applications.
 
 
-Limitations for Cairo v${pom.version}
+Limitations for Cairo v${project.version}
 --------------------------
 
 This is the first release for the Cairo project.  This release provides support for basic speech synthesis and speech recognition functionality using Media Resource Control Protocol Version 2 (MRCPv2) for the control channel between the speech client and the speech resource and Real-time Transport Protocol (RTP) for streaming audio to and from the media sink/source.

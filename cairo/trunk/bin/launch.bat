@@ -12,7 +12,7 @@ goto error
 :init
 
 @setlocal enableextensions enabledelayedexpansion
-set CAIRO_VERSION=${pom.version}
+set CAIRO_VERSION=${project.version}
 
 :startValidation
 
