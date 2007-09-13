@@ -300,6 +300,27 @@
       <scope>compile</scope>
     </dependency>
 
+    <dependency>
+      <groupId>javax.sip</groupId>
+      <artifactId>jain-sip-api</artifactId>
+      <version>1.2</version>
+      <scope>compile</scope>
+    </dependency>
+    
+    <dependency>
+      <groupId>javax.sip</groupId>
+      <artifactId>jain-sip-ri</artifactId>
+      <version>1.2</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.sdp</groupId>
+      <artifactId>nist-sdp</artifactId>
+      <version>1.0</version>
+      <scope>compile</scope>
+    </dependency>
+
     <!-- runtime scope dependencies -->
 
     <dependency>
@@ -314,7 +335,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>3.8.1</version>
+      <version>4.3</version>
       <scope>test</scope>
     </dependency>
 
@@ -322,6 +343,13 @@
       <groupId>sphinx</groupId>
       <artifactId>TIDIGITS_8gau_13dCep_16k_40mel_130Hz_6800Hz</artifactId>
       <version>1.0beta</version>
+      <scope>test</scope>
+    </dependency>
+    
+    <dependency>
+      <groupId>sipunit</groupId>
+      <artifactId>sipunit</artifactId>
+      <version>1.0</version>
       <scope>test</scope>
     </dependency>
 

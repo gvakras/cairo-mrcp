@@ -26,6 +26,8 @@ package org.speechforge.cairo.server.resource;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
+import org.speechforge.cairo.exception.ResourceUnavailableException;
+
 /**
  * Defines the methods required to register a resource with the resource server.
  *
@@ -39,4 +41,5 @@ public interface ResourceRegistry extends Remote {
 
     public void register(Resource resource, Resource.Type type) throws RemoteException;
 
+    public Resource getResource(Resource.Type type) throws ResourceUnavailableException, RemoteException;
 }

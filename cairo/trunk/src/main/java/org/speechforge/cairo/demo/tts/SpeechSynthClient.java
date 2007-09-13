@@ -22,21 +22,22 @@
  */
 package org.speechforge.cairo.demo.tts;
 
+import org.speechforge.cairo.demo.util.DemoSipListener;
 import org.speechforge.cairo.demo.util.NativeMediaClient;
-import org.speechforge.cairo.server.resource.ResourceChannel;
 import org.speechforge.cairo.server.resource.ResourceImpl;
-import org.speechforge.cairo.server.resource.ResourceMediaStream;
-import org.speechforge.cairo.server.resource.ResourceMessage;
-import org.speechforge.cairo.server.resource.ResourceServer;
 import org.speechforge.cairo.server.rtp.RTPConsumer;
+import org.speechforge.cairo.util.sip.SipAgent;
+import org.speechforge.cairo.util.sip.SdpMessage;
+import org.speechforge.cairo.util.sip.SipSession;
 
 import java.awt.Toolkit;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.rmi.Naming;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
+
+import javax.sdp.MediaDescription;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -147,25 +148,6 @@ public class SpeechSynthClient implements MrcpEventListener {
 // static methods
 ////////////////////////////////////
 
-    private static ResourceMessage constructResourceMessage(int localRtpPort) throws UnknownHostException {
-        ResourceMessage message = new ResourceMessage();
-
-        List<ResourceChannel> channels = new ArrayList<ResourceChannel>();
-
-        ResourceChannel channel = new ResourceChannel();
-        channel.setResourceType(MrcpResourceType.SPEECHSYNTH);
-        channels.add(channel);
-
-        message.setChannels(channels);
-
-        ResourceMediaStream stream = new ResourceMediaStream();
-        stream.setHost(InetAddress.getLocalHost().getHostName());
-        stream.setPort(localRtpPort);
-        message.setMediaStream(stream);
-
-        return message;
-    }
-
     private static Options getOptions() {
         Options options = ResourceImpl.getOptions();
 
@@ -231,13 +213,44 @@ public class SpeechSynthClient implements MrcpEventListener {
         InetAddress rserverHost = line.hasOption(ResourceImpl.RSERVERHOST_OPTION) ?
             InetAddress.getByName(line.getOptionValue(ResourceImpl.RSERVERHOST_OPTION)) : InetAddress.getLocalHost();
 
-        // lookup resource server
-        String url = "rmi://" + rserverHost.getHostAddress() + '/' + ResourceServer.NAME;
-        _logger.info("looking up: " + url);
-        ResourceServer resourceServer = (ResourceServer) Naming.lookup(url);
+        int myPort = 5070;
+        String host = null;
+        try {
+            host = InetAddress.getLocalHost().getHostAddress();
+        } catch (UnknownHostException e) {
+            host = "localhost";
+        }
 
-        ResourceMessage message = constructResourceMessage(localRtpPort);
-        message = resourceServer.invite(message);
+        int peerPort = 5060;
+        String peerAddress = rserverHost.getHostAddress();
+        String mySipAddress ="sip:speechSynthClient@speechforge.org";
+        String cairoSipAddress="sip:cairo@speechforge.org";
+
+        DemoSipListener listener = new DemoSipListener();
+
+        //setup the server with this as the sessionlistener
+        SipAgent sipAgent = new SipAgent(listener, mySipAddress, "Synth Client Sip Stack", myPort, "UDP");
+
+        SdpMessage sdpMessage = SdpMessage.createNewSdpSessionMessage(mySipAddress, host, "The session Name");
+        MediaDescription rtpChannel = SdpMessage.createRtpChannelRequest(localRtpPort);
+        MediaDescription mrcpChannel = SdpMessage.createMrcpChannelRequest(MrcpResourceType.SPEECHSYNTH);
+        Vector v = new Vector();
+        v.add(mrcpChannel);
+        v.add(rtpChannel);
+        sdpMessage.getSessionDescription().setMediaDescriptions(v);
+
+        SipSession session = sipAgent.sendInviteWithoutProxy(cairoSipAddress, sdpMessage, peerAddress, peerPort);
+
+        while (!listener.SessionEstablished()) {
+            Thread.sleep(1000);
+        }
+        SdpMessage inviteResponse = listener.getResponse();
+
+        _logger.info("Sent an invite and got a response...");
+
+        List <MediaDescription> xmitterChans = inviteResponse.getMrcpTransmitterChannels();
+        int port = xmitterChans.get(0).getMedia().getMediaPort();
+        String channelId = xmitterChans.get(0).getAttribute(SdpMessage.SDP_CHANNEL_ATTR_NAME);
 
         _logger.debug("Starting NativeMediaClient for receive only...");
         NativeMediaClient mediaClient = new NativeMediaClient(localRtpPort);
@@ -246,9 +259,10 @@ public class SpeechSynthClient implements MrcpEventListener {
         MrcpFactory factory = MrcpFactory.newInstance();
         MrcpProvider provider = factory.createProvider();
         
-        ResourceChannel channel = message.getChannels().get(0);
-        assert (channel.getResourceType() == MrcpResourceType.SPEECHSYNTH) : channel.getResourceType();
-        MrcpChannel ttsChannel = provider.createChannel(channel.getChannelID(), rserverHost, channel.getMrcpPort(), protocol);
+        
+        //ResourceChannel channel = message.getChannels().get(0);
+        //assert (channel.getResourceType() == MrcpResourceType.SPEECHSYNTH) : channel.getResourceType();
+        MrcpChannel ttsChannel = provider.createChannel(channelId, rserverHost, port, protocol);
 
         SpeechSynthClient client = new SpeechSynthClient(ttsChannel);
 
@@ -256,14 +270,17 @@ public class SpeechSynthClient implements MrcpEventListener {
             for (int i=0; i < _repetitions; i++) {
                 client.playPrompt(promptText);
             }
+
         } catch (Exception e){
             if (e instanceof MrcpInvocationException) {
                 MrcpResponse response = ((MrcpInvocationException) e).getResponse();
                 _logger.warn("MRCP response received:\n" + response);
             }
             _logger.warn(e, e);
+    		sipAgent.dispose();
             System.exit(1);
         }
+		sipAgent.dispose();
     }
 
 }

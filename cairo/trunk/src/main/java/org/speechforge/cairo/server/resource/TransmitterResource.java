@@ -30,6 +30,7 @@ import org.speechforge.cairo.server.tts.MrcpSpeechSynthChannel;
 import org.speechforge.cairo.server.tts.PromptGeneratorFactory;
 import org.speechforge.cairo.server.tts.RTPSpeechSynthChannel;
 import org.speechforge.cairo.util.CairoUtil;
+import org.speechforge.cairo.util.sip.SdpMessage;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,14 +39,14 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
-import java.util.ArrayList;
 import java.util.List;
+
+import javax.sdp.MediaDescription;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.pool.ObjectPool;
 import org.apache.log4j.Logger;
@@ -65,11 +66,14 @@ public class TransmitterResource extends ResourceImpl {
     public static final Resource.Type RESOURCE_TYPE = Resource.Type.TRANSMITTER;
 
     private File _basePromptDir;
+
     private MrcpServerSocket _mrcpServer;
+
     private ObjectPool _promptGeneratorPool;
+
     private PortPairPool _portPairPool;
 
-    public TransmitterResource(TransmitterConfig config)
+    public TransmitterResource(TransmitterConfig config) 
       throws IOException, RemoteException, InstantiationException {
         super(RESOURCE_TYPE);
         _basePromptDir = config.getBasePromptDir();
@@ -79,65 +83,75 @@ public class TransmitterResource extends ResourceImpl {
     }
 
     /* (non-Javadoc)
+
      * @see org.speechforge.cairo.server.resource.Resource#invite(org.speechforge.cairo.server.resource.ResourceMessage)
      */
-    public ResourceMessage invite(ResourceMessage request) throws ResourceUnavailableException, RemoteException {
+    public SdpMessage invite(SdpMessage request) throws ResourceUnavailableException, RemoteException {
         _logger.debug("Resource received invite() request.");
+        InetAddress remoteHost = null;
+        try {
+            List<MediaDescription> channels = request.getMrcpTransmitterChannels();
+            if (channels.size() > 0) {
 
-        List<ResourceChannel> channels = new ArrayList<ResourceChannel>();
+                remoteHost = InetAddress.getByName(request.getSessionAddress());
+                int localPort = 0;
+                int remotePort = 0;
 
-        for (ResourceChannel channel : request.getChannels()) {
-            MrcpResourceType resourceType = channel.getResourceType();
-            Type type = Resource.Type.fromMrcpType(resourceType);
-            if (type.equals(RESOURCE_TYPE)) {
-                channels.add(channel);
-            }
-        }
+                for (MediaDescription md : channels) {
+                    String channelID = md.getAttribute(SdpMessage.SDP_CHANNEL_ATTR_NAME);
+                    String rt = md.getAttribute(SdpMessage.SDP_RESOURCE_ATTR_NAME);
 
-        if (channels.size() > 0) {
-            try {
-                ResourceMediaStream stream = request.getMediaStream();
-                int localPort = _portPairPool.borrowPort(); // TODO: return to pool
-                InetAddress remoteHost = InetAddress.getByName(stream.getHost());
-                int remotePort = stream.getPort();
+                    MrcpResourceType resourceType = MrcpResourceType.fromString(rt);
 
-                for (ResourceChannel channel : channels) {
-                    String channelID = channel.getChannelID();
+                    // if (rt.equalsIgnoreCase("speechrecog")) {
+                    // resourceType = MrcpResourceType.SPEECHRECOG;
+                    // } else if (rt.equalsIgnoreCase("speechsynth")) {
+                    // resourceType = MrcpResourceType.SPEECHSYNTH;
+                    // }
 
-                    switch (channel.getResourceType()) {
+                    List<MediaDescription> rtpmd = request.getAudioChansForThisControlChan(md);
+                    if (rtpmd.size() > 0) {
+                        // TODO: What if there is more than 1 media channels?
+                        localPort = _portPairPool.borrowPort(); // TODO: return to pool
+                        // TODO: check if there is an override for the host 9attribute in the m block
+                        // InetAddress remoteHost = InetAddress.getByName(rtpmd.get(1).getAttribute();
+                        remotePort = rtpmd.get(0).getMedia().getMediaPort();
+                        // rtpmd.get(1).getMedia().setMediaPort(localPort);
+                    } else {
+                        _logger.warn("No Media channel specified in the invite request");
+                        // TODO: handle no media channel in the request corresponding tp the mrcp channel (sip
+                        // error)
+                    }
+
+                    switch (resourceType) {
                     case BASICSYNTH:
                     case SPEECHSYNTH:
-                        MrcpSpeechSynthChannel mrcpChannel = new MrcpSpeechSynthChannel(
-                            channelID,
-                            new RTPSpeechSynthChannel(localPort, remoteHost, remotePort),
-                            _basePromptDir,
-                            _promptGeneratorPool
-                        );
+                        MrcpSpeechSynthChannel mrcpChannel = new MrcpSpeechSynthChannel(channelID,
+                                new RTPSpeechSynthChannel(localPort, remoteHost, remotePort), _basePromptDir,
+                                _promptGeneratorPool);
                         _mrcpServer.openChannel(channelID, mrcpChannel);
+                        md.getMedia().setMediaPort(_mrcpServer.getPort());
                         break;
 
                     default:
                         throw new ResourceUnavailableException("Unsupported resource type!");
                     }
-
-                    channel.setMrcpPort(_mrcpServer.getPort());
                 }
-
-            } catch (ResourceUnavailableException e) {
-                _logger.debug(e, e);
-                throw e;
-            } catch (UnknownHostException e) {
-                _logger.debug("Specified host for media stream not found: " + request.getMediaStream().getHost(), e);
-                throw new RemoteException(e.getMessage(), e);
-            } catch (Exception e) {
-                _logger.debug(e, e);
-                throw new ResourceUnavailableException(e);
             }
+        } catch (ResourceUnavailableException e) {
+            _logger.debug(e, e);
+            throw e;
+        } catch (UnknownHostException e) {
+            _logger.debug("Specified host for media stream not found: " + remoteHost, e);
+            throw new RemoteException(e.getMessage(), e);
+        } catch (Exception e) {
+            e.printStackTrace();
+            _logger.debug(e, e);
+            throw new ResourceUnavailableException(e);
         }
 
         return request;
     }
-
 
     public static void main(String[] args) throws Exception {
 

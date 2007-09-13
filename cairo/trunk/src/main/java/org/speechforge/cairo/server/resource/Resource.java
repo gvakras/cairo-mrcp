@@ -23,6 +23,7 @@
 package org.speechforge.cairo.server.resource;
 
 import org.speechforge.cairo.exception.ResourceUnavailableException;
+import org.speechforge.cairo.util.sip.SdpMessage;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -38,7 +39,7 @@ public interface Resource extends Remote {
 
     public void ping() throws RemoteException;
 
-    public ResourceMessage invite(ResourceMessage request) throws ResourceUnavailableException, RemoteException;
+    public SdpMessage invite(SdpMessage request) throws ResourceUnavailableException, RemoteException;
 
     /**
      * Defines whether a resource receives audio input or transmits audio output.
