@@ -329,6 +329,13 @@
       <version>1.0beta</version>
       <scope>runtime</scope>
     </dependency>
+    
+    <dependency>
+      <groupId>sphinx</groupId>
+      <artifactId>WSJ_8gau_13dCep_8kHz_31mel_200Hz_3500Hz</artifactId>
+      <version>1.0beta</version>
+      <scope>runtime</scope>
+    </dependency>
 
     <!-- test scope dependencies -->
 

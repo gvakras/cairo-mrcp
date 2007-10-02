@@ -113,14 +113,15 @@
     </component>
 
 
+
     <!-- ******************************************************** -->
     <!-- The Dictionary configuration                            -->
     <!-- ******************************************************** -->
 
     <component name="dictionary"
                type="edu.cmu.sphinx.linguist.dictionary.FastDictionary">
-        <property name="dictionaryPath" value="resource:/edu.cmu.sphinx.model.acoustic.WSJ_8gau_13dCep_16k_40mel_130Hz_6800Hz.Model!/edu/cmu/sphinx/model/acoustic/WSJ_8gau_13dCep_16k_40mel_130Hz_6800Hz/dict/cmudict.0.6d"/>
-        <property name="fillerPath" value="resource:/edu.cmu.sphinx.model.acoustic.WSJ_8gau_13dCep_16k_40mel_130Hz_6800Hz.Model!/edu/cmu/sphinx/model/acoustic/WSJ_8gau_13dCep_16k_40mel_130Hz_6800Hz/dict/fillerdict"/>
+        <property name="dictionaryPath" value="resource:/edu.cmu.sphinx.model.acoustic.WSJ_8gau_13dCep_8kHz_31mel_200Hz_3500Hz.Model!/edu/cmu/sphinx/model/acoustic/WSJ_8gau_13dCep_8kHz_31mel_200Hz_3500Hz/dict/cmudict.0.6d"/>
+        <property name="fillerPath" value="resource:/edu.cmu.sphinx.model.acoustic.WSJ_8gau_13dCep_8kHz_31mel_200Hz_3500Hz.Model!/edu/cmu/sphinx/model/acoustic/WSJ_8gau_13dCep_8kHz_31mel_200Hz_3500Hz/dict/fillerdict"/>
         <property name="addSilEndingPronunciation" value="false"/>
         <property name="allowMissingWords" value="false"/>
         <property name="unitManager" value="unitManager"/>
@@ -132,13 +133,13 @@
     <!-- ******************************************************** -->
 
     <component name="acousticModel"
-               type="edu.cmu.sphinx.model.acoustic.WSJ_8gau_13dCep_16k_40mel_130Hz_6800Hz.Model">
+               type="edu.cmu.sphinx.model.acoustic.WSJ_8gau_13dCep_8kHz_31mel_200Hz_3500Hz.Model">
         <property name="loader" value="loader"/>
         <property name="unitManager" value="unitManager"/>
     </component>
 
     <component name="loader"
-               type="edu.cmu.sphinx.model.acoustic.WSJ_8gau_13dCep_16k_40mel_130Hz_6800Hz.ModelLoader">
+               type="edu.cmu.sphinx.model.acoustic.WSJ_8gau_13dCep_8kHz_31mel_200Hz_3500Hz.ModelLoader">
         <property name="logMath" value="logMath"/>
         <property name="unitManager" value="unitManager"/>
     </component>
@@ -205,7 +206,11 @@
                type="edu.cmu.sphinx.frontend.transform.DiscreteFourierTransform"/>
 
     <component name="melFilterBank"
-               type="edu.cmu.sphinx.frontend.frequencywarp.MelFrequencyFilterBank"/>
+               type="edu.cmu.sphinx.frontend.frequencywarp.MelFrequencyFilterBank">
+               <property name="minimumFrequency" value="200"/>
+               <property name="maximumFrequency" value="3500"/>
+               <property name="numberFilters" value="31"/>
+    </component>
 
     <component name="dct"
                type="edu.cmu.sphinx.frontend.transform.DiscreteCosineTransform"/>
@@ -253,6 +258,11 @@
                type="edu.cmu.sphinx.util.LogMath">
         <property name="logBase" value="1.0001"/>
         <property name="useAddTable" value="true"/>
+    </component>
+    
+    <component name="confidenceScorer"
+               type="edu.cmu.sphinx.result.MAPConfidenceScorer">
+        <property name="languageWeight" value="${languageWeight}"/>
     </component>
 
 </config>
