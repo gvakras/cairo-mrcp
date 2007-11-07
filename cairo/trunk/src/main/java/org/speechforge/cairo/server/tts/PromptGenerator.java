@@ -43,7 +43,7 @@ public class PromptGenerator extends AbstractPoolableObject {
     private Voice _voice;
 
     public PromptGenerator() {
-        String voiceName = "kevin16";
+        String voiceName = "kevin";
 
         VoiceManager voiceManager = VoiceManager.getInstance();
         _voice = voiceManager.getVoice(voiceName);
