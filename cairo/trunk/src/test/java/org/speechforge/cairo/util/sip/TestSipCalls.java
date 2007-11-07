@@ -9,6 +9,8 @@ import java.util.Properties;
 import javax.sdp.SdpException;
 import javax.sip.ObjectInUseException;
 import javax.sip.SipException;
+import javax.sip.TimeoutEvent;
+
 import org.cafesip.sipunit.SipCall;
 import org.cafesip.sipunit.SipPhone;
 import org.cafesip.sipunit.SipResponse;
@@ -89,7 +91,7 @@ public class TestSipCalls extends SipTestCase implements SessionListener {
             }
 
             int rcode = call.getReturnCode();
-            // System.out.println("The return code is: " +rcode);
+             System.out.println("The return code is: " +rcode);
             if (rcode == 200) { // ok code
                 notDone = false;
             }
@@ -259,6 +261,11 @@ public class TestSipCalls extends SipTestCase implements SessionListener {
         // System.out.println(response.getSessionDescription().toString());
         return null;
 
+    }
+
+    public void processTimeout(TimeoutEvent event) {
+        // TODO Auto-generated method stub
+        
     }
 
 }

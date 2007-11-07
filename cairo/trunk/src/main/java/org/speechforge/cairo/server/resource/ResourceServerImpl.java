@@ -35,6 +35,7 @@ import java.rmi.registry.Registry;
 import javax.sdp.MediaDescription;
 import javax.sdp.SdpException;
 import javax.sip.SipException;
+import javax.sip.TimeoutEvent;
 
 import org.apache.log4j.Logger;
 import org.mrcp4j.MrcpResourceType;
@@ -186,6 +187,11 @@ public class ResourceServerImpl implements SessionListener {
 
         _logger.info("Server and registry bound and waiting...");
 
+    }
+
+    public void processTimeout(TimeoutEvent event) {
+        // TODO Auto-generated method stub
+        
     }
 
 }

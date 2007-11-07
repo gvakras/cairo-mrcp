@@ -22,7 +22,7 @@
  */
 package org.speechforge.cairo.demo.recog;
 
-import org.speechforge.cairo.demo.util.DemoSipListener;
+import org.speechforge.cairo.demo.util.DemoSipAgent;
 import org.speechforge.cairo.demo.util.NativeMediaClient;
 import org.speechforge.cairo.server.resource.ResourceImpl;
 import org.speechforge.cairo.server.rtp.RTPConsumer;
@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Vector;
 
 import javax.sdp.MediaDescription;
+import javax.sdp.SdpException;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -82,6 +83,13 @@ public class RecognitionClient implements MrcpEventListener {
     private MrcpChannel _recogChannel;
     private MrcpEvent _mrcpEvent;
 
+    private static int _myPort = 5080;
+    private static String _host = null;
+    private static int _peerPort = 5060;
+    private static String _mySipAddress ="sip:speechSynthClient@speechforge.org";
+    private static String _cairoSipAddress="sip:cairo@speechforge.org";
+
+    
     /**
      * TODOC
      * @param recogChannel 
@@ -176,6 +184,17 @@ public class RecognitionClient implements MrcpEventListener {
 ////////////////////////////////////
 //static methods
 ////////////////////////////////////
+    
+    private static SdpMessage constructResourceMessage(int localRtpPort) throws UnknownHostException, SdpException {
+        SdpMessage sdpMessage = SdpMessage.createNewSdpSessionMessage(_mySipAddress, _host, "The session Name");
+        MediaDescription rtpChannel = SdpMessage.createRtpChannelRequest(localRtpPort);
+        MediaDescription mrcpChannel = SdpMessage.createMrcpChannelRequest(MrcpResourceType.SPEECHRECOG);
+        Vector v = new Vector();
+        v.add(mrcpChannel);
+        v.add(rtpChannel);
+        sdpMessage.getSessionDescription().setMediaDescriptions(v);
+        return sdpMessage;
+    }
 
     public static Options getOptions() {
         Options options = ResourceImpl.getOptions();
@@ -210,7 +229,6 @@ public class RecognitionClient implements MrcpEventListener {
         }
 
         int localRtpPort = -1;
-
         try {
             localRtpPort = Integer.parseInt(args[0]);
         } catch (Exception e) {
@@ -223,100 +241,95 @@ public class RecognitionClient implements MrcpEventListener {
         }
 
         URL grammarUrl = new URL(args[1]);
-
         String examplePhrase = (args.length > 2) ? args[2] : null;
 
         // lookup resource server
         InetAddress rserverHost = line.hasOption(ResourceImpl.RSERVERHOST_OPTION) ?
             InetAddress.getByName(line.getOptionValue(ResourceImpl.RSERVERHOST_OPTION)) : InetAddress.getLocalHost();
       
-        int myPort = 5080;
-        String host = null;
+
         try {
-            host = InetAddress.getLocalHost().getHostAddress();
+            _host = InetAddress.getLocalHost().getHostAddress();
         } catch (UnknownHostException e) {
-            host = "localhost";
+            _host = "localhost";
         }
-
-        int peerPort = 5060;
         String peerAddress = rserverHost.getHostAddress();
-        String mySipAddress ="sip:speechSynthClient@speechforge.org";
-        String cairoSipAddress="sip:cairo@speechforge.org";
 
-        DemoSipListener listener = new DemoSipListener();
+        //DemoSipListener listener = new DemoSipListener();
 
-        //setup the server with this as the sessionlistener
-        SipAgent sipAgent = new SipAgent(listener, mySipAddress, "Synth Client Sip Stack", myPort, "UDP");
+        // Construct a SIP agent to be used to send a SIP Invitation to the ciaro server
+        DemoSipAgent sipAgent = new DemoSipAgent(_mySipAddress, "Synth Client Sip Stack", _myPort, "UDP");
 
-        SdpMessage sdpMessage = SdpMessage.createNewSdpSessionMessage(mySipAddress, host, "The session Name");
-        MediaDescription rtpChannel = SdpMessage.createRtpChannelRequest(localRtpPort);
-        MediaDescription mrcpChannel = SdpMessage.createMrcpChannelRequest(MrcpResourceType.SPEECHRECOG);
-        Vector v = new Vector();
-        v.add(mrcpChannel);
-        v.add(rtpChannel);
-        sdpMessage.getSessionDescription().setMediaDescriptions(v);
+        // Construct the SDP message that will be sent in the SIP invitation
+        SdpMessage message = constructResourceMessage(localRtpPort);
 
-        SipSession session = sipAgent.sendInviteWithoutProxy(cairoSipAddress, sdpMessage, peerAddress, peerPort);
+        // Send the sip invitation (This method on the demoSipAgent blocks until a response is received or a timeout occurs) 
+        _logger.info("Sending a SIP invitation to the cairo server.");
+        SdpMessage inviteResponse = sipAgent.sendInviteWithoutProxy(_cairoSipAddress, message, peerAddress, _peerPort);
+        if (inviteResponse != null) {
+            _logger.info("Received the SIP Response.");
 
-        while (!listener.SessionEstablished()) {
-            Thread.sleep(1000);
-        }
-        SdpMessage inviteResponse = listener.getResponse();
-        _logger.info("Sent an invite and got a response...");
+            // Get the MRCP media channels (need the port number and the channelID that are sent
+            // back from the server in the response in order to setup the MRCP channel)
+            List <MediaDescription> receiverChans = inviteResponse.getMrcpReceiverChannels();
+            MediaDescription controlChan = receiverChans.get(0);
+            int port = controlChan.getMedia().getMediaPort();
+            String channelId = receiverChans.get(0).getAttribute(SdpMessage.SDP_CHANNEL_ATTR_NAME);
 
-        List <MediaDescription> receiverChans = inviteResponse.getMrcpReceiverChannels();
-        MediaDescription controlChan = receiverChans.get(0);
-        int port = controlChan.getMedia().getMediaPort();
-        String channelId = receiverChans.get(0).getAttribute(SdpMessage.SDP_CHANNEL_ATTR_NAME);
-
-        List <MediaDescription> rtpChans = inviteResponse.getAudioChansForThisControlChan(controlChan);
-        int remoteRtpPort = -1;
-        if (rtpChans.size() > 0) {
-            //TODO: What if there is more than 1 media channels?
-            //TODO: check if there is an override for the host 9attribute in the m block
-            //InetAddress remoteHost = InetAddress.getByName(rtpmd.get(1).getAttribute();
-            remoteRtpPort =  rtpChans.get(0).getMedia().getMediaPort();
-            //rtpmd.get(1).getMedia().setMediaPort(localPort);
-        } else {
-            _logger.warn("No Media channel specified in the invite request");
-            //TODO:  handle no media channel in the response corresponding tp the mrcp channel (sip/sdp error)
-        }
-
-        _logger.debug("Starting NativeMediaClient...");
-        NativeMediaClient mediaClient = new NativeMediaClient(localRtpPort, rserverHost, remoteRtpPort);
-        mediaClient.startTransmit();
-
-        String protocol = MrcpProvider.PROTOCOL_TCP_MRCPv2;
-        MrcpFactory factory = MrcpFactory.newInstance();
-        MrcpProvider provider = factory.createProvider();
-
-        MrcpChannel recogChannel = provider.createChannel(channelId, rserverHost, port, protocol);
-
-        RecognitionClient client = new RecognitionClient(recogChannel);
-
-        try {
-            String result = client.doRecognize(grammarUrl, examplePhrase);
-            if (_logger.isInfoEnabled()) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("\n**************************************************************");
-                sb.append("\nRecognition result: ").append(result);
-                sb.append("\n**************************************************************\n");
-                _logger.info(sb);
+            List <MediaDescription> rtpChans = inviteResponse.getAudioChansForThisControlChan(controlChan);
+            int remoteRtpPort = -1;
+            if (rtpChans.size() > 0) {
+                //TODO: What if there is more than 1 media channels?
+                //TODO: check if there is an override for the host 9attribute in the m block
+                //InetAddress remoteHost = InetAddress.getByName(rtpmd.get(1).getAttribute();
+                remoteRtpPort =  rtpChans.get(0).getMedia().getMediaPort();
+                //rtpmd.get(1).getMedia().setMediaPort(localPort);
+            } else {
+                _logger.warn("No Media channel specified in the invite request");
+                //TODO:  handle no media channel in the response corresponding tp the mrcp channel (sip/sdp error)
             }
 
+            _logger.debug("Starting NativeMediaClient...");
+            NativeMediaClient mediaClient = new NativeMediaClient(localRtpPort, rserverHost, remoteRtpPort);
+            mediaClient.startTransmit();
 
-        } catch (Exception e){
-            if (e instanceof MrcpInvocationException) {
-                MrcpResponse response = ((MrcpInvocationException) e).getResponse();
-                if (_logger.isDebugEnabled()) {
-                    _logger.debug("MRCP response received:\n" + response.toString());
+            //Construct the MRCP Channel
+            String protocol = MrcpProvider.PROTOCOL_TCP_MRCPv2;
+            MrcpFactory factory = MrcpFactory.newInstance();
+            MrcpProvider provider = factory.createProvider();
+            MrcpChannel recogChannel = provider.createChannel(channelId, rserverHost, port, protocol);
+
+            RecognitionClient client = new RecognitionClient(recogChannel);
+
+            try {
+                String result = client.doRecognize(grammarUrl, examplePhrase);
+                if (_logger.isInfoEnabled()) {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("\n**************************************************************");
+                    sb.append("\nRecognition result: ").append(result);
+                    sb.append("\n**************************************************************\n");
+                    _logger.info(sb);
                 }
+
+
+            } catch (Exception e){
+                if (e instanceof MrcpInvocationException) {
+                    MrcpResponse response = ((MrcpInvocationException) e).getResponse();
+                    if (_logger.isDebugEnabled()) {
+                        _logger.debug("MRCP response received:\n" + response.toString());
+                    }
+                }
+                _logger.warn(e, e);
+                sipAgent.dispose();
+                System.exit(1);
             }
-            _logger.warn(e, e);
-    		sipAgent.dispose();
-            System.exit(1);
+
+        } else {
+            //Invitation Timeout
+            _logger.info("Sip Invitation timed out.  Is server running?");
         }
-		sipAgent.dispose();
+        
+        sipAgent.dispose();
         System.exit(0);
     }
 

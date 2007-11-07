@@ -209,8 +209,22 @@ public class SipListenerImpl implements SipListener {
         }
     }
 
-    public void processTimeout(TimeoutEvent arg0) {
+    public void processTimeout(TimeoutEvent event) {
         _logger.debug("Transaction Time out");
+        
+        // if this is a client transaction timeout and if an invite
+        //cleanup pending sessions
+        ClientTransaction ctx = event.getClientTransaction();
+        if (ctx != null) {
+            SipSession session = SipSession.getSessionFromPending(ctx.toString());
+            if (session != null) {
+                SipSession.removeSessionFromPending(session);
+            }
+        }
+        //TODO: should send a cancel request too
+        
+        //notify the application layer of a timeout
+        sipClient.getSessionListener().processTimeout(event);
     }
 
     public void processTransactionTerminated(TransactionTerminatedEvent arg0) {
