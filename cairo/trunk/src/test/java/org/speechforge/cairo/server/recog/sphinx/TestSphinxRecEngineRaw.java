@@ -70,7 +70,10 @@ public class TestSphinxRecEngineRaw extends AbstractTestCase {
         return new TestSuite(TestSphinxRecEngineRaw.class);
     }
 
-    public void test12345() throws Exception {
+    /**
+     * The following test is disabled since TIDIGITS is not available for 8k sample rate
+     */
+    public void xtest12345() throws Exception {
         debugTestName(_logger);
 
         URL sphinxConfigURL = this.getClass().getResource("sphinx-config-TIDIGITS.xml");
@@ -82,7 +85,10 @@ public class TestSphinxRecEngineRaw extends AbstractTestCase {
         recognizeAudioFile(sphinxConfigURL, audioFileURL, expected);
     }
 
-    public void test12345Alt() throws Exception {
+    /**
+     * The following test is disabled since TIDIGITS is not available for 8k sample rate
+     */
+    public void xtest12345Alt() throws Exception {
         debugTestName(_logger);
 
         URL sphinxConfigURL = this.getClass().getResource("sphinx-config-TIDIGITS.xml");
@@ -94,7 +100,10 @@ public class TestSphinxRecEngineRaw extends AbstractTestCase {
         recognizeAudioFile(sphinxConfigURL, audioFileURL, expected);
     }
 
-    public void test12345Alt2() throws Exception {
+    /**
+     * The following test is disabled since TIDIGITS is not available for 8k sample rate
+     */
+    public void xtest12345Alt2() throws Exception {
         debugTestName(_logger);
 
         URL sphinxConfigURL = this.getClass().getResource("sphinx-config-TIDIGITS.xml");
@@ -106,7 +115,10 @@ public class TestSphinxRecEngineRaw extends AbstractTestCase {
         recognizeAudioFile(sphinxConfigURL, audioFileURL, expected);
     }
 
-    public void testSilence12345() throws Exception {
+    /**
+     * The following test is disabled since TIDIGITS is not available for 8k sample rate
+     */
+    public void xtestSilence12345() throws Exception {
         debugTestName(_logger);
 
         URL sphinxConfigURL = this.getClass().getResource("sphinx-config-TIDIGITS.xml");
@@ -118,7 +130,10 @@ public class TestSphinxRecEngineRaw extends AbstractTestCase {
         recognizeAudioFile(sphinxConfigURL, audioFileURL, expected);
     }
 
-    public void test123456() throws Exception {
+    /**
+     * The following test is disabled since TIDIGITS is not available for 8k sample rate
+     */
+    public void xtest123456() throws Exception {
         debugTestName(_logger);
 
         URL sphinxConfigURL = this.getClass().getResource("sphinx-config-TIDIGITS.xml");
@@ -130,7 +145,10 @@ public class TestSphinxRecEngineRaw extends AbstractTestCase {
         recognizeAudioFile(sphinxConfigURL, audioFileURL, expected);
     }
 
-    public void test123456NoSpeechClassifier() throws Exception {
+    /**
+     * The following test is disabled since TIDIGITS is not available for 8k sample rate
+     */
+    public void xtest123456NoSpeechClassifier() throws Exception {
         debugTestName(_logger);
 
         URL sphinxConfigURL = this.getClass().getResource("sphinx-config-TIDIGITS.xml");
