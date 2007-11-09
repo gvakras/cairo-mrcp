@@ -5,21 +5,25 @@ Readme for Cairo Speech Server v${project.version}
 Overview
 --------
 
-Cairo provides an open source speech resource server written entirely in the Java programming language.  To achieve maximum compatibility with existing and future speech clients the Cairo server has been designed from the ground up to comply with the MRCPv2 standard. (For more information on MRCPv2 please see http://www.ietf.org/internet-drafts/draft-ietf-speechsc-mrcpv2-10.txt)
+Cairo provides an open source speech resource server written entirely in the Java programming language.  To achieve maximum compatibility with existing and future speech clients the Cairo server has been designed from the ground up to comply with the MRCPv2 standard. (For more information on MRCPv2 please see http://www.ietf.org/internet-drafts/draft-ietf-speechsc-mrcpv2-14.txt)
 
 The purpose of Cairo is not to replace existing open source speech projects such as FreeTTS and Sphinx, but rather to build upon them and provide additional functionality such as clustering, load balancing and failover support in order to meet the requirements necessary for them to be used in enterprise scale deployments of speech/telephony applications.
+
+New Features for Cairo v${project.version}
+--------------------------
+   * SIP support has been added.  Session initiation is now done with SIP invitation request and response. (See specific limitations below.)
+
+   * The default audio format has been changed from 16Khz to 8Khz sample rate.  Also the Sphinx configuration has been updated to use the 8kHz voice models.  This now matches the sampling rate of the codec used for RTP audio data and as a result recognition performance has been much improved.
 
 
 Limitations for Cairo v${project.version}
 --------------------------
 
-This is the first release for the Cairo project.  This release provides support for basic speech synthesis and speech recognition functionality using Media Resource Control Protocol Version 2 (MRCPv2) for the control channel between the speech client and the speech resource and Real-time Transport Protocol (RTP) for streaming audio to and from the media sink/source.
+This second release for the Cairo project addresses a number of limitations found in Cairo v0.1.  This release continues to provide support for speech synthesis and speech recognition functionality using Media Resource Control Protocol Version 2 (MRCPv2) for the control channel between the speech client and the speech resource and Real-time Transport Protocol (RTP) for streaming audio to and from the media sink/source.  Additionally SIP is now used for session initiation and recognition performance has been improved by using a different voice model.
 
 General limitations of this release:
 
-  * This release uses Java Remote Method Invocation (RMI) to support session negotitation instead of Session Initiation Protocol (SIP) as specified by MRCPv2.  Support for session negotitation using SIP is planned and will be added in a subsequent release.
-
-  * No facility for closure of resource sessions is currently provided.  This will be added in conjunction with implementation of SIP support.
+  * No facility for closure of resource sessions is currently provided.  This will be added in conjunction with implementation of SIP BYE method support.
 
   * Resource processes must be run on the same host as the resource server in order for the MRCPv2 client to locate the resource.
 
@@ -36,13 +40,23 @@ General limitations of this release:
     |                       | BARGE-IN-OCCURRED   |                       |
     +-----------------------+---------------------+-----------------------+
 
+Limitations of the SIP support
+
+   * Re-invite not implemented
+
+   * Register method not implemented.  Cairo server does not register itself with a registrar.  Client must know the server's address.
+
+   * BYE method not implemented
+
+   * Security (authentication and encryption/SIPS) not implemented
+
+   * Options method not implemented
+
 Limitations for the speechrecog resource:
 
   * Recognition results are provided in plain text only.  Natural Language Semantics Markup Language (NLSML) is not yet supported.
 
   * Only Java Speech Grammar Format (JSGF) is supported for specifying grammars to be used for recognition. Speech Recognition Grammar Specification (SRGS) is not yet supported.
-
-  * Due to signal degradation experienced when an RTP channel encounters increased latency, speech recognition success may decrease in this circumstance.  This may happen infrequently to frequently depending upon the environment the server (and client) are executing in (bandwidth available, CPU load, memory available, etc.)
 
 Limitations for the speechsynth resource:
 
@@ -119,7 +133,7 @@ Starting the Cairo Server
   Server process are started by passing appropriate parameters to the launch.bat script in the bin directory of your Cairo installation.  However the launch.bat script should not be invoked directly.  Instead batch files are supplied for each of the server processes present in the default configuration.
 
   The resource server (rserver.bat) should always be started first since the resources must register with the resource server when they become available.  Once the resource server has completed initialization you will see a message on the console that says "Server and registry bound and waiting..."
-  
+ 
   Then the individual resources (transmitter1.bat and receiver1.bat) can be started in any order.  When ready, each of the resources will display a "Resource bound and waiting..." message.
 
   Once all three server processes have completed initialization and display a waiting message, the server cluster is ready to accept MRCPv2 client requests.
@@ -190,3 +204,5 @@ For more information please see the Cairo Project Home at http://cairo.speechfor
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 + Copyright (C) 2005-2006 SpeechForge. All Rights Reserved. +
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 
+
