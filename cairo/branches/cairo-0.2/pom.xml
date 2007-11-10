@@ -6,7 +6,7 @@
   <artifactId>cairo</artifactId>
   <packaging>jar</packaging>
   <name>Cairo</name>
-  <version>SNAPSHOT</version>
+  <version>0.2</version>
   <description>Cairo sets out to provide an enterprise grade, MRCPv2 compliant speech solution utilizing existing open source speech resources.</description>
   <url>http://${pom.artifactId}.sourceforge.net</url>
   <inceptionYear>2005</inceptionYear>
