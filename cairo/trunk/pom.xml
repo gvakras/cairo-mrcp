@@ -76,10 +76,10 @@
   </licenses>
 
   <scm>
-    <connection>scm:svn:https://svn.sourceforge.net/svnroot/${pom.artifactId}/${pom.artifactId}/trunk</connection>
-    <developerConnection>scm:svn:https://svn.sourceforge.net/svnroot/${pom.artifactId}/${pom.artifactId}/trunk</developerConnection>
+    <connection>scm:svn:https://cairo.svn.sourceforge.net/svnroot/${pom.artifactId}/${pom.artifactId}/trunk</connection>
+    <developerConnection>scm:svn:https://cairo.svn.sourceforge.net/svnroot/${pom.artifactId}/${pom.artifactId}/trunk</developerConnection>
     <!--tag>HEAD</tag-->
-    <url>http://svn.sourceforge.net/viewvc/${pom.artifactId}</url>
+    <url>http://cairo.svn.sourceforge.net/viewvc/${pom.artifactId}</url>
   </scm>
 
   <organization>
