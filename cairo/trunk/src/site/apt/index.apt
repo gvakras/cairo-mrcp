@@ -12,11 +12,11 @@ Welcome to Project Cairo
 
 Latest News
 
-*Cairo v0.1 Released - September 14, 2006
+*Cairo v0.2 Released - November 13, 2007
 
-  "Cairo sets out to provide an enterprise grade, MRCPv2 compliant speech server solution utilizing existing open source speech resources.
+  "Cairo sets out to provide an enterprise grade, Media Resource Control Protocol Version 2 (MRCPv2) compliant speech server solution utilizing existing open source speech resources.
 
-  This is the first release for the Cairo project.  This release provides support for basic speech synthesis and speech recognition functionality using the Media Resource Control Protocol Version 2 (MRCPv2) for the control channel between the speech client and the speech resource and the Real-time Transport Protocol (RTP) for streaming audio to and from the media sink/source..." ({{{http://www.freelists.org/archives/speechforge-news/09-2006/msg00000.html}more}})
+  Cairo v0.2 adds support for establishing sessions using Session Initiation Protocol (SIP) signalling and improves speech recognition performance by matching the voice models used by Sphinx to the sampling rate of the received audio data..." ({{{http://www.freelists.org/archives/speechforge-news/11-2007/msg00000.html}more}})
 
 Get Cairo
 
