@@ -28,10 +28,12 @@ import org.speechforge.cairo.server.config.ReceiverConfig;
 import org.speechforge.cairo.server.recog.MrcpRecogChannel;
 import org.speechforge.cairo.server.recog.RTPRecogChannel;
 import org.speechforge.cairo.server.recog.sphinx.SphinxRecEngineFactory;
+import org.speechforge.cairo.server.resource.ResourceSession.ChannelResources;
 import org.speechforge.cairo.server.rtp.RTPStreamReplicator;
 import org.speechforge.cairo.server.rtp.RTPStreamReplicatorFactory;
 import org.speechforge.cairo.util.CairoUtil;
 import org.speechforge.cairo.util.sip.SdpMessage;
+import org.speechforge.cairo.util.sip.SipSession;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,6 +42,7 @@ import java.net.URL;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.util.List;
+import java.util.Map;
 
 import javax.sdp.MediaDescription;
 
@@ -87,9 +90,18 @@ public class ReceiverResource extends ResourceImpl {
     /* (non-Javadoc)
      * @see org.speechforge.cairo.server.resource.Resource#invite(org.speechforge.cairo.server.resource.ResourceMessage)
      */
-    public SdpMessage invite(SdpMessage request) throws ResourceUnavailableException {
+    public SdpMessage invite(SdpMessage request, String sessionId) throws ResourceUnavailableException {
         _logger.debug("Resource received invite() request.");
 
+        // Create a resource session object
+        // TODO: Check if there is already a session (ie. This is a re-invite)        
+        ResourceSession session = ResourceSession.createResourceSession(sessionId);
+        
+        // get the map that holds list of the channels and the resources used for each channel
+        // the key is the dialogID
+        Map<String, ChannelResources> sessionChannels = session.getChannels();
+        
+        
         try {
             List<MediaDescription> channels = request.getMrcpReceiverChannels();
 
@@ -108,7 +120,7 @@ public class ReceiverResource extends ResourceImpl {
                     switch (resourceType) {
                     case  SPEECHRECOG:
                         List<MediaDescription> rtpmd = request.getAudioChansForThisControlChan(md);
-                        RTPStreamReplicator replicator =  (RTPStreamReplicator) _replicatorPool.borrowObject(); // TODO: return object to pool
+                        RTPStreamReplicator replicator =  (RTPStreamReplicator) _replicatorPool.borrowObject();
                         if (rtpmd.size() > 0) {
                             //TODO: What if there is more than 1 media channels?
 
@@ -120,6 +132,16 @@ public class ReceiverResource extends ResourceImpl {
                         RTPRecogChannel recog = new RTPRecogChannel(_recEnginePool, replicator);
                         _mrcpServer.openChannel(channelID, new MrcpRecogChannel(channelID, recog, _baseGrammarDir));
                         md.getMedia().setMediaPort(_mrcpServer.getPort());
+                        
+                        // Create a channel resources object and put it in the channel map (which is in the session).  
+                        // These resources must be returned to the pool when the channel is closed.  In the case of a 
+                        // transmitter, the resource is the RTP Replicator in the rtpReplicatorPool
+                        // TODO:  The channels should cleanup after themselves (retrun resource to pools)
+                        //        instead of having to keep track of the resoruces in the session.
+                        ChannelResources cr = session.new ChannelResources();
+                        cr.setReplicator(replicator);
+                        cr.setChannelId(channelID);
+                        sessionChannels.put(channelID, cr);
                         break;
 
 //                      case RECORDER:
@@ -130,6 +152,7 @@ public class ReceiverResource extends ResourceImpl {
                     default:
                         throw new ResourceUnavailableException("Unsupported resource type: " + resourceType);
                     }
+
                 }
             }
         } catch (ResourceUnavailableException e) {
@@ -139,11 +162,25 @@ public class ReceiverResource extends ResourceImpl {
             _logger.debug(e, e);
             throw new ResourceUnavailableException(e);
         }
-
+        // Add the session to the session list
+        ResourceSession.addSession(session);
         return request;
     }
 
-
+    public void bye(String sessionId) throws  RemoteException {      
+        ResourceSession session = ResourceSession.getSession(sessionId);
+        Map<String, ChannelResources> sessionChannels = session.getChannels();
+        for(ChannelResources channel: sessionChannels.values()) {
+            _mrcpServer.closeChannel(channel.getChannelId());
+            try {
+                _replicatorPool.returnObject(channel.getReplicator());
+            } catch (Exception e) {
+                _logger.debug(e, e);
+                throw new RemoteException(e.getMessage(), e);
+            }
+        }
+        ResourceSession.removeSession(session);
+    }
 
     public static void main(String[] args) throws Exception {
 
@@ -183,5 +220,4 @@ public class ReceiverResource extends ResourceImpl {
         _logger.info("Resource bound and waiting...");
 
     }
-
 }

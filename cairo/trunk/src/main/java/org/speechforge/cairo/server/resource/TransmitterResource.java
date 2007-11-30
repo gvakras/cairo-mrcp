@@ -25,12 +25,14 @@ package org.speechforge.cairo.server.resource;
 import org.speechforge.cairo.exception.ResourceUnavailableException;
 import org.speechforge.cairo.server.config.CairoConfig;
 import org.speechforge.cairo.server.config.TransmitterConfig;
+import org.speechforge.cairo.server.resource.ResourceSession.ChannelResources;
 import org.speechforge.cairo.server.rtp.PortPairPool;
 import org.speechforge.cairo.server.tts.MrcpSpeechSynthChannel;
 import org.speechforge.cairo.server.tts.PromptGeneratorFactory;
 import org.speechforge.cairo.server.tts.RTPSpeechSynthChannel;
 import org.speechforge.cairo.util.CairoUtil;
 import org.speechforge.cairo.util.sip.SdpMessage;
+import org.speechforge.cairo.util.sip.SipSession;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,6 +42,7 @@ import java.net.UnknownHostException;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.util.List;
+import java.util.Map;
 
 import javax.sdp.MediaDescription;
 
@@ -86,9 +89,19 @@ public class TransmitterResource extends ResourceImpl {
 
      * @see org.speechforge.cairo.server.resource.Resource#invite(org.speechforge.cairo.server.resource.ResourceMessage)
      */
-    public SdpMessage invite(SdpMessage request) throws ResourceUnavailableException, RemoteException {
+    public SdpMessage invite(SdpMessage request, String sessionId) throws ResourceUnavailableException, RemoteException {
         _logger.debug("Resource received invite() request.");
         InetAddress remoteHost = null;
+
+        // Create a resource session object
+        // TODO: Check if there is already a session (ie. This is a re-invite)        
+        ResourceSession session = ResourceSession.createResourceSession(sessionId);
+        
+        // get the map that holds list of the channels and the resources used for each channel
+        // the key is the dialogID
+        Map<String, ChannelResources> sessionChannels = session.getChannels();
+        
+        
         try {
             List<MediaDescription> channels = request.getMrcpTransmitterChannels();
             if (channels.size() > 0) {
@@ -96,7 +109,7 @@ public class TransmitterResource extends ResourceImpl {
                 remoteHost = InetAddress.getByName(request.getSessionAddress());
                 int localPort = 0;
                 int remotePort = 0;
-
+                RTPSpeechSynthChannel rtpscc;
                 for (MediaDescription md : channels) {
                     String channelID = md.getAttribute(SdpMessage.SDP_CHANNEL_ATTR_NAME);
                     String rt = md.getAttribute(SdpMessage.SDP_RESOURCE_ATTR_NAME);
@@ -112,23 +125,20 @@ public class TransmitterResource extends ResourceImpl {
                     List<MediaDescription> rtpmd = request.getAudioChansForThisControlChan(md);
                     if (rtpmd.size() > 0) {
                         // TODO: What if there is more than 1 media channels?
-                        localPort = _portPairPool.borrowPort(); // TODO: return to pool
-                        // TODO: check if there is an override for the host 9attribute in the m block
+                        localPort = _portPairPool.borrowPort();
+                        // TODO: check if there is an override for the host attribute in the m block
                         // InetAddress remoteHost = InetAddress.getByName(rtpmd.get(1).getAttribute();
                         remotePort = rtpmd.get(0).getMedia().getMediaPort();
-                        // rtpmd.get(1).getMedia().setMediaPort(localPort);
                     } else {
                         _logger.warn("No Media channel specified in the invite request");
-                        // TODO: handle no media channel in the request corresponding tp the mrcp channel (sip
-                        // error)
+                        // TODO: handle no media channel in the request corresponding to the mrcp channel (sip error)
                     }
 
                     switch (resourceType) {
                     case BASICSYNTH:
                     case SPEECHSYNTH:
-                        MrcpSpeechSynthChannel mrcpChannel = new MrcpSpeechSynthChannel(channelID,
-                                new RTPSpeechSynthChannel(localPort, remoteHost, remotePort), _basePromptDir,
-                                _promptGeneratorPool);
+                        rtpscc = new RTPSpeechSynthChannel(localPort, remoteHost, remotePort);
+                        MrcpSpeechSynthChannel mrcpChannel = new MrcpSpeechSynthChannel(channelID, rtpscc, _basePromptDir, _promptGeneratorPool);
                         _mrcpServer.openChannel(channelID, mrcpChannel);
                         md.getMedia().setMediaPort(_mrcpServer.getPort());
                         break;
@@ -136,6 +146,17 @@ public class TransmitterResource extends ResourceImpl {
                     default:
                         throw new ResourceUnavailableException("Unsupported resource type!");
                     }
+                    
+                    // Create a channel resources object and put it in the channel map (which is in the session).  
+                    // These resources must be returned to the pool when the channel is closed.  In the case of a 
+                    // transmitter, the resource is the RTP port in the port pair pool
+                    // TODO:  The channels should cleanup after themselves (retrun resource to pools)
+                    //        instead of keeping track of the resoruces in the session.
+                    ChannelResources cr = session.new ChannelResources();
+                    cr.setPort(localPort);
+                    cr.setChannelId(channelID);
+                    cr.setRtpssc(rtpscc);
+                    sessionChannels.put(channelID, cr);
                 }
             }
         } catch (ResourceUnavailableException e) {
@@ -149,10 +170,23 @@ public class TransmitterResource extends ResourceImpl {
             _logger.debug(e, e);
             throw new ResourceUnavailableException(e);
         }
-
+        // Add the session to the session list
+        ResourceSession.addSession(session);
+        
         return request;
     }
 
+    public void bye(String sessionId) throws  RemoteException, InterruptedException {
+        ResourceSession session = ResourceSession.getSession(sessionId);
+        Map<String, ChannelResources> sessionChannels = session.getChannels();
+        for(ChannelResources channel: sessionChannels.values()) {
+            _mrcpServer.closeChannel(channel.getChannelId());
+            _portPairPool.returnPort(channel.getPort());
+            channel.getRtpssc().shutdown();
+        }
+        ResourceSession.removeSession(session);
+    }
+    
     public static void main(String[] args) throws Exception {
 
         CommandLineParser parser = new GnuParser();
@@ -191,5 +225,7 @@ public class TransmitterResource extends ResourceImpl {
         _logger.info("Resource bound and waiting...");
 
     }
+
+
 
 }

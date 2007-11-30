@@ -62,15 +62,18 @@ public class RTPPlayer implements ControllerListener {
     private Processor _processor;
 
     private RTPManager _rtpManager;
+    private SendStream _sendStream;
+    private DataSource _dataSource;
+    private SessionAddress _targetAddress;
 
     public RTPPlayer(int localPort, InetAddress remoteAddress, int remotePort)
       throws InvalidSessionAddressException, IOException {
 
       SessionAddress localAddress = new SessionAddress(InetAddress.getLocalHost(), localPort);
-      SessionAddress targetAddress = new SessionAddress(remoteAddress, remotePort);
+       _targetAddress = new SessionAddress(remoteAddress, remotePort);
       _rtpManager = RTPManager.newInstance();
       _rtpManager.initialize(localAddress);
-      _rtpManager.addTarget(targetAddress);
+      _rtpManager.addTarget(_targetAddress);
     }
 
     public RTPPlayer(RTPManager rtpManager) {
@@ -96,8 +99,8 @@ public class RTPPlayer implements ControllerListener {
                 if (_processor != null) {
                     throw new IllegalStateException("Attempt to call playPrompt() when prompt already playing!");
                 }
-                DataSource dataSource = Manager.createDataSource(source);
-                _processor = Manager.createProcessor(dataSource);
+                _dataSource = Manager.createDataSource(source);
+                _processor = Manager.createProcessor(_dataSource);
                 _processor.addControllerListener(this);
             }
 
@@ -107,7 +110,7 @@ public class RTPPlayer implements ControllerListener {
 
             realize();
 
-            play();
+            play(); 
 
         } catch (InterruptedException e) {
             _logger.debug("playSource() interrupted, closing processor...");
@@ -186,8 +189,8 @@ public class RTPPlayer implements ControllerListener {
         synchronized (_lock) {
     
             DataSource dataOutput = _processor.getDataOutput();
-            SendStream sendStream = _rtpManager.createSendStream(dataOutput, 0);
-            sendStream.start();
+            SendStream _sendStream = _rtpManager.createSendStream(dataOutput, 0);
+            _sendStream.start();
             //_logger.debug("init(): Waiting 5 seconds for send stream to start...");
             //Thread.sleep(5000);
             _processor.start();
@@ -197,8 +200,15 @@ public class RTPPlayer implements ControllerListener {
                 _lock.wait();
 
             } while(_processor != null);
-            
 
+            if (_dataSource != null) {
+                _dataSource.disconnect();
+                _dataSource=null;
+            }
+            if (_sendStream != null) {
+                _sendStream.close();
+                _sendStream = null;
+            }     
             _logger.debug("play(): completed successfully.");
         }
     }
@@ -232,12 +242,20 @@ public class RTPPlayer implements ControllerListener {
             if (event instanceof EndOfMediaEvent) {
                 event.getSourceController().close();
             } else if (event instanceof ControllerClosedEvent) {
-                event.getSourceController().removeControllerListener(this);
+                event.getSourceController().removeControllerListener(this);                
+                _processor.close();
                 _processor = null;
+                
             }
 
             _lock.notifyAll();
         }
     }
 
+    public void shutdown() {
+        _rtpManager.removeTargets("Disconnecting...");
+        _rtpManager.dispose();
+        _rtpManager = null;
+
+    }
 }

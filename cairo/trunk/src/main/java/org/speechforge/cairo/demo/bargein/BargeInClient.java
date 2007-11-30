@@ -40,6 +40,7 @@ import java.util.Vector;
 
 import javax.sdp.MediaDescription;
 import javax.sdp.SdpException;
+import javax.sip.SipException;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -90,7 +91,8 @@ public class BargeInClient implements MrcpEventListener {
     private MrcpEvent _mrcpEvent;
     
     private volatile boolean _recognize;
-    
+    private static DemoSipAgent sipAgent;
+    private static  boolean sentBye=false;
     
     private static int _myPort = 5090;
     private static String _host = null;
@@ -343,6 +345,23 @@ public class BargeInClient implements MrcpEventListener {
 ////////////////////////////////////
 
     public static void main(String[] args) throws Exception {
+        
+        // setup a shutdown hook to cleanup and send a SIP bye message even if there is a 
+        // unexpected crash (ie ctrl-c)
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            public void run() {
+                if (!sentBye && sipAgent!=null) {
+                    try {
+                        sipAgent.sendBye();
+                        sipAgent.dispose();
+                    } catch (SipException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+
+                }
+            }
+        });
 
         CommandLineParser parser = new GnuParser();
         Options options = getOptions();
@@ -391,7 +410,7 @@ public class BargeInClient implements MrcpEventListener {
         String peerAddress = rserverHost.getHostAddress();
 
         // Construct a SIP agent to be used to send a SIP Invitation to the ciaro server
-        DemoSipAgent sipAgent = new DemoSipAgent(_mySipAddress, "Synth Client Sip Stack", _myPort, "UDP");
+        sipAgent = new DemoSipAgent(_mySipAddress, "Synth Client Sip Stack", _myPort, "UDP");
 
         // Construct the SDP message that will be sent in the SIP invitation
         SdpMessage message = constructResourceMessage(localRtpPort);
@@ -474,7 +493,9 @@ public class BargeInClient implements MrcpEventListener {
                     }
                 }
                 _logger.warn(e, e);
+                sipAgent.sendBye();
                 sipAgent.dispose();
+                sentBye = true;
                 System.exit(1);
             }
 
@@ -483,7 +504,11 @@ public class BargeInClient implements MrcpEventListener {
             _logger.info("Sip Invitation timed out.  Is server running?");
         }
         
-        sipAgent.dispose();
+        if (sipAgent != null){
+            sipAgent.sendBye();
+            sipAgent.dispose();
+            sentBye = true;
+         }
         System.exit(0);
     }
 

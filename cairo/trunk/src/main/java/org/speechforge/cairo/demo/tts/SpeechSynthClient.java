@@ -39,6 +39,7 @@ import java.util.Vector;
 
 import javax.sdp.MediaDescription;
 import javax.sdp.SdpException;
+import javax.sip.SipException;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -79,6 +80,9 @@ public class SpeechSynthClient implements MrcpEventListener {
 
     private MrcpChannel _ttsChannel;
     private int _rep = 1;
+    private static  boolean sentBye=false;
+    private static DemoSipAgent sipAgent;
+    private static NativeMediaClient _mediaClient; 
     
     private static int _myPort = 5070;
     private static String _host = null;
@@ -185,7 +189,25 @@ public class SpeechSynthClient implements MrcpEventListener {
 ////////////////////////////////////
 
     public static void main(String[] args) throws Exception {
+ 
+        // setup a shutdown hook to cleanup and send a SIP bye message even if there is a 
+        // unexpected crash (ie ctrl-c)
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            public void run() {
+                if (!sentBye && sipAgent!=null) {
+                    try {
+                        _mediaClient.shutdown();
+                        sipAgent.sendBye();
+                        sipAgent.dispose();
+                    } catch (SipException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
 
+                }
+            }
+        }); 
+        
         CommandLineParser parser = new GnuParser();
         Options options = getOptions();
         CommandLine line = parser.parse(options, args, true);
@@ -238,7 +260,8 @@ public class SpeechSynthClient implements MrcpEventListener {
 
         // Construct a SIP agent to be used to send a SIP Invitation to the ciaro server
         //DemoSipListener listener = new DemoSipListener();
-        DemoSipAgent sipAgent = new DemoSipAgent(_mySipAddress, "Synth Client Sip Stack", _myPort, "UDP");
+
+        sipAgent = new DemoSipAgent(_mySipAddress, "Synth Client Sip Stack", _myPort, "UDP");
 
         // Construct the SDP message that will be sent in the SIP invitation
         SdpMessage message = constructResourceMessage(localRtpPort);
@@ -264,7 +287,7 @@ public class SpeechSynthClient implements MrcpEventListener {
 
             //Setup a media client to receive and play the sythesized voice data streamed over the RTP channel
             _logger.debug("Starting NativeMediaClient for receive only...");
-            NativeMediaClient mediaClient = new NativeMediaClient(localRtpPort); 
+            _mediaClient = new NativeMediaClient(localRtpPort); 
 
             SpeechSynthClient client = new SpeechSynthClient(ttsChannel);
 
@@ -280,18 +303,16 @@ public class SpeechSynthClient implements MrcpEventListener {
                     _logger.warn("MRCP response received:\n" + response);
                 }
                 _logger.warn(e, e);
+                sipAgent.sendBye();
                 sipAgent.dispose();
+                sentBye = true;
                 System.exit(1);
             }
 
         } else {
             //Invitation Timeout
-            _logger.info("Sip Invitation timed out.  Is server running?");
+            _logger.info("Sip Invitation timed out or failed.  Is server running?");
         }
-        
-        //Dispose of SIP Agent
-        sipAgent.dispose();
-        //System.exit(0);
+        Thread.sleep(1000000); 
     }
-
 }

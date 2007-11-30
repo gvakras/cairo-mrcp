@@ -22,13 +22,16 @@
  */
 package org.speechforge.cairo.util.sip;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 
 import javax.sip.ClientTransaction;
 import javax.sip.Dialog;
 
 import org.apache.log4j.Logger;
+import org.speechforge.cairo.server.resource.Resource;
 
 /**
  * Represents a SIP session.
@@ -40,15 +43,19 @@ public class SipSession {
     private static Logger _logger = Logger.getLogger(SipSession.class);
 
     private Dialog sipDialog;
-
     private ClientTransaction ctx;
-
     private SipAgent agent;
-
+    private List<Resource> resources;
+    //private  SdpMessage lastRequest;
+    //private  SdpMessage lastResponse;
+    
     private static Map<String, SipSession> sessions = new Hashtable<String, SipSession>();
-
     private static Map<String, SipSession> pendingSessions = new Hashtable<String, SipSession>();
 
+    public SipSession() {
+        resources = new ArrayList<Resource>();
+    } 
+    
     /**
      * @return the ctx
      */
@@ -94,6 +101,24 @@ public class SipSession {
         this.agent = agent;
     }
 
+    /**
+     * @return the resources
+     */
+    public List<Resource> getResources() {
+        return resources;
+    }
+
+    /**
+     * @param resources the resources to set
+     */
+    public void setResources(List<Resource> resources) {
+        this.resources = resources;
+    }
+    
+    public String getId() {
+        return sipDialog.getDialogId();
+    }
+    
     public void bye() {
         // TODO: implement hanging up (re-nvite and info too)
     }
@@ -129,13 +154,11 @@ public class SipSession {
                 sessions.put(session.getSipDialog().getDialogId(), s);
             } else {
                 // TODO: invalid session
-                _logger
-                        .info("Can not move from pending queue to established queue.  Invalid session.  No client side tx.");
+                _logger.info("Can not move from pending queue to established queue.  Invalid session.  No client side tx.");
             }
         } else {
             // TODO: invalid session
-            _logger
-                    .info("Can not move from pending queue to established queue.  Invalid session.  No dialog.");
+            _logger.info("Can not move from pending queue to established queue.  Invalid session.  No dialog.");
         }
     }
 
@@ -174,4 +197,5 @@ public class SipSession {
     public static synchronized SipSession getSessionFromPending(String key) {
         return pendingSessions.get(key);
     }
+
 }

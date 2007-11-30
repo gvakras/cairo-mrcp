@@ -40,6 +40,7 @@ import java.util.Vector;
 
 import javax.sdp.MediaDescription;
 import javax.sdp.SdpException;
+import javax.sip.SipException;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -82,6 +83,8 @@ public class RecognitionClient implements MrcpEventListener {
 
     private MrcpChannel _recogChannel;
     private MrcpEvent _mrcpEvent;
+    private static DemoSipAgent sipAgent;
+    private static  boolean sentBye=false;
 
     private static int _myPort = 5080;
     private static String _host = null;
@@ -135,6 +138,7 @@ public class RecognitionClient implements MrcpEventListener {
                 _mrcpEvent = event;
                 this.notifyAll();
             }
+            System.exit(0);
         }
     }
 
@@ -212,6 +216,23 @@ public class RecognitionClient implements MrcpEventListener {
 
     public static void main(String[] args) throws Exception {
 
+        // setup a shutdown hook to cleanup and send a SIP bye message even if there is a 
+        // unexpected crash (ie ctrl-c)
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            public void run() {
+                if (!sentBye && sipAgent!=null) {
+                    try {
+                        sipAgent.sendBye();
+                        sipAgent.dispose();
+                    } catch (SipException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+
+                }
+            }
+        }); 
+        
         CommandLineParser parser = new GnuParser();
         Options options = getOptions();
         CommandLine line = parser.parse(options, args, true);
@@ -258,7 +279,7 @@ public class RecognitionClient implements MrcpEventListener {
         //DemoSipListener listener = new DemoSipListener();
 
         // Construct a SIP agent to be used to send a SIP Invitation to the ciaro server
-        DemoSipAgent sipAgent = new DemoSipAgent(_mySipAddress, "Synth Client Sip Stack", _myPort, "UDP");
+        sipAgent = new DemoSipAgent(_mySipAddress, "Synth Client Sip Stack", _myPort, "UDP");
 
         // Construct the SDP message that will be sent in the SIP invitation
         SdpMessage message = constructResourceMessage(localRtpPort);
@@ -320,7 +341,9 @@ public class RecognitionClient implements MrcpEventListener {
                     }
                 }
                 _logger.warn(e, e);
+                sipAgent.sendBye();
                 sipAgent.dispose();
+                sentBye = true;
                 System.exit(1);
             }
 
@@ -328,9 +351,7 @@ public class RecognitionClient implements MrcpEventListener {
             //Invitation Timeout
             _logger.info("Sip Invitation timed out.  Is server running?");
         }
-        
-        sipAgent.dispose();
-        System.exit(0);
+        Thread.sleep(1000000); 
     }
 
 }

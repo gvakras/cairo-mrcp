@@ -370,6 +370,15 @@ public class SipAgent {
 
         return session;
     }
+    
+    public void sendBye(SipSession session)  throws SipException {
+        Dialog d = session.getSipDialog();
+        Request byeRequest;
+        byeRequest = d.createRequest(Request.BYE);
+        ClientTransaction ct = sipProvider.getNewClientTransaction(byeRequest);
+        d.sendRequest(ct);
+
+    }
 
     public String getGUID() {
         // counter++;

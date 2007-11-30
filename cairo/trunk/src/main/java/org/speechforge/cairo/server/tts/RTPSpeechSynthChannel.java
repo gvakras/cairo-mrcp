@@ -51,7 +51,7 @@ public class RTPSpeechSynthChannel {
     volatile short _state = IDLE;
 
     BlockingQueue<PromptPlay> _promptQueue = new LinkedBlockingQueue<PromptPlay>();
-    private Thread _sendThread;
+    private SendThread _sendThread;
     RTPPlayer _promptPlayer;
     private int _localPort;
     private InetAddress _remoteAddress;
@@ -76,6 +76,11 @@ public class RTPSpeechSynthChannel {
             return true;
         }
         return false;
+    }
+    
+    public synchronized void shutdown() throws InterruptedException {
+        _sendThread.shutdown();
+        _promptPlayer.shutdown();
     }
 
     public synchronized int queuePrompt(File promptFile, PromptPlayListener listener)
@@ -191,6 +196,10 @@ public class RTPSpeechSynthChannel {
 
                 _state = _promptQueue.isEmpty() ? IDLE : SPEAKING;
             }
+        }
+        
+        public void shutdown() {
+            _run = false;
         }
     }
 

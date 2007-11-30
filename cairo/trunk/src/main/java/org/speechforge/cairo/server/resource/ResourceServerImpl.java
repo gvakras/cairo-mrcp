@@ -104,7 +104,7 @@ public class ResourceServerImpl implements SessionListener {
      * @throws SdpException
      *             the sdp exception
      */
-    private SdpMessage invite(SdpMessage request) throws ResourceUnavailableException, RemoteException,
+    private SdpMessage invite(SdpMessage request, SipSession session) throws ResourceUnavailableException, RemoteException,
             SdpException {
 
 
@@ -136,12 +136,14 @@ public class ResourceServerImpl implements SessionListener {
         // process the invitation (transmiiiter and/or receiver)
         if (transmitter) {
             Resource resource = _registryImpl.getResource(Resource.Type.TRANSMITTER);
-            request = resource.invite(request);
+            request = resource.invite(request, session.getId());
+            session.getResources().add(resource);
         }
 
         if (receiver) {
             Resource resource = _registryImpl.getResource(Resource.Type.RECEIVER);
-            request = resource.invite(request);
+            request = resource.invite(request, session.getId());
+            session.getResources().add(resource);
         } // TODO: catch exception and release transmitter resources
 
         // post process the message
@@ -155,18 +157,19 @@ public class ResourceServerImpl implements SessionListener {
         return request;
     }
 
-    public SdpMessage processByeRequest(SdpMessage request, SipSession session) {
-        // TODO Auto-generated method stub
-        return null;
+    public void processByeRequest(SipSession session) throws RemoteException, InterruptedException {
+        for (Resource r : session.getResources()) {
+            r.bye(session.getId());
+        }
     }
 
     public SdpMessage processInviteRequest(SdpMessage request, SipSession session) throws SdpException,
             ResourceUnavailableException, RemoteException {
-        SdpMessage m = invite(request);
+        SdpMessage m = invite(request, session);
         return m;
     }
 
-    public SdpMessage processInviteResponse(SdpMessage response, SipSession session) {
+    public SdpMessage processInviteResponse(boolean ok, SdpMessage response, SipSession session) {
         // TODO Auto-generated method stub
         return null;
     }

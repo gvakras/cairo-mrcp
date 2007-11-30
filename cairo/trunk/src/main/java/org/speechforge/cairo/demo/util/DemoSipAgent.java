@@ -24,16 +24,20 @@
 package org.speechforge.cairo.demo.util;
 
 import javax.sip.ObjectInUseException;
+import javax.sip.ResponseEvent;
 import javax.sip.SipException;
 import javax.sip.TimeoutEvent;
+import javax.sip.message.Response;
 
+import org.apache.log4j.Logger;
+import org.speechforge.cairo.demo.tts.SpeechSynthClient;
 import org.speechforge.cairo.util.sip.SdpMessage;
 import org.speechforge.cairo.util.sip.SessionListener;
 import org.speechforge.cairo.util.sip.SipAgent;
 import org.speechforge.cairo.util.sip.SipSession;
 
 public class DemoSipAgent implements SessionListener {
-
+        private static Logger _logger = Logger.getLogger(DemoSipAgent.class);
         private String _mySipAddress;
         private String _stackName;
         private int _port;
@@ -77,9 +81,8 @@ public class DemoSipAgent implements SessionListener {
         }
         
 
-	public SdpMessage processByeRequest(SdpMessage request, SipSession session) {
+	public void processByeRequest(SipSession session) {
 		// TODO Auto-generated method stub
-		return null;
 	}
 
 
@@ -89,17 +92,29 @@ public class DemoSipAgent implements SessionListener {
 		return null;
 	}
 
-	public synchronized SdpMessage processInviteResponse(SdpMessage response,SipSession session) {
+	public synchronized SdpMessage processInviteResponse(boolean ok, SdpMessage response,SipSession session) {
+            if (ok) {
 		_response = response;
                 _session = session;
-                this.notify();
-                return null;
+            } else {
+                _response = null;  
+            }
+            this.notify();
+            return null;
 	}
 
         public synchronized void processTimeout(TimeoutEvent event) {
             _response = null;
             this.notify();
-    
+        }
+        
+        public void sendBye() throws SipException {
+            if(_session != null) {
+               _sipAgent.sendBye(_session);
+               _logger.info("Sent a SIP BYE.");
+            } else {
+                _logger.info("Could not send SIP Bye.  There is no session yet.");
+            }
         }
 
 }

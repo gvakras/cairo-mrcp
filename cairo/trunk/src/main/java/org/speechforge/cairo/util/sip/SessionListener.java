@@ -26,6 +26,7 @@ package org.speechforge.cairo.util.sip;
 import java.rmi.RemoteException;
 
 import javax.sdp.SdpException;
+import javax.sip.ResponseEvent;
 import javax.sip.TimeoutEvent;
 
 import org.speechforge.cairo.exception.ResourceUnavailableException;
@@ -41,9 +42,9 @@ public interface SessionListener {
     public SdpMessage processInviteRequest(SdpMessage request, SipSession session) throws SdpException,
             ResourceUnavailableException, RemoteException;
 
-    public SdpMessage processInviteResponse(SdpMessage response, SipSession session);
+    public SdpMessage processInviteResponse(boolean ok, SdpMessage response, SipSession session);
 
-    public SdpMessage processByeRequest(SdpMessage request, SipSession session);
+    public void processByeRequest(SipSession session) throws RemoteException, InterruptedException;
     
     public void processTimeout(TimeoutEvent event);
 

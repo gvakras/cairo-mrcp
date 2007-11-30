@@ -98,7 +98,7 @@ public class TestSipCalls extends SipTestCase implements SessionListener {
         }
 
         // ------
-        assertTrue("Wrong number of responses received", call.getAllReceivedResponses().size() == 1);
+        assertTrue("Wrong number of responses received", call.getAllReceivedResponses().size() == 2);
 
         // verify RINGING was received
         // assertResponseReceived("Should have gotten TRYING response",
@@ -244,9 +244,9 @@ public class TestSipCalls extends SipTestCase implements SessionListener {
      *  }
      */
 
-    public SdpMessage processByeRequest(SdpMessage request, SipSession session) {
+    public void processByeRequest(SipSession session) {
         // TODO Auto-generated method stub
-        return null;
+
     }
 
     public SdpMessage processInviteRequest(SdpMessage request, SipSession session) {
@@ -256,7 +256,7 @@ public class TestSipCalls extends SipTestCase implements SessionListener {
 
     }
 
-    public SdpMessage processInviteResponse(SdpMessage response, SipSession session) {
+    public SdpMessage processInviteResponse(boolean ok, SdpMessage response, SipSession session) {
         // System.out.println("Got a invite Response");
         // System.out.println(response.getSessionDescription().toString());
         return null;
