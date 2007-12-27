@@ -1,0 +1,13 @@
+                       -----
+                    Future Architecture
+                       -----
+                  Cairo Project Team
+                       -----
+
+Next Generation Architecture
+
+   The cairo architecure will change in version 1.0.  Transmitters and Receivers will be combined into a single Channel Server.  It will handle both incoming and outgoing media streams.  This change will use rtp ports more efficiently.  The recognition endpointer will be factored out of the recognizer and be placed in the Channel Server.  This change will keep the recognizer resources free when not used for actual recognition.  The previous design ties up a recognizer to do endpointing.
+
+[images/CairoDiagram1.gif] 
+
+  Figure 1 -- Future Cairo Block Diagram
