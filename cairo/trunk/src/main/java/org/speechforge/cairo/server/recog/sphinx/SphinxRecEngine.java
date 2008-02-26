@@ -220,7 +220,7 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
             _logger.debug("waitForResult(): got null result from recognizer!");
             return null;
         }
-        return new RecognitionResult(result);
+        return new RecognitionResult(result, _jsgfGrammar.getRuleGrammar());
     }
 
     /* (non-Javadoc)

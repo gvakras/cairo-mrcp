@@ -22,7 +22,18 @@
  */
 package org.speechforge.cairo.server.recog;
 
+import org.speechforge.cairo.util.rule.RuleMatch;
+import org.speechforge.cairo.util.rule.SimpleNLRuleHandler;
+
+import java.util.List;
+
+import javax.speech.recognition.GrammarException;
+import javax.speech.recognition.RuleGrammar;
+import javax.speech.recognition.RuleParse;
+
 import edu.cmu.sphinx.result.Result;
+
+import org.apache.log4j.Logger;
 
 /**
  * Represents the result of a completed recognition request.
@@ -31,29 +42,80 @@ import edu.cmu.sphinx.result.Result;
  */
 public class RecognitionResult {
 
-    private Result _result;
+    private static Logger _logger = Logger.getLogger(RecognitionResult.class);
+
+    private Result _rawResult;
+    private RuleGrammar _ruleGrammar;
+    private String _text;
+    private List<RuleMatch> _ruleMatches;
+
 
     /**
      * TODOC
+     * @param rawResult
+     * @throws NullPointerException
      */
-    public RecognitionResult(Result result) {
-        _result = result;
+    public RecognitionResult(Result rawResult, RuleGrammar ruleGrammar) throws NullPointerException {
+        _rawResult = rawResult;
+        _ruleGrammar = ruleGrammar;
+        if (_rawResult != null) {
+            _text = _rawResult.getBestFinalResultNoFiller();
+            if (_text != null && (_text = _text.trim()).length() > 0 && _ruleGrammar != null) {
+                try {
+                    RuleParse ruleParse = _ruleGrammar.parse(_text, null);
+                    _ruleMatches = SimpleNLRuleHandler.getRuleMatches(ruleParse);
+                } catch (GrammarException e) {
+                    _logger.warn("GrammarException encountered!", e);
+                }
+            }
+        }
     }
 
     /**
      * TODOC
-     * @return Returns the result.
+     * @return Returns the original result.
      */
-    public Result getResult() {
-        return _result;
+    public Result getRawResult() {
+        return _rawResult;
     }
-    
+
+    /**
+     * TODOC
+     * @return
+     */
+    public RuleGrammar getRuleGrammar() {
+        return _ruleGrammar;
+    }
+
+    /**
+     * TODOC
+     * @return
+     */
+    public String getText() {
+        return _text;
+    }
+
+    /**
+     * TODOC
+     * @return
+     */
+    public List<RuleMatch> getRuleMatches() {
+        return _ruleMatches;
+    }
+
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
     @Override
     public String toString() {
-        return (_result == null) ? null : _result.getBestFinalResultNoFiller();
+        StringBuilder sb = new StringBuilder(_text);
+        if (_ruleMatches != null) {
+            for (RuleMatch ruleMatch : _ruleMatches) {
+                sb.append('<').append(ruleMatch.getRule());
+                sb.append(':').append(ruleMatch.getTag()).append('>');
+            }
+        }
+        return sb.toString();
     }
 
 }

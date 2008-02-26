@@ -181,7 +181,7 @@ public class TestSphinxRecEngineRaw extends AbstractTestCase {
         System.setProperty(PROP_GRAMMAR_NAME, "example");
 
         URL audioFileURL = this.getClass().getResource("/prompts/get_me_a_stock_quote.wav");
-        String expected = "get me a stock quote";
+        String expected = "get me a stock quote<main:STOCKS>";
 
         recognizeAudioFile(sphinxConfigURL, audioFileURL, expected);
     }
@@ -194,7 +194,7 @@ public class TestSphinxRecEngineRaw extends AbstractTestCase {
         System.setProperty(PROP_GRAMMAR_NAME, "example");
 
         URL audioFileURL = this.getClass().getResource("/prompts/i_would_like_sports_news.wav");
-        String expected = "i would like sports news";
+        String expected = "i would like sports news<main:SPORTS>";
 
         recognizeAudioFile(sphinxConfigURL, audioFileURL, expected);
     }
@@ -207,10 +207,10 @@ public class TestSphinxRecEngineRaw extends AbstractTestCase {
         System.setProperty(PROP_GRAMMAR_NAME, "example");
 
         URL audioFileURL2 = this.getClass().getResource("/prompts/get_me_a_stock_quote.wav");
-        String expected2 = "get me a stock quote";
+        String expected2 = "get me a stock quote<main:STOCKS>";
 
         URL audioFileURL1 = this.getClass().getResource("/prompts/i_would_like_sports_news.wav");
-        String expected1 = "i would like sports news";
+        String expected1 = "i would like sports news<main:SPORTS>";
 
         recognizeAudioFile(sphinxConfigURL, audioFileURL1, expected1, audioFileURL2, expected2);
     }
