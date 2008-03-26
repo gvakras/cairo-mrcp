@@ -510,7 +510,7 @@ public class SdpMessage implements Serializable {
      * @throws SdpException
      *             the sdp exception
      */
-    public static MediaDescription createRtpChannelRequest(int localPort) throws SdpException {
+    public static MediaDescription createRtpChannelRequest(int localPort, Vector formats) throws SdpException {
 
         MediaDescription md = new MediaDescriptionImpl();
         Media m = new MediaField();
@@ -519,6 +519,7 @@ public class SdpMessage implements Serializable {
             m.setMediaPort(localPort);
             m.setMediaType(SDP_AUDIO_MEDIA);
             m.setProtocol(SDP_RTP_PROTOCOL);
+            m.setMediaFormats(formats);
             // m.setPortCount(arg0);
             // m.setMediaFormats(arg0)
             md.setMedia(m);
@@ -534,4 +535,46 @@ public class SdpMessage implements Serializable {
         return md;
     }
 
+    /**
+     * Creates a rtp channel sdp object for a given resource type
+     * 
+     * @param resourceType
+     *            the resource type (speechrecog or speechsynth)
+     * 
+     * @return the rtp media desription (As a sdp object)
+     * 
+     * @throws SdpException
+     *             the sdp exception
+     */
+    public static MediaDescription createRtpChannelRequest(int localPort, Vector formats, String rtpHost) throws SdpException {
+
+        MediaDescription md = new MediaDescriptionImpl();
+        Media m = new MediaField();
+        Connection c = new ConnectionField();
+        try {
+            m.setMediaPort(localPort);
+            m.setMediaType(SDP_AUDIO_MEDIA);
+            m.setProtocol(SDP_RTP_PROTOCOL);
+            m.setMediaFormats(formats);
+            // m.setPortCount(arg0);
+            // m.setMediaFormats(arg0)
+            md.setMedia(m);
+
+            md.setAttribute(SDP_MID_ATTR_NAME, "1");
+            md.setAttribute("sendrecv", null);
+            c.setAddress(rtpHost);
+            c.setAddressType("IP4");
+            c.setNetworkType("IN");
+            md.setConnection(c);
+            // md.setAttribute("sendonly", null);
+
+        } catch (SdpException e) {
+            _logger.debug(e, e);
+            throw e;
+        }
+        return md;
+    }   
+    
 }
+
+

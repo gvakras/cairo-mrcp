@@ -41,6 +41,7 @@ import javax.media.MediaLocator;
 import javax.media.Processor;
 import javax.media.control.TrackControl;
 import javax.media.format.UnsupportedFormatException;
+import javax.media.protocol.ContentDescriptor;
 import javax.media.protocol.DataSource;
 import javax.media.rtp.InvalidSessionAddressException;
 import javax.media.rtp.RTPManager;
@@ -48,6 +49,7 @@ import javax.media.rtp.SendStream;
 import javax.media.rtp.SessionAddress;
 
 import org.apache.log4j.Logger;
+import org.speechforge.cairo.util.sip.AudioFormats;
 
 /**
  * Handles playing of audio prompt files over an RTP output stream.
@@ -65,8 +67,9 @@ public class RTPPlayer implements ControllerListener {
     private SendStream _sendStream;
     private DataSource _dataSource;
     private SessionAddress _targetAddress;
+    private AudioFormats _af;
 
-    public RTPPlayer(int localPort, InetAddress remoteAddress, int remotePort)
+    public RTPPlayer(int localPort, InetAddress remoteAddress, int remotePort, AudioFormats af)
       throws InvalidSessionAddressException, IOException {
 
       SessionAddress localAddress = new SessionAddress(InetAddress.getLocalHost(), localPort);
@@ -74,10 +77,12 @@ public class RTPPlayer implements ControllerListener {
       _rtpManager = RTPManager.newInstance();
       _rtpManager.initialize(localAddress);
       _rtpManager.addTarget(_targetAddress);
+      _af = af;
     }
 
     public RTPPlayer(RTPManager rtpManager) {
         _rtpManager = rtpManager;
+        _af = new AudioFormats();
     }
 
     public void playPrompt(File promptFile) throws InterruptedException, IllegalStateException, IllegalArgumentException {
@@ -164,12 +169,31 @@ public class RTPPlayer implements ControllerListener {
         _processor.setContentDescriptor(CONTENT_DESCRIPTOR_RAW_RTP);
 
         Format[] supported = trackControls[0].getSupportedFormats();
+       
         int formats = (supported == null) ? -1 : supported.length;
         if (formats < 1) {
             throw new UnsupportedFormatException(
                     "No supported formats found: " + formats, trackControls[0].getFormat());
         }
-        trackControls[0].setFormat(supported[0]);
+        
+        ContentDescriptor c = _processor.getContentDescriptor();
+        //System.out.println("Content Descriptor: "+c.toString());
+        boolean foundOne = false;
+        for (int i=0; i< supported.length; i++) {
+
+            //System.out.println("FORMAT# "+i+" "+supported[i].toString());
+            //System.out.println("FORMAT# "+i+" "+supported[i].getEncoding());
+            if (_af.isSupported(supported[i])) {
+                trackControls[0].setFormat(supported[i]);
+                foundOne = true;
+                break;
+           }
+        }
+        
+        if (!foundOne) {
+            throw new UnsupportedFormatException(
+                    "No supported formats found: " + formats, trackControls[0].getFormat());
+        }
     }
 
     private void realize() throws CannotRealizeException, InterruptedException {

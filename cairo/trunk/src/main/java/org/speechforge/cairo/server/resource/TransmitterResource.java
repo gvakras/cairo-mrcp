@@ -31,6 +31,7 @@ import org.speechforge.cairo.server.tts.MrcpSpeechSynthChannel;
 import org.speechforge.cairo.server.tts.PromptGeneratorFactory;
 import org.speechforge.cairo.server.tts.RTPSpeechSynthChannel;
 import org.speechforge.cairo.util.CairoUtil;
+import org.speechforge.cairo.util.sip.AudioFormats;
 import org.speechforge.cairo.util.sip.SdpMessage;
 import org.speechforge.cairo.util.sip.SipSession;
 
@@ -43,6 +44,7 @@ import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
 import javax.sdp.MediaDescription;
 
@@ -91,6 +93,7 @@ public class TransmitterResource extends ResourceImpl {
      */
     public SdpMessage invite(SdpMessage request, String sessionId) throws ResourceUnavailableException, RemoteException {
         _logger.debug("Resource received invite() request.");
+        _logger.debug(request.getSessionDescription().toString());
         InetAddress remoteHost = null;
 
         // Create a resource session object
@@ -107,6 +110,7 @@ public class TransmitterResource extends ResourceImpl {
             if (channels.size() > 0) {
 
                 remoteHost = InetAddress.getByName(request.getSessionAddress());
+                InetAddress mediaHost = remoteHost;
                 int localPort = 0;
                 int remotePort = 0;
                 RTPSpeechSynthChannel rtpscc;
@@ -121,14 +125,28 @@ public class TransmitterResource extends ResourceImpl {
                     // } else if (rt.equalsIgnoreCase("speechsynth")) {
                     // resourceType = MrcpResourceType.SPEECHSYNTH;
                     // }
-
+                    AudioFormats af = null;
                     List<MediaDescription> rtpmd = request.getAudioChansForThisControlChan(md);
+                    Vector formatsInRequest = null;
                     if (rtpmd.size() > 0) {
+                        //TODO: Complete the method below that checks if audio format is supported.  
+                        //      If not resource not available exception should be shown.
+                        //      maybe this could be part of the up-front validation
+                        formatsInRequest = rtpmd.get(0).getMedia().getMediaFormats(true);      
+                        af  = AudioFormats.constructWithSdpVector(formatsInRequest);
+                        
                         // TODO: What if there is more than 1 media channels?
                         localPort = _portPairPool.borrowPort();
+                        
                         // TODO: check if there is an override for the host attribute in the m block
                         // InetAddress remoteHost = InetAddress.getByName(rtpmd.get(1).getAttribute();
                         remotePort = rtpmd.get(0).getMedia().getMediaPort();
+                        
+                        //get the host for the rtp channel.  maybe the media is going to a differnet host.
+                        //if so tehre will be a c-line in the media block
+                        if (rtpmd.get(0).getConnection()!= null)
+                            mediaHost = InetAddress.getByName(rtpmd.get(0).getConnection().getAddress());
+                        
                     } else {
                         _logger.warn("No Media channel specified in the invite request");
                         // TODO: handle no media channel in the request corresponding to the mrcp channel (sip error)
@@ -137,10 +155,13 @@ public class TransmitterResource extends ResourceImpl {
                     switch (resourceType) {
                     case BASICSYNTH:
                     case SPEECHSYNTH:
-                        rtpscc = new RTPSpeechSynthChannel(localPort, remoteHost, remotePort);
+
+                        rtpscc = new RTPSpeechSynthChannel(localPort, mediaHost, remotePort,af);
                         MrcpSpeechSynthChannel mrcpChannel = new MrcpSpeechSynthChannel(channelID, rtpscc, _basePromptDir, _promptGeneratorPool);
                         _mrcpServer.openChannel(channelID, mrcpChannel);
                         md.getMedia().setMediaPort(_mrcpServer.getPort());
+                        md.getMedia().setMediaFormats(af.filterOutUnSupportedFormatsInOffer());
+                        _logger.debug("Created a SPEECHSYNTH Channel.  id is: "+channelID+" rtp remotehost:port is: "+ mediaHost+":"+remotePort);
                         break;
 
                     default:
@@ -158,6 +179,8 @@ public class TransmitterResource extends ResourceImpl {
                     cr.setRtpssc(rtpscc);
                     sessionChannels.put(channelID, cr);
                 }
+            } else {
+                _logger.warn("Invite request had no channels.");
             }
         } catch (ResourceUnavailableException e) {
             _logger.debug(e, e);
@@ -175,6 +198,8 @@ public class TransmitterResource extends ResourceImpl {
         
         return request;
     }
+
+
 
     public void bye(String sessionId) throws  RemoteException, InterruptedException {
         ResourceSession session = ResourceSession.getSession(sessionId);

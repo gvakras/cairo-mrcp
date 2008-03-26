@@ -148,7 +148,7 @@ public class ResourceServerImpl implements SessionListener {
 
         // post process the message
         // - remove the resource attribute
-        // TODO: change the host adresss
+        // TODO: change the host adresss on a per channel basis (in case the resources are distributed across a network)
         for (MediaDescription md : request.getMrcpChannels()) {
             md.removeAttribute("resource");
         }
@@ -166,6 +166,7 @@ public class ResourceServerImpl implements SessionListener {
     public SdpMessage processInviteRequest(SdpMessage request, SipSession session) throws SdpException,
             ResourceUnavailableException, RemoteException {
         SdpMessage m = invite(request, session);
+        _ua.sendResponse(session, m);
         return m;
     }
 

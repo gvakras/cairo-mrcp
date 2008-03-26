@@ -31,6 +31,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import javax.media.rtp.InvalidSessionAddressException;
 
 import org.apache.log4j.Logger;
+import org.speechforge.cairo.util.sip.AudioFormats;
 
 /**
  * Handle requests for speech synthesis (TTS) to be streamed through an outbound RTP channel.
@@ -56,22 +57,24 @@ public class RTPSpeechSynthChannel {
     private int _localPort;
     private InetAddress _remoteAddress;
     private int _remotePort;
-
+    private AudioFormats _af;
+    
     /**
      * TODOC
      * @param localPort 
      * @param remoteAddress 
      * @param remotePort 
      */
-    public RTPSpeechSynthChannel(int localPort, InetAddress remoteAddress, int remotePort) {
+    public RTPSpeechSynthChannel(int localPort, InetAddress remoteAddress, int remotePort, AudioFormats af) {
         _localPort = localPort;
         _remoteAddress = remoteAddress;
         _remotePort = remotePort;
+        _af = af;
     }
 
     private boolean init() throws InvalidSessionAddressException, IOException {
         if (_promptPlayer == null) {
-            _promptPlayer = new RTPPlayer(_localPort, _remoteAddress, _remotePort);
+            _promptPlayer = new RTPPlayer(_localPort, _remoteAddress, _remotePort, _af);
             (_sendThread = new SendThread()).start();
             return true;
         }
@@ -227,7 +230,7 @@ public class RTPSpeechSynthChannel {
         InetAddress remoteAddress = InetAddress.getLocalHost();
         int remotePort = 42048;
 
-        RTPSpeechSynthChannel player = new RTPSpeechSynthChannel(localPort, remoteAddress, remotePort);
+        RTPSpeechSynthChannel player = new RTPSpeechSynthChannel(localPort, remoteAddress, remotePort, new AudioFormats());
         
         File prompt = new File(promptDir, "good_morning_rita.wav");
         player.queuePrompt(prompt, null);

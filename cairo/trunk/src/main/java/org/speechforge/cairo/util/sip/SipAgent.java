@@ -28,6 +28,7 @@ import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 
 import java.util.Random;
 
@@ -41,11 +42,13 @@ import javax.sip.InvalidArgumentException;
 import javax.sip.ListeningPoint;
 import javax.sip.ObjectInUseException;
 import javax.sip.PeerUnavailableException;
+import javax.sip.ServerTransaction;
 import javax.sip.SipException;
 import javax.sip.SipFactory;
 import javax.sip.SipListener;
 import javax.sip.SipProvider;
 import javax.sip.SipStack;
+import javax.sip.TransactionDoesNotExistException;
 import javax.sip.TransactionUnavailableException;
 import javax.sip.TransportNotSupportedException;
 import javax.sip.address.Address;
@@ -66,6 +69,7 @@ import javax.sip.header.ViaHeader;
 
 import javax.sip.message.MessageFactory;
 import javax.sip.message.Request;
+import javax.sip.message.Response;
 
 import org.apache.log4j.Logger;
 
@@ -351,7 +355,22 @@ public class SipAgent {
             ctx.sendRequest();
 
             Dialog dialog = ctx.getDialog();
-            session = SipSession.createSipSession(this, ctx, null);
+            if (_logger.isDebugEnabled()) {
+                _logger.debug("------------- SENDING A SIP REQUEST ---------------");
+                _logger.debug("Sending a "+ ctx.getRequest().getMethod()+" SIP Request");
+                Iterator headers = ctx.getRequest().getHeaderNames();
+                while (headers.hasNext()) {
+                    _logger.debug(ctx.getRequest().getHeader((String) headers.next()).toString());
+                }
+                byte[] contentBytes = ctx.getRequest().getRawContent();
+                if (contentBytes == null) {
+                    _logger.debug("No content in the request.");
+                } else {
+                   String contentString = new String(contentBytes);
+                   _logger.debug(contentString);
+                } 
+             } 
+            session = SipSession.createSipSession(this, ctx, dialog, null,null,null);
             SipSession.addPendingSession(session);
 
         } catch (TransactionUnavailableException e) {
@@ -376,7 +395,7 @@ public class SipAgent {
         Request byeRequest;
         byeRequest = d.createRequest(Request.BYE);
         ClientTransaction ct = sipProvider.getNewClientTransaction(byeRequest);
-        d.sendRequest(ct);
+        SipAgent.sendRequest(d, ct);
 
     }
 
@@ -431,6 +450,99 @@ public class SipAgent {
      */
     public void setMyAddress(Address myAddress) {
         this.myAddress = myAddress;
+    }
+    
+    public void sendResponse(SipSession session, SdpMessage sdpResponse) {
+
+        // send the ok (assuming that the offer is accepted with the response in the sdpMessaage)
+        //TODO what if the offer is not accepted?  Do all non-ok response come thru the exception path?
+        Response okResponse = null;
+        try {
+            okResponse = getMessageFactory().createResponse(Response.OK, session.getRequest().getRequest());
+        } catch (ParseException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+
+        // Create a application/sdp ContentTypeHeader
+        ContentTypeHeader contentTypeHeader = null;
+        try {
+            contentTypeHeader = getHeaderFactory().createContentTypeHeader("application", "sdp");
+        } catch (ParseException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+
+        // add the sdp response to the message
+        try {
+            okResponse.setContent(sdpResponse.getSessionDescription().toString(), contentTypeHeader);
+        } catch (ParseException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+
+        ToHeader toHeader = (ToHeader) okResponse.getHeader(ToHeader.NAME);
+        //toHeader.setTag(guid);
+        
+        Address address = null;
+        try {
+            address = getAddressFactory().createAddress("<sip:" + getHost() + ":" + getPort() + ">");
+        } catch (ParseException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+        ContactHeader contactHeader = getHeaderFactory().createContactHeader(address);
+        okResponse.addHeader(contactHeader);
+        
+        // Now if there were no exceptions, we were able to process the invite
+        // request and we have a valid reponse to send back
+        // if there is an exception here, not much that can be done.
+        try {
+            SipAgent.sendResponse(session.getStx(), okResponse);
+        } catch (SipException e) {
+            _logger.error(e, e);
+        } catch (InvalidArgumentException e) {
+            _logger.error(e, e);
+        }
+        
+    }
+    
+    public static void sendResponse(ServerTransaction serverTransaction, Response response) throws SipException, InvalidArgumentException {
+        if (SipListenerImpl._logger.isDebugEnabled()) {
+            SipListenerImpl._logger.debug("------------- SENDING A SIP RESPONSE ---------------");
+            SipListenerImpl._logger.debug("Sending a SIP Response.  Status: "+response.getStatusCode()+", "+response.getReasonPhrase());
+            Iterator headers = response.getHeaderNames();
+            while (headers.hasNext()) {
+                SipListenerImpl._logger.debug(response.getHeader((String) headers.next()).toString());
+            }
+            byte[] contentBytes = response.getRawContent();
+            if (contentBytes == null) {
+                SipListenerImpl._logger.debug("No content in the response.");
+            } else {
+               String contentString = new String(contentBytes);
+               SipListenerImpl._logger.debug(contentString);
+            } 
+         }
+        serverTransaction.sendResponse(response);
+    }
+
+    public static void sendRequest(Dialog dialog, ClientTransaction ctx) throws TransactionDoesNotExistException, SipException {
+        if (_logger.isDebugEnabled()) {
+            _logger.debug("------------- SENDING A SIP REQUEST ---------------");
+            _logger.debug("Sending a "+ ctx.getRequest().getMethod()+" SIP Request");
+            Iterator headers = ctx.getRequest().getHeaderNames();
+            while (headers.hasNext()) {
+                _logger.debug(ctx.getRequest().getHeader((String) headers.next()).toString());
+            }
+            byte[] contentBytes = ctx.getRequest().getRawContent();
+            if (contentBytes == null) {
+                _logger.debug("No content in the request.");
+            } else {
+               String contentString = new String(contentBytes);
+               _logger.debug(contentString);
+            } 
+         } 
+        dialog.sendRequest(ctx);
     }
 
 }

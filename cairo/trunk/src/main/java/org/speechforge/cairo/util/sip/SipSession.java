@@ -29,8 +29,12 @@ import java.util.Map;
 
 import javax.sip.ClientTransaction;
 import javax.sip.Dialog;
+import javax.sip.RequestEvent;
+import javax.sip.ServerTransaction;
+import javax.sip.message.Request;
 
 import org.apache.log4j.Logger;
+import org.mrcp4j.client.MrcpChannel;
 import org.speechforge.cairo.server.resource.Resource;
 
 /**
@@ -42,10 +46,23 @@ public class SipSession {
 
     private static Logger _logger = Logger.getLogger(SipSession.class);
 
-    private Dialog sipDialog;
-    private ClientTransaction ctx;
+    //common to server and client tx
     private SipAgent agent;
+    
+    //server side transaction 
+    private Dialog sipDialog;
+    private RequestEvent request;
+    private ServerTransaction stx;
     private List<Resource> resources;
+    private SipSession forward;
+    
+    private String channelName;
+    
+    //client side transaction
+    private ClientTransaction ctx;
+    private MrcpChannel ttsChannel;
+    private MrcpChannel recogChannel;
+
     //private  SdpMessage lastRequest;
     //private  SdpMessage lastResponse;
     
@@ -119,6 +136,21 @@ public class SipSession {
         return sipDialog.getDialogId();
     }
     
+    /**
+     * @return the forward
+     */
+    public SipSession getForward() {
+        return forward;
+    }
+
+    /**
+     * @param forward the forward to set
+     */
+    public void setForward(SipSession forward) {
+        this.forward = forward;
+    }
+    
+    
     public void bye() {
         // TODO: implement hanging up (re-nvite and info too)
     }
@@ -127,11 +159,14 @@ public class SipSession {
         // TODO: implement modifying the session via re-invite
     }
 
-    public static SipSession createSipSession(SipAgent agent, ClientTransaction ctx, Dialog d) {
+    public static SipSession createSipSession(SipAgent agent, ClientTransaction ctx, Dialog d, RequestEvent request, ServerTransaction stx, String channelName) {
         SipSession s = new SipSession();
         s.agent = agent;
         s.ctx = ctx;
         s.sipDialog = d;
+        s.request = request;
+        s.stx = stx;
+        s.channelName = channelName;
         return s;
     }
 
@@ -197,5 +232,77 @@ public class SipSession {
     public static synchronized SipSession getSessionFromPending(String key) {
         return pendingSessions.get(key);
     }
+
+    /**
+     * @return the recogChanel
+     */
+    public MrcpChannel getRecogChannel() {
+        return recogChannel;
+    }
+
+    /**
+     * @param recogChanel the recogChanel to set
+     */
+    public void setRecogChannel(MrcpChannel recogChanel) {
+        this.recogChannel = recogChanel;
+    }
+
+    /**
+     * @return the ttsChannel
+     */
+    public MrcpChannel getTtsChannel() {
+        return ttsChannel;
+    }
+
+    /**
+     * @param ttsChannel the ttsChannel to set
+     */
+    public void setTtsChannel(MrcpChannel ttsChannel) {
+        this.ttsChannel = ttsChannel;
+    }
+
+    /**
+     * @return the request
+     */
+    public RequestEvent getRequest() {
+        return request;
+    }
+
+    /**
+     * @param request the request to set
+     */
+    public void setRequest(RequestEvent request) {
+        this.request = request;
+    }
+
+    /**
+     * @return the stx
+     */
+    public ServerTransaction getStx() {
+        return stx;
+    }
+
+    /**
+     * @param stx the stx to set
+     */
+    public void setStx(ServerTransaction stx) {
+        this.stx = stx;
+    }
+
+    /**
+     * @return the channelName
+     */
+    public String getChannelName() {
+        return channelName;
+    }
+
+    /**
+     * @param channelName the channelName to set
+     */
+    public void setChannelName(String channelName) {
+        this.channelName = channelName;
+    }
+
+
 
 }

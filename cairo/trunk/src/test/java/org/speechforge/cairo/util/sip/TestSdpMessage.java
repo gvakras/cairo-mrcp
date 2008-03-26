@@ -22,6 +22,8 @@
  */
 package org.speechforge.cairo.util.sip;
 
+import java.util.Vector;
+
 import org.mrcp4j.MrcpResourceType;
 import org.speechforge.cairo.server.recog.sphinx.AbstractTestCase;
 import org.speechforge.cairo.util.sip.SdpMessage;
@@ -125,7 +127,9 @@ public class TestSdpMessage extends AbstractTestCase {
         debugTestName(_logger);
 
         int localPort = 12345;
-        MediaDescription md = SdpMessage.createRtpChannelRequest(localPort);
+        Vector format = new Vector();
+        format.add("0");           //PCMU
+        MediaDescription md = SdpMessage.createRtpChannelRequest(localPort,format);
         Media m = md.getMedia();
         try {
             assertEquals(m.getMediaPort(), localPort);

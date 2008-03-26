@@ -32,6 +32,7 @@ import org.speechforge.cairo.server.resource.ResourceSession.ChannelResources;
 import org.speechforge.cairo.server.rtp.RTPStreamReplicator;
 import org.speechforge.cairo.server.rtp.RTPStreamReplicatorFactory;
 import org.speechforge.cairo.util.CairoUtil;
+import org.speechforge.cairo.util.sip.AudioFormats;
 import org.speechforge.cairo.util.sip.SdpMessage;
 import org.speechforge.cairo.util.sip.SipSession;
 
@@ -43,6 +44,7 @@ import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
 import javax.sdp.MediaDescription;
 
@@ -104,7 +106,7 @@ public class ReceiverResource extends ResourceImpl {
         
         try {
             List<MediaDescription> channels = request.getMrcpReceiverChannels();
-
+            Vector formatsInRequest = null;
             if (channels.size() > 0) {
 
                 for(MediaDescription md: channels) {
@@ -117,9 +119,16 @@ public class ReceiverResource extends ResourceImpl {
                         resourceType = MrcpResourceType.SPEECHSYNTH;
                     }
 
+                    AudioFormats af = null;
                     switch (resourceType) {
                     case  SPEECHRECOG:
                         List<MediaDescription> rtpmd = request.getAudioChansForThisControlChan(md);
+                        //TODO: Check if audio format is supported.  If not resource not available exception should be shown.
+                        //      maybe this could be part of the up-front validation
+                        formatsInRequest = rtpmd.get(0).getMedia().getMediaFormats(true); 
+                        af  = AudioFormats.constructWithSdpVector(formatsInRequest);
+                        //formatsInRequest = AudioFormats.filterOutUnSupportedFormatsInOffer(formatsInRequest);
+ 
                         RTPStreamReplicator replicator =  (RTPStreamReplicator) _replicatorPool.borrowObject();
                         if (rtpmd.size() > 0) {
                             //TODO: What if there is more than 1 media channels?
@@ -132,6 +141,7 @@ public class ReceiverResource extends ResourceImpl {
                         RTPRecogChannel recog = new RTPRecogChannel(_recEnginePool, replicator);
                         _mrcpServer.openChannel(channelID, new MrcpRecogChannel(channelID, recog, _baseGrammarDir));
                         md.getMedia().setMediaPort(_mrcpServer.getPort());
+                        md.getMedia().setMediaFormats(af.filterOutUnSupportedFormatsInOffer());
                         
                         // Create a channel resources object and put it in the channel map (which is in the session).  
                         // These resources must be returned to the pool when the channel is closed.  In the case of a 

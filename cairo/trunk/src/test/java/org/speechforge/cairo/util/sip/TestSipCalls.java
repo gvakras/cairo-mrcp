@@ -26,7 +26,8 @@ public class TestSipCalls extends SipTestCase implements SessionListener {
     String host;
 
     private Properties properties = new Properties();
-
+    SipAgent cairoUA ;
+    
     public void setUp() throws Exception {
 
         host = null;
@@ -70,7 +71,7 @@ public class TestSipCalls extends SipTestCase implements SessionListener {
         }
 
 
-        SipAgent cairoUA = new SipAgent(this, "sip:cairo@speechforge.org", "name", 5062, "udp");
+        cairoUA = new SipAgent(this, "sip:cairo@speechforge.org", "name", 5062, "udp");
 
         // use sipunit to make a call
         SipCall call = ua.makeCall("sip:cairo@speechforge.org", host + ":5062/UDP",
@@ -250,8 +251,9 @@ public class TestSipCalls extends SipTestCase implements SessionListener {
     }
 
     public SdpMessage processInviteRequest(SdpMessage request, SipSession session) {
-        // System.out.println("Got a invite Request");
-        // System.out.println(request.getSessionDescription().toString());
+         System.out.println("Got a invite Request");
+         System.out.println(request.getSessionDescription().toString());
+        cairoUA.sendResponse(session,  SdpMessage.createSdpSessionMessage(request.getSessionDescription()));
         return SdpMessage.createSdpSessionMessage(request.getSessionDescription());
 
     }

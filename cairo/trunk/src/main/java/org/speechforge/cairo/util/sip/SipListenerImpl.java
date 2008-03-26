@@ -24,6 +24,7 @@ package org.speechforge.cairo.util.sip;
 
 import java.rmi.RemoteException;
 import java.text.ParseException;
+import java.util.Iterator;
 
 import javax.sdp.SdpException;
 import javax.sdp.SdpFactory;
@@ -47,6 +48,7 @@ import javax.sip.address.Address;
 import javax.sip.header.CSeqHeader;
 import javax.sip.header.ContactHeader;
 import javax.sip.header.ContentTypeHeader;
+import javax.sip.header.Header;
 import javax.sip.header.ToHeader;
 import javax.sip.message.Request;
 import javax.sip.message.Response;
@@ -63,7 +65,7 @@ import org.speechforge.cairo.server.resource.Resource;
  */
 public class SipListenerImpl implements SipListener {
 
-    private static Logger _logger = Logger.getLogger(SipListenerImpl.class);
+    static Logger _logger = Logger.getLogger(SipListenerImpl.class);
 
     private SipAgent sipClient;
 
@@ -83,9 +85,7 @@ public class SipListenerImpl implements SipListener {
 
         Request request = requestEvent.getRequest();
         ServerTransaction stx = requestEvent.getServerTransaction();
-        _logger.debug("Request " + request.getMethod() + " received at "
-                + sipClient.getSipStack().getStackName() + " with server transaction id " + stx);
-        /*
+    /*
          * 
          * TODO: Check if the request is really addressed to me. check To header
          * ot route or contact header? ToHeader to = (ToHeader)
@@ -93,6 +93,26 @@ public class SipListenerImpl implements SipListener {
          * (sipClient.getMyAddress().getURI().toString().equals(
          * to.getAddress().getURI().getScheme())) {
          */
+        
+        if (_logger.isDebugEnabled()) {
+            _logger.debug("------------- RECEIVED A SIP REQUEST ---------------");
+
+            _logger.debug("Received a "+ request.getMethod() +" SIP request");
+            if (requestEvent.getDialog() != null) {
+               _logger.debug("Pre-existing Dialog: "+requestEvent.getDialog().toString());
+            }
+            Iterator headers = request.getHeaderNames();
+            while (headers.hasNext()) {
+                _logger.debug(request.getHeader((String) headers.next()).toString());
+            }
+            byte[] contentBytes = request.getRawContent();
+            if (contentBytes == null) {
+                _logger.debug("No content in the request.");
+            } else {
+               String contentString = new String(contentBytes);
+               _logger.debug(contentString);
+            } 
+         }
 
         if (request.getMethod().equals(Request.INVITE)) {
             processInvite(requestEvent);
@@ -111,11 +131,11 @@ public class SipListenerImpl implements SipListener {
             // think it should be symetrical.
             try {
                 _logger.info("Got an unhandled SIP request Method = " + request.getMethod());
-                stx.sendResponse(sipClient.getMessageFactory().createResponse(202, request));
+                SipAgent.sendResponse(stx, sipClient.getMessageFactory().createResponse(202, request));
                 // send one back
                 SipProvider prov = (SipProvider) requestEvent.getSource();
                 Request refer = requestEvent.getDialog().createRequest("REFER");
-                requestEvent.getDialog().sendRequest(prov.getNewClientTransaction(refer));
+                SipAgent.sendRequest(requestEvent.getDialog(), prov.getNewClientTransaction(refer));
             } catch (SipException e) {
                 _logger.error(e, e);
             } catch (InvalidArgumentException e) {
@@ -135,13 +155,33 @@ public class SipListenerImpl implements SipListener {
         ClientTransaction ctx = responseEvent.getClientTransaction();
         CSeqHeader cseq = (CSeqHeader) response.getHeader(CSeqHeader.NAME);
 
-        _logger.debug("Sip Response received : Status Code = " + response.getStatusCode() + " cseq= " + cseq
-                + "request method:" + cseq.getMethod());
+        if (_logger.isDebugEnabled()) {
+           _logger.debug("------------- RECEIVED A SIP RESPONSE ---------------");
+            _logger.debug("Sip Response received : Status:" + response.getStatusCode()+", "+response.getReasonPhrase());
+           
+           Iterator headers = response.getHeaderNames();
+           while (headers.hasNext()) {
+               _logger.debug(response.getHeader((String) headers.next()).toString());
+           }
+           
+           byte[] contentBytes = response.getRawContent();
 
+           if (contentBytes == null) {
+               _logger.debug("No content in the response.");
+           } else {
+               String contentString = new String(contentBytes);
+               _logger.debug(contentString);
+           } 
+        }
+        
+
+        
         if (ctx != null) {
             dialog = ctx.getDialog();
         } else {
-            _logger.info("Stray response -- dropping ");
+            _logger.info("Stray SIP response -- dropping ");
+            //_logger.info("Status:" + response.getStatusCode()+", "+response.getReasonPhrase());
+            
             return;
         }
 
@@ -176,6 +216,7 @@ public class SipListenerImpl implements SipListener {
                         }
 
                         SdpMessage sdpMessage = SdpMessage.createSdpSessionMessage(sd);
+                        _logger.debug(sdpMessage.toString());
                         SdpMessage sdpResponse = sipClient.getSessionListener().processInviteResponse(true, sdpMessage, session);
                     } else {
                         // TODO: handle error condition where the session was
@@ -193,7 +234,7 @@ public class SipListenerImpl implements SipListener {
                         // late !!");
                         Request byeRequest = dialog.createRequest(Request.BYE);
                         ClientTransaction ct = sipClient.getSipProvider().getNewClientTransaction(byeRequest);
-                        dialog.sendRequest(ct);
+                        SipAgent.sendRequest(dialog, ct);
                     }
                 } else if (cseq.getMethod().equals(Request.BYE)) {
                 }
@@ -206,10 +247,10 @@ public class SipListenerImpl implements SipListener {
                        SdpMessage sdpResponse = sipClient.getSessionListener().processInviteResponse(false, null, session);
                     }
                 } else { //methods not handled for this repsonse code
-                    _logger.warn("Received a "+ responseEvent.getResponse().getStatusCode()+" : "+responseEvent.getResponse().getReasonPhrase()+" response to a "+cseq.getMethod());
+                    _logger.warn("Received an SIP response status code for an unhandled method (ignoring it): "+ responseEvent.getResponse().getStatusCode()+" : "+responseEvent.getResponse().getReasonPhrase()+" response to a "+cseq.getMethod());
                 }
             } else {  //response code not handled
-               _logger.warn("Got a " + responseEvent.getResponse().getStatusCode() +" : "+responseEvent.getResponse().getReasonPhrase());
+               _logger.warn("Received an unhandled SIP response status code (ignoring it): " + responseEvent.getResponse().getStatusCode() +" : "+responseEvent.getResponse().getReasonPhrase());
             }
         } catch (SipException e) {
             // TODO: Handle case where there is an exception handling the invite
@@ -262,6 +303,14 @@ public class SipListenerImpl implements SipListener {
         boolean reinvite = false;
         
         String guid = sipClient.getGUID();
+        
+        String channelName = null;
+        Header channelHeader = requestEvent.getRequest().getHeader("x-channel");
+        if (channelHeader != null) {
+           String channel[] = channelHeader.toString().split(":");
+           channelName = channel[1];
+        }
+        
         try {
 
             stx = requestEvent.getServerTransaction();
@@ -269,11 +318,6 @@ public class SipListenerImpl implements SipListener {
                 stx = sipProvider.getNewServerTransaction(request);
             }
            
-
-            
-            Address address = sipClient.getAddressFactory().createAddress(
-                    "<sip:" + sipClient.getHost() + ":" + sipClient.getPort() + ">");
-            ContactHeader contactHeader = sipClient.getHeaderFactory().createContactHeader(address);
 
             byte[] contentBytes = request.getRawContent();
             SdpFactory sdpFactory = SdpFactory.getInstance();
@@ -289,41 +333,53 @@ public class SipListenerImpl implements SipListener {
                 noOffer = true;
                 _logger.info("No offer in the invite request.  Should provide offer in response but not supported yet.");
             } else {
-                
-                // Send a provisional Response: Session Progress -- establishes the dialog id
-                Response response = sipClient.getMessageFactory().createResponse(Response.SESSION_PROGRESS, request);
-                ToHeader provToHeader = (ToHeader) response.getHeader(ToHeader.NAME);
-                provToHeader.setTag(guid);
-                try {
-                    stx.sendResponse(response);
-                } catch (InvalidArgumentException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                Dialog dialog = requestEvent.getDialog();
+                if ( dialog == null) {
+                   // Send a provisional Response: Session Progress -- establishes the dialog id
+                   Response response = sipClient.getMessageFactory().createResponse(Response.SESSION_PROGRESS, request);
+                   ToHeader provToHeader = (ToHeader) response.getHeader(ToHeader.NAME);
+                   provToHeader.setTag(guid);
+                   try {
+                       SipAgent.sendResponse(stx, response);
+                   } catch (InvalidArgumentException e) {
+                       // TODO Auto-generated catch block
+                       e.printStackTrace();
+                   }
+                   dialog = stx.getDialog();
+                   if (dialog != null) {
+                       String did = dialog.getDialogId();
+                       if (did != null) {
+                           session = SipSession.getSession(did);
+                           if (session != null) {
+                               // TODO: handle a re-invite. This must be a re-invite if
+                               // there already is a dialog with a valid ID and a session
+                               reinvite = true;
+                               session.setStx(stx);
+                               session.setRequest(requestEvent);
+                              _logger.warn("Recieved a re-invite request. Type A");
+                           } else {
+                               _logger.debug("adding the session with dialog ID: "+dialog.getDialogId());
+                               session = SipSession.createSipSession(sipClient, null, dialog, requestEvent, stx, channelName);
+                               SipSession.addSession(session);
+                           }
+                       } else {
+                           _logger.warn("Failed to create a SIP session for teh invite request.  No Dialog id established for the dialog.");
+                       }
+                   } else {
+                       _logger.warn("Failed to create a SIP session for the invite request. No Dialog attached to server transaction.");
+                   }
+                   
+                } else {
+                    String did = dialog.getDialogId();
+                    session = SipSession.getSession(did);
+                    session.setStx(stx);
+                    session.setRequest(requestEvent);
+                    reinvite = true;
+                    _logger.warn("Recieved a re-invite request. Type B.");
                 }
                 
                 //establish the session, now that the dialog id is established
-                Dialog dialog = stx.getDialog();
-                if (dialog != null) {
-                    String did = dialog.getDialogId();
-                    if (did != null) {
-                        session = SipSession.getSession(did);
-                        if (session != null) {
-                            // TODO: handle a re-invite. This must be a re-invite if
-                            // there already is a dialog with a valid ID and a session
-                            reinvite = true;
-                           _logger.warn("Recieved a re-invite request.  Not supported yet.");
-                        } else {
-                            _logger.debug("adding the session with dialog ID: "+dialog.getDialogId());
-                            session = SipSession.createSipSession(sipClient, null, dialog);
-                            SipSession.addSession(session);
-                            _logger.debug("Created the SIP session in rsponse to a invite request.");
-                        }
-                    } else {
-                        _logger.warn("Failed to create a SIP session for teh invite request.  No Dialog id established for the dialog.");
-                    }
-                } else {
-                    _logger.warn("Failed to create a SIP session for teh invite request. No Dialog attached to server transaction.");
-                }
+
             
                 
                 String contentString = new String(contentBytes);
@@ -332,30 +388,21 @@ public class SipListenerImpl implements SipListener {
 
                 //valudate the sdp message (throw sdpException if the message is invalid)
                 SdpMessageValidator.validate(sdpMessage);
-
+            
                 //process the invitaion (the resource manager processInviteRequest method)
-                SdpMessage sdpResponse = sipClient.getSessionListener().processInviteRequest(sdpMessage,
-                        session);
+                SdpMessage sdpResponse = sipClient.getSessionListener().processInviteRequest(sdpMessage, session);
+                
+                //----- REmoved the response sending
+                //------Must send yourself. 
+                //------To do so use the SipAgent.sendResponse()
 
-                // send the ok (assuming that the offer is accepted with the response in the sdpMessaage)
-                //TODO what if the offer is not accepted?  Do all non-ok response come thru the exception path?
-                okResponse = sipClient.getMessageFactory().createResponse(Response.OK, request);
-
-                // Create a application/sdp ContentTypeHeader
-                ContentTypeHeader contentTypeHeader = sipClient.getHeaderFactory().createContentTypeHeader(
-                        "application", "sdp");
-
-                // add the sdp response to the message
-                okResponse.setContent(sdpResponse.getSessionDescription().toString(), contentTypeHeader);
-
-                ToHeader toHeader = (ToHeader) okResponse.getHeader(ToHeader.NAME);
-                toHeader.setTag(guid);
-                okResponse.addHeader(contactHeader);
 
             }
         } catch (SipException e) {
+            e.printStackTrace();
             OfferRejected(requestEvent, session, stx);
             _logger.info("Could not process invite." + e, e);
+
         } catch (ParseException e) {
             OfferRejected(requestEvent,session, stx);
             _logger.info("Could not process invite." + e, e);
@@ -370,17 +417,7 @@ public class SipListenerImpl implements SipListener {
             _logger.info("Could not process invite." + e, e);
         }
 
-        // Now if there were no exceptions, we were able to process the invite
-        // request and we have a valid reponse to send back
-        // if there is an exception here, not much that can be done.
-        try {
-            stx.sendResponse(okResponse);
 
-        } catch (SipException e) {
-            _logger.error(e, e);
-        } catch (InvalidArgumentException e) {
-            _logger.error(e, e);
-        }
 
     }
 
@@ -405,7 +442,7 @@ public class SipListenerImpl implements SipListener {
                 stx = sipProvider.getNewServerTransaction(request);
             }
             Response response = sipClient.getMessageFactory().createResponse(Response.NOT_ACCEPTABLE_HERE, request);
-            stx.sendResponse(response);
+            SipAgent.sendResponse(stx, response);
 
             // release resources
             for (Resource r: session.getResources() ){
@@ -438,7 +475,7 @@ public class SipListenerImpl implements SipListener {
         // Dialog dialog = stx.getDialog();
         try {
             Response response = sipClient.getMessageFactory().createResponse(200, request);
-            stx.sendResponse(response);
+            SipAgent.sendResponse(stx, response);
 
             // Not sure if this is really required. Do I need to save the invite
             // requests
@@ -478,7 +515,7 @@ public class SipListenerImpl implements SipListener {
                 sipClient.getSessionListener().processByeRequest(session);
                 SipSession.removeSession(session);
                 Response response = sipClient.getMessageFactory().createResponse(200, request);
-                stx.sendResponse(response);
+                SipAgent.sendResponse(stx, response);
             } catch (SipException e) {
                 _logger.error(e, e);
             } catch (ParseException e) {

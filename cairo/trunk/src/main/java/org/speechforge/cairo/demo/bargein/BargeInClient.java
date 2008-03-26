@@ -24,6 +24,7 @@ package org.speechforge.cairo.demo.bargein;
 
 import org.speechforge.cairo.demo.util.DemoSipAgent;
 import org.speechforge.cairo.demo.util.NativeMediaClient;
+import org.speechforge.cairo.server.recog.RecognitionResult;
 import org.speechforge.cairo.server.resource.ResourceImpl;
 import org.speechforge.cairo.server.rtp.RTPConsumer;
 import org.speechforge.cairo.util.sip.SipAgent;
@@ -311,9 +312,9 @@ public class BargeInClient implements MrcpEventListener {
 //  static methods
 ////////////////////////////////////
     
-    private static SdpMessage constructResourceMessage(int localRtpPort) throws UnknownHostException, SdpException {
+    private static SdpMessage constructResourceMessage(int localRtpPort, Vector format) throws UnknownHostException, SdpException {
         SdpMessage sdpMessage = SdpMessage.createNewSdpSessionMessage(_mySipAddress, _host, "The session Name");
-        MediaDescription rtpChannel = SdpMessage.createRtpChannelRequest(localRtpPort);
+        MediaDescription rtpChannel = SdpMessage.createRtpChannelRequest(localRtpPort, format);
         MediaDescription synthControlChannel = SdpMessage.createMrcpChannelRequest(MrcpResourceType.SPEECHSYNTH);
         MediaDescription recogControlChannel = SdpMessage.createMrcpChannelRequest(MrcpResourceType.SPEECHRECOG);
         Vector v = new Vector();
@@ -413,7 +414,9 @@ public class BargeInClient implements MrcpEventListener {
         sipAgent = new DemoSipAgent(_mySipAddress, "Synth Client Sip Stack", _myPort, "UDP");
 
         // Construct the SDP message that will be sent in the SIP invitation
-        SdpMessage message = constructResourceMessage(localRtpPort);
+        Vector format = new Vector();
+        format.add("0");           //PCMU
+        SdpMessage message = constructResourceMessage(localRtpPort,format);
 
         // Send the sip invitation (This method on the demoSipAgent blocks until a response is received or timeout occurs) 
         _logger.info("Sending a SIP invitation to the cairo server.");
@@ -463,6 +466,7 @@ public class BargeInClient implements MrcpEventListener {
 
                 String result = null;
 
+                String parrotString;
                 do {
                     result = client.playAndRecognize(prompt, grammarUrl);
 
@@ -474,15 +478,19 @@ public class BargeInClient implements MrcpEventListener {
                         _logger.info(sb);
                     }
 
+
                     if (result == null) {
-                        result = "I'm sorry, I could not understand.";
+                        parrotString = "I'm sorry, I could not understand.";
+                    } else {
+                       RecognitionResult r = RecognitionResult.constructResultFromString(result);
+                       parrotString = r.getText();
                     }
-
                     if (_parrot) {
-                        client.play(result);
+                        client.play(parrotString);
                     }
 
-                } while (_loop && !result.contains("exit") && !result.contains("quit"));
+                    //TODO: check the natural language elements in recognition result for tag:value == main:quit
+                } while (_loop && !parrotString.contains("exit") && !parrotString.contains("quit"));
 
 
             } catch (Exception e){

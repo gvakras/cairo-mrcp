@@ -189,9 +189,9 @@ public class RecognitionClient implements MrcpEventListener {
 //static methods
 ////////////////////////////////////
     
-    private static SdpMessage constructResourceMessage(int localRtpPort) throws UnknownHostException, SdpException {
+    private static SdpMessage constructResourceMessage(int localRtpPort,Vector format) throws UnknownHostException, SdpException {
         SdpMessage sdpMessage = SdpMessage.createNewSdpSessionMessage(_mySipAddress, _host, "The session Name");
-        MediaDescription rtpChannel = SdpMessage.createRtpChannelRequest(localRtpPort);
+        MediaDescription rtpChannel = SdpMessage.createRtpChannelRequest(localRtpPort,format);
         MediaDescription mrcpChannel = SdpMessage.createMrcpChannelRequest(MrcpResourceType.SPEECHRECOG);
         Vector v = new Vector();
         v.add(mrcpChannel);
@@ -282,7 +282,9 @@ public class RecognitionClient implements MrcpEventListener {
         sipAgent = new DemoSipAgent(_mySipAddress, "Synth Client Sip Stack", _myPort, "UDP");
 
         // Construct the SDP message that will be sent in the SIP invitation
-        SdpMessage message = constructResourceMessage(localRtpPort);
+        Vector format = new Vector();
+        format.add("0");           //PCMU
+        SdpMessage message = constructResourceMessage(localRtpPort,format);
 
         // Send the sip invitation (This method on the demoSipAgent blocks until a response is received or a timeout occurs) 
         _logger.info("Sending a SIP invitation to the cairo server.");
