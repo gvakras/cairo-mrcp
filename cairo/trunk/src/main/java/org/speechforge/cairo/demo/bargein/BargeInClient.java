@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.Vector;
 
 import javax.sdp.MediaDescription;
+import javax.sdp.SdpConstants;
 import javax.sdp.SdpException;
 import javax.sip.SipException;
 
@@ -415,7 +416,7 @@ public class BargeInClient implements MrcpEventListener {
 
         // Construct the SDP message that will be sent in the SIP invitation
         Vector format = new Vector();
-        format.add("0");           //PCMU
+        format.add(SdpConstants.PCMU);
         SdpMessage message = constructResourceMessage(localRtpPort,format);
 
         // Send the sip invitation (This method on the demoSipAgent blocks until a response is received or timeout occurs) 

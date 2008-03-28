@@ -30,6 +30,7 @@ import org.speechforge.cairo.util.sip.SdpMessage;
 import javax.sdp.Media;
 import javax.sdp.MediaDescription;
 import javax.sdp.Origin;
+import javax.sdp.SdpConstants;
 import javax.sdp.SdpException;
 import javax.sdp.SdpParseException;
 import javax.sdp.SessionName;
@@ -128,7 +129,7 @@ public class TestSdpMessage extends AbstractTestCase {
 
         int localPort = 12345;
         Vector format = new Vector();
-        format.add("0");           //PCMU
+        format.add(SdpConstants.PCMU);
         MediaDescription md = SdpMessage.createRtpChannelRequest(localPort,format);
         Media m = md.getMedia();
         try {
