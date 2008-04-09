@@ -160,7 +160,7 @@ public class TransmitterResource extends ResourceImpl {
                         MrcpSpeechSynthChannel mrcpChannel = new MrcpSpeechSynthChannel(channelID, rtpscc, _basePromptDir, _promptGeneratorPool);
                         _mrcpServer.openChannel(channelID, mrcpChannel);
                         md.getMedia().setMediaPort(_mrcpServer.getPort());
-                        md.getMedia().setMediaFormats(af.filterOutUnSupportedFormatsInOffer());
+                        rtpmd.get(0).getMedia().setMediaFormats(af.filterOutUnSupportedFormatsInOffer());
                         _logger.debug("Created a SPEECHSYNTH Channel.  id is: "+channelID+" rtp remotehost:port is: "+ mediaHost+":"+remotePort);
                         break;
 

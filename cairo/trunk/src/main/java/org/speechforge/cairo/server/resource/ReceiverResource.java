@@ -141,7 +141,7 @@ public class ReceiverResource extends ResourceImpl {
                         RTPRecogChannel recog = new RTPRecogChannel(_recEnginePool, replicator);
                         _mrcpServer.openChannel(channelID, new MrcpRecogChannel(channelID, recog, _baseGrammarDir));
                         md.getMedia().setMediaPort(_mrcpServer.getPort());
-                        md.getMedia().setMediaFormats(af.filterOutUnSupportedFormatsInOffer());
+                        rtpmd.get(0).getMedia().setMediaFormats(af.filterOutUnSupportedFormatsInOffer());
                         
                         // Create a channel resources object and put it in the channel map (which is in the session).  
                         // These resources must be returned to the pool when the channel is closed.  In the case of a 

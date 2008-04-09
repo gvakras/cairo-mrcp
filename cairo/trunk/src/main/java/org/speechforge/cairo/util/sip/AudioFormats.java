@@ -86,9 +86,9 @@ public class AudioFormats {
                 foundAtLeastOne = true;
                 v.add(requestedFormatsSDP.get(i));
             }
-            if (!foundAtLeastOne)
-                throw new ResourceUnavailableException();
         }
+        if (!foundAtLeastOne)
+            throw new ResourceUnavailableException();
         return v;
     }
     
