@@ -25,11 +25,14 @@ package org.speechforge.cairo.server.rtp;
 import static org.speechforge.cairo.server.recog.sphinx.SourceAudioFormat.PREFERRED_MEDIA_FORMATS;
 import static org.speechforge.cairo.util.jmf.JMFUtil.CONTENT_DESCRIPTOR_RAW;
 
+import org.speechforge.cairo.server.recorder.RecorderMediaClient;
 import org.speechforge.cairo.util.jmf.ProcessorStarter;
 
 import java.io.IOException;
 
+import javax.media.CannotRealizeException;
 import javax.media.Manager;
+import javax.media.NoPlayerException;
 import javax.media.Processor;
 import javax.media.ProcessorModel;
 import javax.media.protocol.ContentDescriptor;
@@ -52,7 +55,7 @@ public class RTPStreamReplicator extends RTPConsumer {
 
     private PBDSReplicator _replicator;
     private Processor _processor;
-    
+    private RecorderMediaClient recorder;
     private int _port;
 
     public RTPStreamReplicator(int port) throws IOException {
@@ -125,6 +128,8 @@ public class RTPStreamReplicator extends RTPConsumer {
     @Override
     public synchronized void streamInactive(ReceiveStream stream, boolean byeEvent) {
         //if (byeEvent) {
+
+            //_replicator.shutdown();
             _replicator = null; // TODO: close data source properly, make sure this triggers EndOfStreamEvent in replicated PBDS
             if (_processor != null) {
                 if (_logger.isDebugEnabled()) {
@@ -132,6 +137,8 @@ public class RTPStreamReplicator extends RTPConsumer {
                 }
                 _processor.close();
                 _processor = null;
+                if (_logger.isDebugEnabled()) 
+                   recorder.streamInactive(null,false);
             }
         //}
     }
@@ -174,6 +181,19 @@ public class RTPStreamReplicator extends RTPConsumer {
             throw (IOException) new IOException(e.getMessage()).initCause(e);
         } catch (javax.media.NoProcessorException e){
             throw (IOException) new IOException(e.getMessage()).initCause(e);
+        }
+
+        
+        if (_logger.isDebugEnabled()) {
+            try {
+                recorder = new RecorderMediaClient(_replicator.replicate());
+            } catch (NoPlayerException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (CannotRealizeException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         }
 
         _logger.debug("Processor realized.");

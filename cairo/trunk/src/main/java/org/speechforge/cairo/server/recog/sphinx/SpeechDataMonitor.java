@@ -26,7 +26,9 @@ import org.speechforge.cairo.server.recog.SpeechEventListener;
 
 import edu.cmu.sphinx.frontend.BaseDataProcessor;
 import edu.cmu.sphinx.frontend.Data;
+import edu.cmu.sphinx.frontend.DataEndSignal;
 import edu.cmu.sphinx.frontend.DataProcessingException;
+import edu.cmu.sphinx.frontend.DataStartSignal;
 import edu.cmu.sphinx.frontend.endpoint.SpeechEndSignal;
 import edu.cmu.sphinx.frontend.endpoint.SpeechStartSignal;
 
@@ -66,6 +68,10 @@ public class SpeechDataMonitor extends BaseDataProcessor {
             broadcastSpeechStartSignal();
         } else if (data instanceof SpeechEndSignal) {
             broadcastSpeechEndSignal();
+        } else if (data instanceof DataStartSignal) {
+            _logger.debug("<<<<<<<<<<<<<<< DataStartSignal encountered!");
+        } else if (data instanceof DataEndSignal) {
+            _logger.debug(">>>>>>>>>>>>>>> DataEndSignal encountered!");
         }
         return data;
     }
