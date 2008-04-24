@@ -484,7 +484,11 @@ public class BargeInClient implements MrcpEventListener {
                         parrotString = "I'm sorry, I could not understand.";
                     } else {
                        RecognitionResult r = RecognitionResult.constructResultFromString(result);
-                       parrotString = r.getText();
+                       if (r.isOutOfGrammar()) {
+                           parrotString = "I'm sorry, I could not understand.  Your response was out of grammar.";
+                       } else {
+                           parrotString = r.getText(); 
+                       }
                     }
                     if (_parrot) {
                         client.play(parrotString);

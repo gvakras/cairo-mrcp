@@ -46,6 +46,8 @@ public class RecognitionResult {
     private static Logger _logger = Logger.getLogger(RecognitionResult.class);
     
     private final static String tagRuleDelimiter = ":";
+    private final static String OUTOFGRAMMAR = "<unk>";
+    private boolean oog;
 
     private Result _rawResult;
     private RuleGrammar _ruleGrammar;
@@ -71,7 +73,11 @@ public class RecognitionResult {
         _ruleGrammar = ruleGrammar;
         if (_rawResult != null) {
             _text = _rawResult.getBestFinalResultNoFiller();
-            if (_text != null && (_text = _text.trim()).length() > 0 && _ruleGrammar != null) {
+            oog = false;
+            if (_text.equals(OUTOFGRAMMAR)) {
+                oog = true;
+            }
+            if (_text != null && (_text = _text.trim()).length() > 0 && _ruleGrammar != null && !oog) {
                 try {
                     RuleParse ruleParse = _ruleGrammar.parse(_text, null);
                     _ruleMatches = SimpleNLRuleHandler.getRuleMatches(ruleParse);
@@ -137,10 +143,17 @@ public class RecognitionResult {
      */
     public static  RecognitionResult constructResultFromString(String inputString) throws InvalidRecognitionResultException {
         
-        RecognitionResult result = new RecognitionResult();
+
         
         if (inputString == null)
             throw new InvalidRecognitionResultException();
+        
+        RecognitionResult result = new RecognitionResult();
+        if(inputString.trim().equals(OUTOFGRAMMAR)) {
+            result.oog = true;
+            result._text = "out of grammar";
+            return result;
+        }
         
         result._text = inputString.substring(0, inputString.indexOf("<"));      //raw result are at the begining before the first ruleMatch
         if (result == null)
@@ -166,6 +179,14 @@ public class RecognitionResult {
             }
         } 
         return result;
+    }
+    
+    /**
+     * TODOC
+     * @return
+     */
+    public boolean isOutOfGrammar() {
+        return oog;
     }
     
 }
