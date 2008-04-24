@@ -307,8 +307,15 @@ public class SipListenerImpl implements SipListener {
         String channelName = null;
         Header channelHeader = requestEvent.getRequest().getHeader("x-channel");
         if (channelHeader != null) {
-           String channel[] = channelHeader.toString().split(":");
+           String channel[] = channelHeader.toString().split(":",2);
            channelName = channel[1];
+        }
+        
+        String applicationName = null;
+        Header applicationHeader = requestEvent.getRequest().getHeader("x-application");
+        if (applicationHeader != null) {
+           String application[] = applicationHeader.toString().split(":",2);
+           applicationName = application[1];
         }
         
         try {
@@ -359,7 +366,7 @@ public class SipListenerImpl implements SipListener {
                               _logger.warn("Recieved a re-invite request. Type A");
                            } else {
                                _logger.debug("adding the session with dialog ID: "+dialog.getDialogId());
-                               session = SipSession.createSipSession(sipClient, null, dialog, requestEvent, stx, channelName);
+                               session = SipSession.createSipSession(sipClient, null, dialog, requestEvent, stx, channelName, applicationName);
                                SipSession.addSession(session);
                            }
                        } else {

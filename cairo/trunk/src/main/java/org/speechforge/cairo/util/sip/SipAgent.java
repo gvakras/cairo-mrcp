@@ -370,7 +370,7 @@ public class SipAgent {
                    _logger.debug(contentString);
                 } 
              } 
-            session = SipSession.createSipSession(this, ctx, dialog, null,null,null);
+            session = SipSession.createSipSession(this, ctx, dialog, null,null,null,null);
             SipSession.addPendingSession(session);
 
         } catch (TransactionUnavailableException e) {

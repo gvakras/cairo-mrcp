@@ -57,6 +57,8 @@ public class SipSession {
     private SipSession forward;
     
     private String channelName;
+    private String applicationName;
+    
     
     //client side transaction
     private ClientTransaction ctx;
@@ -159,7 +161,8 @@ public class SipSession {
         // TODO: implement modifying the session via re-invite
     }
 
-    public static SipSession createSipSession(SipAgent agent, ClientTransaction ctx, Dialog d, RequestEvent request, ServerTransaction stx, String channelName) {
+    public static SipSession createSipSession(SipAgent agent, ClientTransaction ctx, Dialog d, RequestEvent request, 
+                                              ServerTransaction stx, String channelName, String applicationName) {
         SipSession s = new SipSession();
         s.agent = agent;
         s.ctx = ctx;
@@ -167,6 +170,7 @@ public class SipSession {
         s.request = request;
         s.stx = stx;
         s.channelName = channelName;
+        s.applicationName = applicationName;
         return s;
     }
 
@@ -301,6 +305,20 @@ public class SipSession {
      */
     public void setChannelName(String channelName) {
         this.channelName = channelName;
+    }
+
+    /**
+     * @return the applicationName
+     */
+    public String getApplicationName() {
+        return applicationName;
+    }
+
+    /**
+     * @param applicationName the applicationName to set
+     */
+    public void setApplicationName(String applicationName) {
+        this.applicationName = applicationName;
     }
 
 
