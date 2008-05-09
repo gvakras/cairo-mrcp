@@ -25,6 +25,9 @@
 
 package edu.cmu.sphinx.frontend.endpoint;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -137,10 +140,17 @@ public class SpeechClassifierPatch extends BaseDataProcessor {
     private double adjustment;
     private double level;               // average signal level
     private double background = 0;          // background signal level
+    private double oldbackground = 0;
     private double minSignal;           // minimum valid signal level
     private double threshold;
     private float frameLengthSec;
     List outputQueue = new LinkedList();
+    
+    
+    private long zeroCrossing;
+    private double lastValFromPreviousFrame = 0.0;
+    private boolean flag =true;
+    private BufferedWriter out;
     
     /*
      * (non-Javadoc)
@@ -182,6 +192,16 @@ public class SpeechClassifierPatch extends BaseDataProcessor {
     public void initialize() {
         super.initialize();
         reset();
+        if (debug) {
+            try {
+                out = new BufferedWriter(new FileWriter("c:/temp/"+System.currentTimeMillis()));
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            //        out.close();
+        }
+        
     }
 
 
@@ -208,7 +228,21 @@ public class SpeechClassifierPatch extends BaseDataProcessor {
         for (int i = 0; i < samples.length; i++) {
             double sample = samples[i];
             sumOfSquares += sample * sample;
+            if (i>0) {
+                if (((samples[i] < 0) && (samples[i-1] >0)) || ((samples[i] > 0) && (samples[i-1] <0))) {
+                    zeroCrossing++;
+                }
+            } else if (i ==0) {
+                if (((samples[i] < 0) && (lastValFromPreviousFrame >0)) || ((samples[i] > 0) && (lastValFromPreviousFrame <0))) {
+                    zeroCrossing++;
+                }
+            }
         }
+        if (flag) { 
+           System.out.println(samples.length);
+           flag = false;
+        }
+        lastValFromPreviousFrame = samples[samples.length-1];
         double rootMeanSquare = Math.sqrt
             ((double)sumOfSquares/samples.length);
         rootMeanSquare = Math.max(rootMeanSquare, 1);
@@ -228,21 +262,23 @@ public class SpeechClassifierPatch extends BaseDataProcessor {
             System.out.println("Before -- Bkg: " + background + ", level: " + level +
                                ", current: " + current);
         }
+        
+        //TODO:  checking that SNR > threshold may be better than  the absolute diff between nosie and rms level > threshold 
+        //TODO:  Research adding zero crossings to the algorithm
         boolean isSpeech = false;
         if (current >= minSignal) {
             level = ((level*averageNumber) + current)/(averageNumber + 1);
-            if (current < background) {
-                background = current;
-            } else {
-                background += (current - background) * adjustment;
-            }
-            if (level < background) {
-                level = background;
-            }
+            oldbackground = background;
+            background += (current - background) * adjustment;
             isSpeech = (level - background > threshold);
+            if (isSpeech) {
+                background = oldbackground;
+            }
         }
+        
         SpeechClassifiedData labeledAudio
             = new SpeechClassifiedData(audio, isSpeech);
+        
         if (debug) {
             String speech = "";
             if (labeledAudio.isSpeech()) {
@@ -250,7 +286,26 @@ public class SpeechClassifierPatch extends BaseDataProcessor {
             }
             System.out.println("Bkg: " + background + ", level: " + level +
                                ", current: " + current + " " + speech);
+        
+            //For debugging. writes the rms level, background noise estimate and zero crossings to a file.
+            //it may be useful to be plot this.
+            try {
+                long inSpeech;
+                if (labeledAudio.isSpeech()) {
+                    inSpeech = 20;
+                } else {
+                    inSpeech = 0;
+                }
+                out.write(inSpeech + "  "+ level  + "  "+  background + "  "+  zeroCrossing);
+                out.newLine();
+                zeroCrossing = 0;
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         }
+        
+        
         outputQueue.add(labeledAudio);
     }
     

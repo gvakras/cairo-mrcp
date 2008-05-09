@@ -20,7 +20,7 @@
     <property name="languageWeight"              value="8"/>
     <property name="silenceInsertionProbability" value="1"/>
 
-    <property name="speechClassifierThreshold"   value="13"/>
+    <property name="speechClassifierThreshold"   value="20"/>
     <property name="mergeSpeechSegments"         value="false"/>
 
     <property name="grammarLocation"             value="resource:/org.speechforge.cairo.server.recog.sphinx.SphinxRecEngine!/grammar"/>
@@ -126,6 +126,7 @@
                type="edu.cmu.sphinx.linguist.dictionary.FastDictionary">
         <property name="dictionaryPath" value="resource:/edu.cmu.sphinx.model.acoustic.WSJ_8gau_13dCep_8kHz_31mel_200Hz_3500Hz.Model!/edu/cmu/sphinx/model/acoustic/WSJ_8gau_13dCep_8kHz_31mel_200Hz_3500Hz/dict/cmudict.0.6d"/>
         <property name="fillerPath" value="resource:/edu.cmu.sphinx.model.acoustic.WSJ_8gau_13dCep_8kHz_31mel_200Hz_3500Hz.Model!/edu/cmu/sphinx/model/acoustic/WSJ_8gau_13dCep_8kHz_31mel_200Hz_3500Hz/dict/fillerdict"/>
+		<!--property name="addenda" value="resource:/org.speechforge.cairo.server.recog.sphinx.SphinxRecEngine!/grammar/addendum.dict"/-->
         <property name="addSilEndingPronunciation" value="false"/>
         <property name="allowMissingWords" value="false"/>
         <property name="unitManager" value="unitManager"/>
@@ -167,6 +168,7 @@
             <item>speechClassifier</item>
             <item>speechMarker</item>
             <item>speechDataMonitor</item>
+            <!--item>speechDataRecorder</item-->
             <item>nonSpeechDataFilter</item>
             <item>preemphasizer</item>
             <item>windower</item>
@@ -189,11 +191,17 @@
 
     <component name="speechMarker"
                type="edu.cmu.sphinx.frontend.endpoint.SpeechMarker" >
-        <property name="speechTrailer" value="50"/>
+	    <property name="speechTrailer" value="500"/>
+        <property name="endSilence" value="500"/>
+	    <property name="startSpeech" value="50"/>
+	    <property name="speechLeader" value="500"/>
     </component>
 
     <component name="speechDataMonitor"
                type="org.speechforge.cairo.server.recog.sphinx.SpeechDataMonitor"/>
+
+    <component name="speechDataRecorder"
+               type="org.speechforge.cairo.server.recog.sphinx.SpeechDataRecorder"/>
 
     <component name="nonSpeechDataFilter"
                type="edu.cmu.sphinx.frontend.endpoint.NonSpeechDataFilter">
