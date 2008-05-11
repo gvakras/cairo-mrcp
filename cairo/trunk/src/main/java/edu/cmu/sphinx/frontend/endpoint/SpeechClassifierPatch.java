@@ -211,7 +211,7 @@ public class SpeechClassifierPatch extends BaseDataProcessor {
     private void reset() {
         System.out.println("SpeechClassifierPatch.reset()");
         level = 0;
-        background = 100;
+        background = 10;
     }
 
     /**
