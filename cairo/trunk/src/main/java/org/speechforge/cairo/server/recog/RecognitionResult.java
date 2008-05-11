@@ -155,29 +155,36 @@ public class RecognitionResult {
             return result;
         }
         
-        result._text = inputString.substring(0, inputString.indexOf("<"));      //raw result are at the begining before the first ruleMatch
-        if (result == null)
-            throw new InvalidRecognitionResultException();
-        //System.out.println(result._text);
-        String theTags = inputString.substring(inputString.indexOf("<"));
-        //System.out.println(theTags);
-        String ruleMatches[] = theTags.split("<|>|><");
-        //System.out.println("number of rule matches: " + ruleMatches.length);
-        for (int i=0; i<ruleMatches.length;i++) {
-            //if ((ruleMatches[i].length() > 3) &&(ruleMatches[i].contains(tagRuleDelimiter)) ){
-            if (ruleMatches[i].length() > 3  ){
-               //System.out.println(" rule match # "+i+"  " +ruleMatches[i]);
-               String rule[] = ruleMatches[i].split(tagRuleDelimiter);
-               if (rule.length == 2 ) {
-                  result._ruleMatches.add(new RuleMatch(rule[0],rule[1]));
-                 //System.out.println(" rule match # "+i+"  " + rule.length);
-               } else {
-                   throw new InvalidRecognitionResultException();
-               }
-            } else {
-                _logger.debug("Bad Tag Rule In Result: "+ruleMatches[i]);
+        int firstBracketIndex =inputString.indexOf("<");
+        if (firstBracketIndex >0) {
+            result._text = inputString.substring(0, firstBracketIndex);      //raw result are at the begining before the first ruleMatch
+            if (result == null)
+                throw new InvalidRecognitionResultException();
+            //System.out.println(result._text);
+            String theTags = inputString.substring(inputString.indexOf("<"));
+            //System.out.println(theTags);
+            String ruleMatches[] = theTags.split("<|>|><");
+            //System.out.println("number of rule matches: " + ruleMatches.length);
+            for (int i=0; i<ruleMatches.length;i++) {
+                //if ((ruleMatches[i].length() > 3) &&(ruleMatches[i].contains(tagRuleDelimiter)) ){
+                if (ruleMatches[i].length() > 3  ){
+                   //System.out.println(" rule match # "+i+"  " +ruleMatches[i]);
+                   String rule[] = ruleMatches[i].split(tagRuleDelimiter);
+                   if (rule.length == 2 ) {
+                      result._ruleMatches.add(new RuleMatch(rule[0],rule[1]));
+                     //System.out.println(" rule match # "+i+"  " + rule.length);
+                   } else {
+                       throw new InvalidRecognitionResultException();
+                   }
+                } else {
+                    _logger.debug("Bad Tag Rule In Result: "+ruleMatches[i]);
+                }
             }
-        } 
+            
+        //there is no rule to match (just return the raw result
+        } else {
+            result._text = inputString;   
+        }
         return result;
     }
     
