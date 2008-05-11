@@ -26,8 +26,15 @@ import org.speechforge.cairo.exception.UnsupportedHeaderException;
 import org.speechforge.cairo.server.MrcpGenericChannel;
 import org.speechforge.cairo.server.resource.TransmitterResource;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.concurrent.TimeoutException;
 
 import javax.media.rtp.InvalidSessionAddressException;
@@ -46,6 +53,7 @@ import org.mrcp4j.message.request.StopRequest;
 import org.mrcp4j.message.request.MrcpRequestFactory.UnimplementedRequest;
 import org.mrcp4j.server.MrcpSession;
 import org.mrcp4j.server.provider.SpeechSynthRequestHandler;
+
 
 /**
  * Handles MRCPv2 speech synthesis requests by delegating to a dedicated {@link org.speechforge.cairo.server.tts.RTPSpeechSynthChannel}.
@@ -115,6 +123,87 @@ public class MrcpSpeechSynthChannel extends MrcpGenericChannel implements Speech
                 } catch (IOException e) {
                     _logger.debug(e, e);
                     statusCode = MrcpResponse.STATUS_OPERATION_FAILED;
+                }
+            } else if (contentType.equalsIgnoreCase("text/uri-list")) {
+                String text = request.getContent();
+                String[] uris = text.split("\\r");
+                System.out.println(text);
+                //TODO: Handle multiple URI's in a URI list
+                //should there be just one listener for the last prompt?  for now limiting to one.
+                if (uris.length > 1) {
+                   _logger.warn("Multiple URIs not supported yet.  Just playing the first URI.");
+                }
+                //for (int i=0; i<uris.length;i++) {
+                for (int i=0; i<1;i++) {
+                    try {
+
+                        URL url = new URL(uris[i]);
+                        URLConnection uc = url.openConnection();
+                        System.out.println(uris[i]+"  "+uc.getContentType());
+                        
+                        if (uc.getContentType().equals("text/plain")) {                        
+                           BufferedReader in = new BufferedReader(
+                                                new InputStreamReader(
+                                                uc.getInputStream()));
+                           
+                           //TODO: Make this more efficient
+                           String inputLine;
+                           String promptString = new String();
+                           while ((inputLine = in.readLine()) != null) {
+                               promptString = promptString +inputLine;
+                           }
+                           in.close();
+                           
+                           try {
+                              File promptFile = generatePrompt(promptString);
+                              int state = _rtpChannel.queuePrompt(promptFile, new Listener(session));
+                              requestState = (state == RTPSpeechSynthChannel.IDLE) ? MrcpRequestState.IN_PROGRESS : MrcpRequestState.PENDING;
+                              statusCode = MrcpResponse.STATUS_SUCCESS;
+                           } catch (RuntimeException e) {
+                               _logger.debug(e, e);
+                               statusCode = MrcpResponse.STATUS_SERVER_INTERNAL_ERROR;
+                               break;
+                           } catch (InvalidSessionAddressException e) {
+                               _logger.debug(e, e);
+                               statusCode = MrcpResponse.STATUS_OPERATION_FAILED;
+                               break;
+                           } catch (IOException e) {
+                               _logger.debug(e, e);
+                               statusCode = MrcpResponse.STATUS_OPERATION_FAILED;
+                               break;
+                           }
+                           
+                        } else if (uc.getContentType().equals("audio/x-wav")) {
+                            try {
+                                File promptFile = copyPrompt(url);
+                                int state = _rtpChannel.queuePrompt(promptFile, new Listener(session));
+                                requestState = (state == RTPSpeechSynthChannel.IDLE) ? MrcpRequestState.IN_PROGRESS : MrcpRequestState.PENDING;
+                                statusCode = MrcpResponse.STATUS_SUCCESS;
+                             } catch (RuntimeException e) {
+                                 _logger.debug(e, e);
+                                 statusCode = MrcpResponse.STATUS_SERVER_INTERNAL_ERROR;
+                                 break;
+                             } catch (InvalidSessionAddressException e) {
+                                 _logger.debug(e, e);
+                                 statusCode = MrcpResponse.STATUS_OPERATION_FAILED;
+                                 break;
+                             } catch (IOException e) {
+                                 _logger.debug(e, e);
+                                 statusCode = MrcpResponse.STATUS_OPERATION_FAILED;
+                                 break;
+                             }
+                        } else {
+                            _logger.warn("Unsupported content type for in the speak request");
+                        }
+                  
+                        
+                    } catch (MalformedURLException e) {
+                        _logger.debug(e, e);
+                        statusCode = MrcpResponse.STATUS_OPERATION_FAILED;
+                    } catch (IOException e) {
+                        _logger.debug(e, e);
+                        statusCode = MrcpResponse.STATUS_OPERATION_FAILED;
+                    }
                 }
             } else {
                 statusCode = MrcpResponse.STATUS_UNSUPPORTED_HEADER_VALUE;
@@ -195,6 +284,29 @@ public class MrcpSpeechSynthChannel extends MrcpGenericChannel implements Speech
         throw new UnsupportedHeaderException();
     }
 
+    private File copyPrompt(URL url) throws IOException {
+        
+        if (_promptDir == null || !_promptDir.isDirectory()) {
+            throw new IllegalArgumentException("Directory file specified does not exist or is not a directory: " + _promptDir);
+        }
+
+        String promptName = Long.toString(System.currentTimeMillis());
+        File promptFile = new File(_promptDir, promptName);
+        
+        InputStream is = url.openStream();
+        FileOutputStream fos = new FileOutputStream(promptFile);
+    
+        // Transfer bytes from in to out
+        byte[] buf = new byte[1024];
+        int len;
+        while ((len = is.read(buf)) > 0) {
+            fos.write(buf, 0, len);
+        }
+        is.close();
+        fos.close();
+        return promptFile;
+    }
+    
     private File generatePrompt(String text) {
         PromptGenerator promptGenerator = null;
 

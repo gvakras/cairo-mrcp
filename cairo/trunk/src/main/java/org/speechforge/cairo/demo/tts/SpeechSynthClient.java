@@ -74,10 +74,12 @@ public class SpeechSynthClient implements MrcpEventListener {
 
     private static final String BEEP_OPTION = "beep";
     private static final String REPETITIONS_OPTION = "reps";
+    private static final String URL_OPTION = "url";
 
     private static boolean _beep = false;
     private static Toolkit _toolkit = null;
     private static int _repetitions = 1;
+    private static boolean _url;
 
     private MrcpChannel _ttsChannel;
     private int _rep = 1;
@@ -155,6 +157,48 @@ public class SpeechSynthClient implements MrcpEventListener {
         return response.getRequestState();
     }
 
+    public MrcpRequestState playOnePrompt(String url)
+    throws IOException, MrcpInvocationException, InterruptedException {
+
+      // speak request
+      MrcpRequest request = _ttsChannel.createRequest(MrcpMethodName.SPEAK);
+      request.setContent("text/uri-list", null, url);
+      MrcpResponse response = _ttsChannel.sendRequest(request);
+
+      if (_beep) {
+          _toolkit.beep();
+      }
+
+      if (_logger.isDebugEnabled()) {
+          _logger.debug("MRCP response received:\n" + response.toString());
+      }
+
+      return response.getRequestState();
+  }
+
+  public MrcpRequestState playMultiplePrompts(String[] urls)
+  throws IOException, MrcpInvocationException, InterruptedException {
+
+    // speak request
+    MrcpRequest request = _ttsChannel.createRequest(MrcpMethodName.SPEAK);
+    String content = urls[0];
+    for (int i=1;i<urls.length; i++) {
+        content=content+"\r\n"+urls[i];
+    }
+
+    request.setContent("text/uri-list", null, content);
+    MrcpResponse response = _ttsChannel.sendRequest(request);
+
+    if (_beep) {
+        _toolkit.beep();
+    }
+
+    if (_logger.isDebugEnabled()) {
+        _logger.debug("MRCP response received:\n" + response.toString());
+    }
+
+    return response.getRequestState();
+  }
 
 ////////////////////////////////////
 // static methods
@@ -175,6 +219,9 @@ public class SpeechSynthClient implements MrcpEventListener {
         Options options = ResourceImpl.getOptions();
 
         Option option = new Option(BEEP_OPTION, "play response/event timing beep");
+        options.addOption(option);
+        
+        option = new Option(URL_OPTION, "play the wave or text file at the given url");
         options.addOption(option);
 
         option = new Option(REPETITIONS_OPTION, true, "number of times to repeat the TTS prompt");
@@ -235,6 +282,8 @@ public class SpeechSynthClient implements MrcpEventListener {
         if (_beep) {
             _toolkit = Toolkit.getDefaultToolkit();
         }
+        
+        _url = line.hasOption(URL_OPTION);
 
         int localRtpPort = -1;
         try {
@@ -248,7 +297,7 @@ public class SpeechSynthClient implements MrcpEventListener {
                 " should be even integer between 0 and " + RTPConsumer.TCP_PORT_MAX);
         }
 
-        String promptText = args[1];
+        String text = args[1];
         InetAddress rserverHost = line.hasOption(ResourceImpl.RSERVERHOST_OPTION) ?
             InetAddress.getByName(line.getOptionValue(ResourceImpl.RSERVERHOST_OPTION)) : InetAddress.getLocalHost();
 
@@ -298,7 +347,11 @@ public class SpeechSynthClient implements MrcpEventListener {
             // RTP channel as specified in teh SIP invitation
             try {
                 for (int i=0; i < _repetitions; i++) {
-                    client.playPrompt(promptText);
+                    if (_url) {
+                       client.playOnePrompt(text);  
+                    } else {
+                       client.playPrompt(text);
+                    }
                 }
             } catch (Exception e){
                 if (e instanceof MrcpInvocationException) {
