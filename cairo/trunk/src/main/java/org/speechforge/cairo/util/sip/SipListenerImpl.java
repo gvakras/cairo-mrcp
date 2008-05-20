@@ -122,6 +122,8 @@ public class SipListenerImpl implements SipListener {
             processBye(requestEvent);
         } else if (request.getMethod().equals(Request.CANCEL)) {
             processCancel(requestEvent);
+        } else if (request.getMethod().equals(Request.REGISTER)) {
+            processRegister(requestEvent);
         } else {
             // TODO: this snippet is taken from the shootist example. Shootme
             // only has teh first line
@@ -500,6 +502,9 @@ public class SipListenerImpl implements SipListener {
         }
     }
 
+    
+    
+    
     /**
      * Process the bye request.
      */
@@ -538,4 +543,29 @@ public class SipListenerImpl implements SipListener {
             }
         }
     }
+    
+    public void processRegister(RequestEvent requestEvent) {
+        // SipProvider sipProvider = (SipProvider) requestEvent.getSource();
+        Request request = requestEvent.getRequest();
+        ServerTransaction stx = requestEvent.getServerTransaction();
+        Dialog dialog = requestEvent.getDialog();
+  
+        
+        try {
+            //TODO:  to be able to forward calls to this device need to maintain a registry
+            // for now this is just for demo support (i.e. calling from the device to cairo)
+            _logger.info("registering device "+request.toString());
+            Response response = sipClient.getMessageFactory().createResponse(200, request);
+            SipAgent.sendResponse(stx, response);
+        } catch (SipException e) {
+            _logger.error(e, e);
+        } catch (ParseException e) {
+            _logger.error(e, e);
+        } catch (InvalidArgumentException e) {
+            _logger.error(e, e);
+
+        }
+
+    }
+    
 }
