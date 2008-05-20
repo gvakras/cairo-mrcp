@@ -27,6 +27,7 @@ import gov.nist.javax.sdp.SessionDescriptionImpl;
 import gov.nist.javax.sdp.fields.ConnectionField;
 import gov.nist.javax.sdp.fields.MediaField;
 import gov.nist.javax.sdp.fields.OriginField;
+import gov.nist.javax.sdp.fields.ProtoVersionField;
 import gov.nist.javax.sdp.fields.SessionNameField;
 
 import java.io.Serializable;
@@ -47,6 +48,7 @@ import javax.sdp.MediaDescription;
 import javax.sdp.Origin;
 import javax.sdp.SdpConstants;
 import javax.sdp.SdpException;
+import javax.sdp.Version;
 
 import javax.sdp.SdpParseException;
 import javax.sdp.SessionDescription;
@@ -413,6 +415,9 @@ public class SdpMessage implements Serializable {
         }
 
         try {
+            Version v = new ProtoVersionField();
+            v.setVersion(0);
+            message._sd.setVersion(v);
             Origin o = new OriginField();
             o.setAddress(address);
             o.setAddressType("IP4");
