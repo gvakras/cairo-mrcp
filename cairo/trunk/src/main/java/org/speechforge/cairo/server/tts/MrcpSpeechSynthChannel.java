@@ -173,9 +173,16 @@ public class MrcpSpeechSynthChannel extends MrcpGenericChannel implements Speech
                                break;
                            }
                            
-                        } else if (uc.getContentType().equals("audio/x-wav")) {
+                        } else if ((uc.getContentType().equals("audio/x-wav")) ||
+                                   (uc.getContentType().equals("audio/basic"))){
                             try {
-                                File promptFile = copyPrompt(url);
+                                File promptFile;
+                                //if file protocol url -- no need to copy it to the server else copy it
+                                if (url.getProtocol().equals("file")) {
+                                   promptFile = new File(url.getFile());
+                                } else {
+                                   promptFile = copyPrompt(url);
+                                }
                                 int state = _rtpChannel.queuePrompt(promptFile, new Listener(session));
                                 requestState = (state == RTPSpeechSynthChannel.IDLE) ? MrcpRequestState.IN_PROGRESS : MrcpRequestState.PENDING;
                                 statusCode = MrcpResponse.STATUS_SUCCESS;
@@ -193,7 +200,7 @@ public class MrcpSpeechSynthChannel extends MrcpGenericChannel implements Speech
                                  break;
                              }
                         } else {
-                            _logger.warn("Unsupported content type for in the speak request");
+                            _logger.warn("Unsupported content type for in the speak request: "+ uc.getContentType());
                         }
                   
                         
