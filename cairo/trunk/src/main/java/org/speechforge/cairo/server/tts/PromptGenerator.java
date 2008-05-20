@@ -27,6 +27,7 @@ import org.speechforge.cairo.util.pool.AbstractPoolableObject;
 import java.io.File;
 
 import javax.sound.sampled.AudioFileFormat;
+import javax.sound.sampled.AudioFormat;
 
 import com.sun.speech.freetts.Voice;
 import com.sun.speech.freetts.VoiceManager;
@@ -74,13 +75,15 @@ public class PromptGenerator extends AbstractPoolableObject {
         String promptName = Long.toString(System.currentTimeMillis());
         File promptFile = new File(dir, promptName);
 
-        AudioPlayer ap = new SingleFileAudioPlayer(promptFile.getAbsolutePath(), AudioFileFormat.Type.WAVE);
+        AudioPlayer ap = new SingleFileAudioPlayer(promptFile.getAbsolutePath(), AudioFileFormat.Type.AU);
+        AudioFormat af = new AudioFormat(AudioFormat.Encoding.ULAW, 8000, 8, 1, 8, 8000, false);
+        ap.setAudioFormat(af);
         _voice.setAudioPlayer(ap);
         _voice.speak(text);
         ap.close();
         _voice.setAudioPlayer(null);
 
-        promptFile = new File(dir, promptName + ".wav");
+        promptFile = new File(dir, promptName + ".au");
         if (!promptFile.exists()) {
             throw new RuntimeException("Expected generated prompt file does not exist!");
         }

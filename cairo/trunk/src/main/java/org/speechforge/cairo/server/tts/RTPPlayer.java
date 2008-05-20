@@ -30,6 +30,7 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 
 import javax.media.CannotRealizeException;
+import javax.media.Codec;
 import javax.media.Controller;
 import javax.media.ControllerClosedEvent;
 import javax.media.ControllerEvent;
@@ -39,6 +40,8 @@ import javax.media.Format;
 import javax.media.Manager;
 import javax.media.MediaLocator;
 import javax.media.Processor;
+import javax.media.UnsupportedPlugInException;
+import javax.media.control.PacketSizeControl;
 import javax.media.control.TrackControl;
 import javax.media.format.UnsupportedFormatException;
 import javax.media.protocol.ContentDescriptor;
@@ -112,7 +115,20 @@ public class RTPPlayer implements ControllerListener {
             configure();
             
             program();
-
+          
+            TrackControl[] trackControls = _processor.getTrackControls();
+            Codec codec[] = new Codec[3];
+            codec[0] = new com.ibm.media.codec.audio.rc.RCModule();
+            codec[1] = new com.ibm.media.codec.audio.ulaw.JavaEncoder();
+            codec[2] = new com.sun.media.codec.audio.ulaw.Packetizer();
+            ((com.sun.media.codec.audio.ulaw.Packetizer) codec[2]).setPacketSize(160);
+            
+            try {
+                trackControls[0].setCodecChain(codec);
+            } catch (UnsupportedPlugInException e) {
+                e.printStackTrace();
+            }
+                        
             realize();
 
             play(); 
@@ -161,6 +177,7 @@ public class RTPPlayer implements ControllerListener {
     private void program() throws UnsupportedFormatException {
 
         TrackControl[] trackControls = _processor.getTrackControls();
+   
         int tracks = (trackControls == null) ? -1 : trackControls.length;
         if (tracks != 1 || !trackControls[0].isEnabled()) {
             throw new UnsupportedFormatException("Cannot handle track count: " + tracks, null);
@@ -176,7 +193,7 @@ public class RTPPlayer implements ControllerListener {
                     "No supported formats found: " + formats, trackControls[0].getFormat());
         }
         
-        ContentDescriptor c = _processor.getContentDescriptor();
+        //ContentDescriptor c = _processor.getContentDescriptor();
         //System.out.println("Content Descriptor: "+c.toString());
         boolean foundOne = false;
         for (int i=0; i< supported.length; i++) {
@@ -188,8 +205,8 @@ public class RTPPlayer implements ControllerListener {
                 foundOne = true;
                 break;
            }
-        }
-        
+        }       
+
         if (!foundOne) {
             throw new UnsupportedFormatException(
                     "No supported formats found: " + formats, trackControls[0].getFormat());
