@@ -87,9 +87,7 @@ public class SpeechDataRecorder extends BaseDataProcessor {
      */
     @Override
     public Data getData() throws DataProcessingException {
-
-
-           
+      
         Data data = getPredecessor().getData();
         if (data instanceof SpeechStartSignal) {
             isInSpeech = true;
@@ -105,16 +103,11 @@ public class SpeechDataRecorder extends BaseDataProcessor {
             _logger.debug(">>>>>>>>>>>>>>> DataEndSignal encountered!");
         }
         
+        //if inspeech we want to write to a file.  
+        // convert to double and call write method
         if ((isInSpeech) && (data instanceof DoubleData || data instanceof FloatData)) {
             DoubleData dd = data instanceof DoubleData ? (DoubleData) data : FloatData2DoubleData((FloatData) data);
             double[] values = dd.getValues();
-
-//            if (isBigEndian) {
-//                doubleData = DataUtil.bytesToValues(samplesBuffer, 0, totalRead, bytesPerValue, signedData);
-//            } else {
-//                doubleData = DataUtil.littleEndianBytesToValues(samplesBuffer, 0, totalRead, bytesPerValue, signedData);
-//            }
-
             for (double value : values) {
                 try {
                     dos.writeShort(new Short((short) value));
@@ -126,7 +119,13 @@ public class SpeechDataRecorder extends BaseDataProcessor {
         return data;
     }
     
-    /** Converts DoubleData object to FloatDatas. */
+    /**
+     * Converts DoubleData object to FloatDatas.
+     * 
+     * @param data the data
+     * 
+     * @return the double data
+     */
     public static DoubleData FloatData2DoubleData(FloatData data) {
         int numSamples = data.getValues().length;
 
@@ -135,29 +134,38 @@ public class SpeechDataRecorder extends BaseDataProcessor {
         for (int i = 0; i < values.length; i++) {
             doubleData[i] = values[i];
         }
-//        System.arraycopy(data.getValues(), 0, doubleData, 0, numSamples); 
-
         return new DoubleData(doubleData, data.getSampleRate(), data.getCollectTime(), data.getFirstSampleNumber());
     }
     
  
+
+    /**
+     * Writes the data to a file.  The data should correspond to the utterance (post endpointing)
+     * so it is the same that gets fed to recoginizer.  File names is a sequences number
+     * that gets incremented for each utterance.
+     * 
+     * @param data the data
+     */
     private void stopRecordingData(Data data) {
         
+        //location of audio file (where it will be written)
         String dumpFilePath = "c:/temp/";
 
+        
+        //audio format parameters
         int bitsPerSample = 16;
         int sampleRate = 8000;
         boolean isBigEndian = true;
         boolean isSigned = true;
 
+        
+        //create an audio format object (java sound api)
         AudioFormat wavFormat = new AudioFormat(sampleRate, bitsPerSample, 1, isSigned, isBigEndian);
         AudioFileFormat.Type outputType = getTargetType("wav");
-
-        System.out.println("created audio Format Object "+wavFormat.toString());
-        
-        
         String wavName = dumpFilePath + getNextFreeIndex(dumpFilePath) + ".wav";
-        System.out.println("filename:" + wavName);
+        
+        _logger.debug("created audio Format Object "+wavFormat.toString());
+        _logger.debug("filename:" + wavName);
 
         byte[] abAudioData = baos.toByteArray();
         ByteArrayInputStream bais = new ByteArrayInputStream(abAudioData);
@@ -174,7 +182,7 @@ public class SpeechDataRecorder extends BaseDataProcessor {
         } else {
            System.out.println("output type not supported..."); 
         }
-        System.out.println("Can read?: "+ outWavFile.canRead() );
+
         /*Player player;
         try {
             MediaLocator source = new MediaLocator(outWavFile.toURL());
@@ -193,6 +201,13 @@ public class SpeechDataRecorder extends BaseDataProcessor {
         isInSpeech = false;
     }
     
+    /**
+     * Gets the target type.
+     * 
+     * @param extension the extension
+     * 
+     * @return the target type
+     */
     private static AudioFileFormat.Type getTargetType(String extension) {
         AudioFileFormat.Type[] typesSupported = AudioSystem.getAudioFileTypes();
 
@@ -201,10 +216,17 @@ public class SpeechDataRecorder extends BaseDataProcessor {
                 return aTypesSupported;
             }
         }
-
         return null;
     }
     
+    //
+    /**
+     * Gets the next free index (a unique number for the next file name)
+     * 
+     * @param outPattern the out pattern
+     * 
+     * @return the next free index
+     */
     private static int getNextFreeIndex(String outPattern) {
         int fileIndex = 0;
         while (new File(outPattern + fileIndex + ".wav").isFile())
