@@ -1,28 +1,3 @@
-/*
- * Copyright 1999-2002 Carnegie Mellon University.  
- * Portions Copyright 2002 Sun Microsystems, Inc.  
- * Portions Copyright 2002 Mitsubishi Electric Research Laboratories.
- * All Rights Reserved.  Use is subject to license terms.
- * 
- * See the file "license.terms" for information on usage and
- * redistribution of this file, and for a DISCLAIMER OF ALL 
- * WARRANTIES.
- *
- */
-
-/**
- * 
- * NOTE:
- * 
- * This file provides a patch to fix a bug in edu.cmu.sphinx.frontend.endpoint.SpeechClassifier.
- * Please see http://sourceforge.net/tracker/index.php?func=detail&aid=1501329&group_id=1904&atid=101904
- * for details of the bug.
- * 
- * Since the code contained herein is verbatim to the original, with the exception of a misspelled
- * method that has been fixed, the code retains the original CMU, et al. copyright notice. 
- * 
- */
-
 package edu.cmu.sphinx.frontend.endpoint;
 
 import java.io.BufferedWriter;
@@ -44,13 +19,31 @@ import edu.cmu.sphinx.util.props.Registry;
 
 /**
  * 
- * Provides a patch to fix a bug in {@code edu.cmu.sphinx.frontend.endpoint.SpeechClassifier}.
- *
- * <p>Please see <a href="http://sourceforge.net/tracker/index.php?func=detail&aid=1501329&group_id=1904&atid=101904"
- * target="_blank">http://sourceforge.net/tracker/index.php?func=detail&aid=1501329&group_id=1904&atid=101904</a>
- * for details of the bug.<hr>
- *
  * Implements a level tracking endpointer invented by Bent Schmidt Nielsen.
+ * 
+ * Modified to:
+ * <ol> 
+ * <li> Compare SNR to a configurable value rather than to compare the 
+ * absolute difference between the RMS signal and the estimated background 
+ * noise.
+ * <li>  Estamates the background noise differently.  First rms value is
+ * the initial estimate.  All rms values that are declared out of speech are used to
+ * adjust the background noise estimate thereafter (does not reset like previous
+ * algorithm).
+ * </ol>  
+ * 
+ * <p>For second point.  In the original classifier module, the noise estimate was calculated as 
+ * <br>
+ * B(i) = c*(F(i) -B(i-1)) + B(i-1) if F(i) < B(i-1) 
+ * <br>
+ * B(i) = F(i) otherwise.  
+ * <br> 
+ * where F(i) is the rms value of the ith frame and B(i) is the estmated background noise of the ith frame
+ * <br> 
+ * This cuases the noise estimate to steadily increase 
+ * while in speech and occasionally cut-off end of utterenaces.  Another side effect was that the 
+ * noise estimate can drop to a very low level when the F(i) was randomly low and thus causing subsequent 
+ * false positives.
  *
  * <p>This endpointer is composed of three main steps.
  * <ol>
@@ -74,7 +67,7 @@ import edu.cmu.sphinx.util.props.Registry;
  * @see SpeechMarker
  *
  */
-public class SpeechClassifierPatch extends BaseDataProcessor {
+public class SnrSpeechClassifier extends BaseDataProcessor {
 
     /**
      * The SphinxProperty specifying the endpointing frame length
@@ -132,19 +125,33 @@ public class SpeechClassifierPatch extends BaseDataProcessor {
      * The default value of PROP_DEBUG.
      */
     public static final boolean PROP_DEBUG_DEFAULT = false;
-
     
+    
+    /**
+     * The SphinxProperty specifying whether to use a snr threshold 
+     * or sig minus noise threshold.
+     */
+    public static final String PROP_SNR_THRESHOLD = "useSnrThreshold";
 
+    /**
+     * The default value of PROP_SNR_THRESHOLD.
+     */
+    public static final boolean PROP_SNR_THRESHOLD_DEFAULT = false;
+
+    private double snr;                 //signal to noise ratio
+    private boolean snrThresholdFlag;   //if true comapare snr against threshold.  If false compare (signal-noise) against threshold
+    private boolean reset  = true;      //flag used to set the inital value of background noise to the next level value
     private boolean debug;
     private double averageNumber = 1;
     private double adjustment;
     private double level;               // average signal level
-    private double background = 0;          // background signal level
+    private double background = 0;      // background signal level
     private double oldbackground = 0;
     private double minSignal;           // minimum valid signal level
     private double threshold;
     private float frameLengthSec;
     List outputQueue = new LinkedList();
+    
     
     
     private long zeroCrossing;
@@ -166,6 +173,7 @@ public class SpeechClassifierPatch extends BaseDataProcessor {
         registry.register(PROP_THRESHOLD, PropertyType.DOUBLE);
         registry.register(PROP_MIN_SIGNAL, PropertyType.DOUBLE);
         registry.register(PROP_DEBUG, PropertyType.BOOLEAN);
+        registry.register(PROP_SNR_THRESHOLD, PropertyType.BOOLEAN);
     }
 
     /*
@@ -182,6 +190,7 @@ public class SpeechClassifierPatch extends BaseDataProcessor {
         threshold = ps.getDouble(PROP_THRESHOLD, PROP_THRESHOLD_DEFAULT);
         minSignal = ps.getDouble(PROP_MIN_SIGNAL, PROP_MIN_SIGNAL_DEFAULT);
         debug = ps.getBoolean(PROP_DEBUG, PROP_DEBUG_DEFAULT);
+        snrThresholdFlag = ps.getBoolean(PROP_SNR_THRESHOLD, PROP_SNR_THRESHOLD_DEFAULT);
     }
 
     /**
@@ -212,6 +221,7 @@ public class SpeechClassifierPatch extends BaseDataProcessor {
         System.out.println("SpeechClassifierPatch.reset()");
         level = 0;
         background = 10;
+        reset = true;          
     }
 
     /**
@@ -228,6 +238,8 @@ public class SpeechClassifierPatch extends BaseDataProcessor {
         for (int i = 0; i < samples.length; i++) {
             double sample = samples[i];
             sumOfSquares += sample * sample;
+            
+            //keep track of zero crossings (to be used for better endpointing -- experimental)
             if (i>0) {
                 if (((samples[i] < 0) && (samples[i-1] >0)) || ((samples[i] > 0) && (samples[i-1] <0))) {
                     zeroCrossing++;
@@ -238,10 +250,7 @@ public class SpeechClassifierPatch extends BaseDataProcessor {
                 }
             }
         }
-        if (flag) { 
-           System.out.println(samples.length);
-           flag = false;
-        }
+
         lastValFromPreviousFrame = samples[samples.length-1];
         double rootMeanSquare = Math.sqrt
             ((double)sumOfSquares/samples.length);
@@ -257,35 +266,34 @@ public class SpeechClassifierPatch extends BaseDataProcessor {
      */
     private void classify(DoubleData audio) {
         double current = logRootMeanSquare(audio.getValues());
-        // System.out.println("current: " + current);
-        if (false && debug) {
-            System.out.println("Before -- Bkg: " + background + ", level: " + level +
-                               ", current: " + current);
-        }
+
+        if (reset) {
+            background = current;
+            reset = false;
+         }
         
-        //TODO:  checking that SNR > threshold may be better than  the absolute diff between nosie and rms level > threshold 
         //TODO:  Research adding zero crossings to the algorithm
         boolean isSpeech = false;
         if (current >= minSignal) {
             level = ((level*averageNumber) + current)/(averageNumber + 1);
-            oldbackground = background;
-            background += (current - background) * adjustment;
-            isSpeech = (level - background > threshold);
-            if (isSpeech) {
-                background = oldbackground;
+            if (snrThresholdFlag) {
+               snr = level/background;
+               isSpeech = snr > threshold;
+            } else {
+              isSpeech = (level - background > threshold);
             }
+            
+            // update the noise estimate if not in speech.
+            // TODO:  Can get stuck in state "In speech" if noise estimate is very low.  
+            // And then becuase of this check it never update the nosie estimate
+            if (!isSpeech)
+                background += (current - background) * adjustment;     
         }
         
         SpeechClassifiedData labeledAudio
             = new SpeechClassifiedData(audio, isSpeech);
         
         if (debug) {
-            String speech = "";
-            if (labeledAudio.isSpeech()) {
-                speech = "*";
-            }
-            System.out.println("Bkg: " + background + ", level: " + level +
-                               ", current: " + current + " " + speech);
         
             //For debugging. writes the rms level, background noise estimate and zero crossings to a file.
             //it may be useful to be plot this.
@@ -296,7 +304,7 @@ public class SpeechClassifierPatch extends BaseDataProcessor {
                 } else {
                     inSpeech = 0;
                 }
-                out.write(inSpeech + "  "+ level  + "  "+  background + "  "+  zeroCrossing);
+                out.write(inSpeech + "  "+ level  + "  "+  background + "  "+  snr + "  "+ zeroCrossing);
                 out.newLine();
                 zeroCrossing = 0;
             } catch (IOException e) {
