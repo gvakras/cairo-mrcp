@@ -111,12 +111,8 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
         // close RTP streams
         if (_rtpManager != null) {
             _rtpManager.removeTargets("RTP receiver shutting down.");
-            // Can not dispose of the rtpmanager since this object could be 
-            // reused.  For example, in Cario rtpStreamReplicators (which extends this class)
-            // are constructed and pooled.  After it is used it is placed back into a pool 
-            // and used again.
-            //_rtpManager.dispose();
-            //_rtpManager = null;
+            _rtpManager.dispose();
+            _rtpManager = null;
         }
 
     }
