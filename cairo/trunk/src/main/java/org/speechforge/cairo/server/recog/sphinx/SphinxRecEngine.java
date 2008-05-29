@@ -213,11 +213,6 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
 
         stopProcessing();
         if (result != null) {
-            if (result.isFinal()) {
-                System.out.println("Final Result is: "+ result.getBestFinalResultNoFiller());
-            } else {
-                System.out.println("Not a final result.  It is: "+result.toString());
-            }
             Result result2clear = _recognizer.recognize();
             if (result2clear != null) {
                 _logger.debug("waitForResult(): result2clear not null!");
