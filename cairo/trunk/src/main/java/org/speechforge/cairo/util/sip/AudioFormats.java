@@ -82,7 +82,7 @@ public class AudioFormats {
         for (int i=0; i<requestedFormatsSDP.size(); i++) {
             //System.out.println(i+" format type is: "+requestedFormatsSDP.get(i).getClass().getCanonicalName());
             //System.out.println("   ...and it is: "+requestedFormatsSDP.get(i).toString());
-            if (((String) requestedFormatsSDP.get(i)).equals("0")) {
+            if (((String) requestedFormatsSDP.get(i)).equals(PCMU_SDP)) {
                 foundAtLeastOne = true;
                 v.add(requestedFormatsSDP.get(i));
             }
