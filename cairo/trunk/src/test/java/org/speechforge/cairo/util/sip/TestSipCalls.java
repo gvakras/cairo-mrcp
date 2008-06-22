@@ -10,6 +10,7 @@ import javax.sdp.SdpException;
 import javax.sip.ObjectInUseException;
 import javax.sip.SipException;
 import javax.sip.TimeoutEvent;
+import javax.sip.message.Request;
 
 import org.cafesip.sipunit.SipCall;
 import org.cafesip.sipunit.SipPhone;
@@ -266,6 +267,11 @@ public class TestSipCalls extends SipTestCase implements SessionListener {
     }
 
     public void processTimeout(TimeoutEvent event) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void processInfoRequest(SipSession session, String contentType, String contentSubType, String content) {
         // TODO Auto-generated method stub
         
     }

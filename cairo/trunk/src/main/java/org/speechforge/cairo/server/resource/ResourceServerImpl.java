@@ -197,5 +197,8 @@ public class ResourceServerImpl implements SessionListener {
         // TODO Auto-generated method stub
         
     }
+    public void processInfoRequest(SipSession session, String contentType, String contentSubType, String content) {
+        // TODO Auto-generated method stub
+    }
 
 }

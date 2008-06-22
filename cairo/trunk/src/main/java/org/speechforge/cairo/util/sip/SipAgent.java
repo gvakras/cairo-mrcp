@@ -276,8 +276,32 @@ public class SipAgent {
         sipStack.deleteSipProvider(sipProvider);
     }
 
-    public void sendInfoRequestWithoutProxy(String to, String peerHost, int peerPort) {
-        // TODO: implement getting the info from the server
+
+    
+    public void sendInfoRequest(SipSession session, String contentType, String contentSubType, String content)  throws SipException {
+        
+        //get the dialog object from the session
+        Dialog d = session.getSipDialog();
+        
+        //create an info request
+        Request infoRequest;
+        infoRequest = d.createRequest(Request.INFO);
+        
+
+        try { 
+            // Create ContentTypeHeader
+            ContentTypeHeader contentTypeHeader;
+            contentTypeHeader = headerFactory.createContentTypeHeader(contentType,contentSubType);
+
+           // add the message body (sdp)
+           infoRequest.setContent(content, contentTypeHeader);
+        } catch (ParseException e) {
+            _logger.debug(e, e);
+            throw new SipException("Parse Exception when trying to add content to info message.", e);
+        }
+        
+        ClientTransaction ct = sipProvider.getNewClientTransaction(infoRequest);
+        SipAgent.sendRequest(d, ct);
     }
 
     public SipSession sendInviteWithoutProxy(String to, SdpMessage message, String peerHost, int peerPort)

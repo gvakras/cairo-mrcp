@@ -43,7 +43,9 @@ import javax.sip.SipException;
 import javax.sip.SipListener;
 import javax.sip.SipProvider;
 import javax.sip.TimeoutEvent;
+import javax.sip.TransactionAlreadyExistsException;
 import javax.sip.TransactionTerminatedEvent;
+import javax.sip.TransactionUnavailableException;
 import javax.sip.address.Address;
 import javax.sip.header.CSeqHeader;
 import javax.sip.header.ContactHeader;
@@ -124,6 +126,8 @@ public class SipListenerImpl implements SipListener {
             processCancel(requestEvent);
         } else if (request.getMethod().equals(Request.REGISTER)) {
             processRegister(requestEvent);
+        } else if (request.getMethod().equals(Request.INFO)) {
+            processInfo(requestEvent);
         } else {
             // TODO: this snippet is taken from the shootist example. Shootme
             // only has teh first line
@@ -429,6 +433,71 @@ public class SipListenerImpl implements SipListener {
 
 
     }
+    
+
+    /**
+     * Process the invite request.
+     */
+    public void processInfo(RequestEvent requestEvent) {
+
+        Request request = requestEvent.getRequest();
+            SipProvider sipProvider = (SipProvider) requestEvent.getSource();
+            ServerTransaction stx = null;
+            SipSession session = null;
+            stx = requestEvent.getServerTransaction();
+            
+            //get the content, content type and content subtype out of the request, to be passed to the listener
+ 
+            byte[] contentBytes = request.getRawContent();
+            String contentString = new String(contentBytes);
+            ContentTypeHeader cTypeHeader = (ContentTypeHeader) request.getHeader(ContentTypeHeader.NAME);
+            if (cTypeHeader == null) {
+                _logger.warn("no content type header in the info request."); 
+            }
+
+            if (stx == null) {
+                _logger.warn("null stx so getting a new one...");
+                try {
+                    stx = sipProvider.getNewServerTransaction(request);
+                } catch (TransactionAlreadyExistsException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (TransactionUnavailableException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+            //_logger.info("the stx: "+stx.toString());
+
+            Dialog dialog = requestEvent.getDialog();
+            if ( dialog == null) {
+                _logger.warn("info request: null dialog.  Therefore no session to find out where to forward the info");  
+            } else {
+                String did = dialog.getDialogId();
+                session = SipSession.getSession(did);
+                session.setStx(stx);
+                session.setRequest(requestEvent);
+            }
+
+            //process the invitaion (the resource manager processInviteRequest method)
+            sipClient.getSessionListener().processInfoRequest(session, cTypeHeader.getContentType(),cTypeHeader.getContentSubType(), contentString);
+
+            //send the OK response
+            try {
+                Response response = sipClient.getMessageFactory().createResponse(200, request);
+                SipAgent.sendResponse(stx, response);
+            } catch (SipException e) {
+                _logger.error(e, e);
+            } catch (ParseException e) {
+                _logger.error(e, e);
+            } catch (InvalidArgumentException e) {
+                _logger.error(e, e);
+            }
+           
+    }
+
+
+    
 
     private void OfferRejected(RequestEvent requestEvent, SipSession session, ServerTransaction stx) {
         // TODO: Distinguish between a rejected offer(488) and a busy here (486)

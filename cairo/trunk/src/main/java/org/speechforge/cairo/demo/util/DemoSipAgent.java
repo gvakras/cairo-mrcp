@@ -24,13 +24,9 @@
 package org.speechforge.cairo.demo.util;
 
 import javax.sip.ObjectInUseException;
-import javax.sip.ResponseEvent;
 import javax.sip.SipException;
 import javax.sip.TimeoutEvent;
-import javax.sip.message.Response;
-
 import org.apache.log4j.Logger;
-import org.speechforge.cairo.demo.tts.SpeechSynthClient;
 import org.speechforge.cairo.util.sip.SdpMessage;
 import org.speechforge.cairo.util.sip.SessionListener;
 import org.speechforge.cairo.util.sip.SipAgent;
@@ -115,6 +111,11 @@ public class DemoSipAgent implements SessionListener {
             } else {
                 _logger.info("Could not send SIP Bye.  There is no session yet.");
             }
+        }
+
+        public void processInfoRequest(SipSession session, String contentType, String contentSubType, String content) {
+            // TODO Auto-generated method stub
+            
         }
 
 }
