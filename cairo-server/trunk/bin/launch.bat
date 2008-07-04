@@ -111,7 +111,11 @@ set CLASSPATH=!CLASSPATH!;%CAIRO_HOME%\config
 @REM echo CLASSPATH=%CLASSPATH%
 
 :run
-"%JAVA_HOME%\bin\java" -Xmx200m -Dlog4j.configuration=log4j.xml %*
+@rem -XX:+UseParallelGC  -XX:+UseConcMarkSweepGC -Xincgc 
+@rem -Dsun.rmi.dgc.client.gcInterval=3600000 -Dsun.rmi.dgc.server.gcInterval=3600000 
+@rem -Xms100m -Xmx200m 
+@rem -verbose:gc
+"%JAVA_HOME%\bin\java" -Xmx200m  -XX:+UseConcMarkSweepGC -Dlog4j.configuration=log4j.xml -Dsun.rmi.dgc.client.gcInterval=3600000 -Dsun.rmi.dgc.server.gcInterval=3600000 %*
 goto exit
 
 :error
