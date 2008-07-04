@@ -20,7 +20,7 @@
     <property name="languageWeight"              value="8"/>
     <property name="silenceInsertionProbability" value="1"/>
 
-    <property name="speechClassifierThreshold"   value="1.25"/>
+    <property name="speechClassifierThreshold"   value="15"/>
     <property name="mergeSpeechSegments"         value="false"/>
 
     <property name="grammarLocation"             value="resource:/org.speechforge.cairo.server.recog.sphinx.SphinxRecEngine!/grammar"/>
@@ -185,7 +185,7 @@
 
     <component name="speechClassifier"
                type="edu.cmu.sphinx.frontend.endpoint.SnrSpeechClassifier">
-        <property name="useSnrThreshold" value="true"/>
+        <property name="useSnrThreshold" value="false"/>
         <property name="threshold" value="${speechClassifierThreshold}"/>
         <property name="debug" value="false"/>
     </component>
