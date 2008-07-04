@@ -18,11 +18,30 @@
       </excludes>
     </fileSet>
     <fileSet>
+      <directory>bin</directory>
+      <outputDirectory>bin</outputDirectory>
+      <includes>
+        <include>*.sh</include>
+      </includes>
+      <excludes>
+        <exclude>launch.sh</exclude><!-- specified individually in "files" section to allow filtering -->
+      </excludes>
+      <lineEnding>unix</lineEnding>
+    </fileSet>
+    <fileSet>
       <directory>bin/demo</directory>
       <outputDirectory>demo/bin</outputDirectory>
       <includes>
         <include>*.bat</include>
       </includes>
+    </fileSet>
+        <fileSet>
+      <directory>bin/demo</directory>
+      <outputDirectory>demo/bin</outputDirectory>
+      <includes>
+        <include>*.sh</include>
+      </includes>
+      <lineEnding>unix</lineEnding>
     </fileSet>
     <fileSet>
       <directory>src/main/java/org/speechforge/cairo/demo</directory>
@@ -81,6 +100,12 @@
     <file>
       <source>bin/launch.bat</source>
       <outputDirectory>bin</outputDirectory>
+      <filtered>true</filtered>
+    </file>
+    <file>
+      <source>bin/launch.sh</source>
+      <outputDirectory>bin</outputDirectory>
+      <lineEnding>unix</lineEnding>
       <filtered>true</filtered>
     </file>
     <file>
