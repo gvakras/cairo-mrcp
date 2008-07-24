@@ -25,6 +25,7 @@ package org.speechforge.cairo.server.resource;
 import java.util.Hashtable;
 import java.util.Map;
 import org.apache.log4j.Logger;
+import org.speechforge.cairo.server.recog.RTPRecogChannel;
 import org.speechforge.cairo.server.rtp.RTPStreamReplicator;
 import org.speechforge.cairo.server.tts.RTPSpeechSynthChannel;
 import org.speechforge.cairo.util.sip.SdpMessage;
@@ -92,6 +93,7 @@ public class ResourceSession {
         
         //resource to be cleaned up for a recog channels
         private RTPStreamReplicator replicator;
+        private RTPRecogChannel recog;
         
         //resoruces needed to be celaned up for synth channels
         private int port;
@@ -144,6 +146,18 @@ public class ResourceSession {
          */
         public void setRtpssc(RTPSpeechSynthChannel rtpssc) {
             this.rtpssc = rtpssc;
+        }
+        /**
+         * @return the recog
+         */
+        public RTPRecogChannel getRecog() {
+            return recog;
+        }
+        /**
+         * @param recog the recog to set
+         */
+        public void setRecog(RTPRecogChannel recog) {
+            this.recog = recog;
         }
     }
     

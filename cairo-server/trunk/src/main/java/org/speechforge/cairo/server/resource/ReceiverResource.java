@@ -151,6 +151,7 @@ public class ReceiverResource extends ResourceImpl {
                         ChannelResources cr = session.new ChannelResources();
                         cr.setReplicator(replicator);
                         cr.setChannelId(channelID);
+                        cr.setRecog(recog);
                         sessionChannels.put(channelID, cr);
                         break;
 
@@ -182,12 +183,14 @@ public class ReceiverResource extends ResourceImpl {
         Map<String, ChannelResources> sessionChannels = session.getChannels();
         for(ChannelResources channel: sessionChannels.values()) {
             _mrcpServer.closeChannel(channel.getChannelId());
+            channel.getRecog().closeProcessor();
             try {
                 _replicatorPool.returnObject(channel.getReplicator());
             } catch (Exception e) {
                 _logger.debug(e, e);
                 throw new RemoteException(e.getMessage(), e);
             }
+            
         }
         ResourceSession.removeSession(session);
     }

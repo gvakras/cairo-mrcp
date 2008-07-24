@@ -169,7 +169,7 @@ public class RTPRecogChannel {
         return startInputTimers;
     }
 
-    synchronized void closeProcessor() {
+    public synchronized void closeProcessor() {
         if (_processor != null) {
           _logger.debug("Closing processor...");
             _processor.close();
