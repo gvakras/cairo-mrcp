@@ -28,10 +28,11 @@ fi
 #chkCairoHome
 if [ -z "$CAIRO_HOME" ]
 then
-   echo "ERROR: CAIRO_HOME not found in your environment."
+   echo "CAIRO_HOME not found in your environment."
    echo "Please set the CAIRO_HOME variable in your environment to match the"
    echo "location of the Cairo installation"
-   error
+   echo "using pwd"
+   CAIRO_HOME=$(pwd)/..
 fi
 
 #validate CairoHome
@@ -125,7 +126,9 @@ echo CPATH=$CPATH
 #-Dsun.rmi.dgc.client.gcInterval=3600000 -Dsun.rmi.dgc.server.gcInterval=3600000
 #-Xms100m -Xmx200m 
 #-verbose:gc
+#-Dawt.toolkit=sun.awt.HeadlessToolkit (workaround for headless JMF on linux)
 
-"$JAVA_HOME/bin/java" -cp $CPATH  -Xmx200m  -XX:+UseConcMarkSweepGC -Dlog4j.configuration=log4j.xml -Dsun.rmi.dgc.client.gcInterval=3600000 -Dsun.rmi.dgc.server.gcInterval=3600000 "$@"
+
+"$JAVA_HOME/bin/java" -cp $CPATH  -Xmx200m  -XX:+UseConcMarkSweepGC -Dawt.toolkit=sun.awt.HeadlessToolkit -Dlog4j.configuration=log4j.xml -Dsun.rmi.dgc.client.gcInterval=3600000 -Dsun.rmi.dgc.server.gcInterval=3600000 "$@"
 exit 0
 
