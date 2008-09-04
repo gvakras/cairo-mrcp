@@ -90,7 +90,7 @@ public class RTPRecogChannel {
      * @throws ResourceUnavailableException
      * @throws GrammarException
      */
-    public synchronized void recognize(RecogListener listener, GrammarLocation grammarLocation, long noInputTimeout)
+    public synchronized void recognize(RecogListener listener, GrammarLocation grammarLocation, long noInputTimeout, boolean hotword)
       throws IllegalStateException, IOException, ResourceUnavailableException, GrammarException {
 
         if (_processor != null) {
@@ -120,7 +120,7 @@ public class RTPRecogChannel {
         try {
             _logger.debug("Loading grammar...");
             _recEngine.loadJSGF(grammarLocation);
-
+            _recEngine.setHotword(hotword);
             _logger.debug("Starting recognition...");
             _state = WAITING_FOR_SPEECH;
             _recEngine.startRecognition(dataSource, _recogListener);
