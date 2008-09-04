@@ -62,6 +62,19 @@ public class RecognitionResult {
         _ruleMatches = new ArrayList<RuleMatch>();
         _text = new String();
     }
+    
+
+    /**
+     * TODOC
+     * @param rawResult
+     * @throws NullPointerException
+     */
+    public RecognitionResult(String textResult, RuleGrammar ruleGrammar) throws NullPointerException {
+        _text = textResult;
+        _ruleGrammar = ruleGrammar;
+        commonInit();
+    }
+
 
     /**
      * TODOC
@@ -69,24 +82,35 @@ public class RecognitionResult {
      * @throws NullPointerException
      */
     public RecognitionResult(Result rawResult, RuleGrammar ruleGrammar) throws NullPointerException {
-        _rawResult = rawResult;
-        _ruleGrammar = ruleGrammar;
+
+        setNewResult(rawResult,ruleGrammar);
+    }
+    
+    public void setNewResult(Result r, RuleGrammar ruleGrammar) {
+        _rawResult = r;
+        _ruleGrammar =ruleGrammar;
         if (_rawResult != null) {
             _text = _rawResult.getBestFinalResultNoFiller();
-            oog = false;
-            if (_text.equals(OUTOFGRAMMAR)) {
-                oog = true;
-            }
-            if (_text != null && (_text = _text.trim()).length() > 0 && _ruleGrammar != null && !oog) {
-                try {
-                    RuleParse ruleParse = _ruleGrammar.parse(_text, null);
-                    _ruleMatches = SimpleNLRuleHandler.getRuleMatches(ruleParse);
-                } catch (GrammarException e) {
-                    _logger.warn("GrammarException encountered!", e);
-                }
+            commonInit();
+        }
+    }
+    
+    private void commonInit() {
+        oog = false;
+        if (_text.equals(OUTOFGRAMMAR)) {
+            oog = true;
+        }
+        if (_text != null && (_text = _text.trim()).length() > 0 && _ruleGrammar != null && !oog) {
+            try {
+                RuleParse ruleParse = _ruleGrammar.parse(_text, null);
+                _ruleMatches = SimpleNLRuleHandler.getRuleMatches(ruleParse);
+            } catch (GrammarException e) {
+                _logger.warn("GrammarException encountered!", e);
             }
         }
     }
+ 
+    
 
     /**
      * TODOC

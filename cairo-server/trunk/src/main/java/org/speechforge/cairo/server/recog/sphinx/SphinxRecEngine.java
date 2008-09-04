@@ -78,6 +78,8 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
 
     private RawAudioTransferHandler _rawAudioTransferHandler;
     RecogListener _recogListener;
+    
+    private boolean hotword = false;
 
     public SphinxRecEngine(ConfigurationManager cm)
       throws IOException, PropertyException, InstantiationException {
@@ -208,9 +210,34 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
         new RecogThread().start();
     }
 
-    private RecognitionResult waitForResult() {
-        Result result = _recognizer.recognize();
+    private RecognitionResult waitForResult(boolean hotword) {
+        Result result = null;
+        
+        _logger.debug("The hotword flag is: "+hotword);
+        //if hotword mode, run recognize until a match occurs
+        if (hotword) {
+            RecognitionResult rr = new RecognitionResult();
+            boolean inGrammarResult = false;
+            while (!inGrammarResult) {
+                 result = _recognizer.recognize();
 
+                 if (result == null) {
+                     _logger.debug("result is null");
+                 } else {
+                     _logger.debug("result is:"+result.toString());
+                 }
+                 rr.setNewResult(result, _jsgfGrammar.getRuleGrammar());
+                 _logger.debug("Rec result: "+rr.toString());
+                 _logger.debug("text:"+rr.getText()+" matches:"+rr.getRuleMatches()+" oog flag:"+rr.isOutOfGrammar());
+                 if( (!rr.getRuleMatches().isEmpty()) && (!rr.isOutOfGrammar())) {
+                     inGrammarResult = true;
+                 }
+            }
+         
+        //if not hotword, just run recognize once
+        } else {
+             result = _recognizer.recognize();
+        }
         stopProcessing();
         if (result != null) {
             Result result2clear = _recognizer.recognize();
@@ -218,10 +245,11 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
                 _logger.debug("waitForResult(): result2clear not null!");
             }
         } else {
-            _logger.debug("waitForResult(): got null result from recognizer!");
+            _logger.info("waitForResult(): got null result from recognizer!");
             return null;
         }
         return new RecognitionResult(result, _jsgfGrammar.getRuleGrammar());
+
     }
 
     /* (non-Javadoc)
@@ -266,12 +294,14 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
         public void run() {
             _logger.debug("RecogThread waiting for result...");
 
-            RecognitionResult result = SphinxRecEngine.this.waitForResult();
+            RecognitionResult result = SphinxRecEngine.this.waitForResult(hotword);
 
             if (_logger.isDebugEnabled()) {
                 StringBuilder sb = new StringBuilder();
                 sb.append("\n**************************************************************");
                 sb.append("\nRecogThread got result: ").append(result);
+                sb.append("\nUtterance"+result.getRawResult().getBestToken().getWordUnitPath());
+
                 sb.append("\n**************************************************************");
                 _logger.debug(sb);
             }
@@ -418,6 +448,20 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
             //System.exit(0);
         }
 
+    }
+
+    /**
+     * @return the hotword
+     */
+    public boolean isHotword() {
+        return hotword;
+    }
+
+    /**
+     * @param hotword the hotword to set
+     */
+    public void setHotword(boolean hotword) {
+        this.hotword = hotword;
     }
 
 }

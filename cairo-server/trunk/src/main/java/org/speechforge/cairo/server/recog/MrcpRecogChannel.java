@@ -128,7 +128,15 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
                     Boolean startInputTimers = (Boolean) getParam(MrcpHeaderName.START_INPUT_TIMERS, request, DEFAULT_START_INPUT_TIMERS);
                     Long noInputTimeout = (startInputTimers.booleanValue()) ?
                             (Long) getParam(MrcpHeaderName.NO_INPUT_TIMEOUT, request, DEFAULT_NO_INPUT_TIMEOUT) : LONG_MINUS_ONE;
-                    _rtpChannel.recognize(new Listener(session), grammarLocation, noInputTimeout.longValue());
+                    //TODO: get the hotword mode from mrcp message        
+                    boolean hotword = false;
+                    String hw = (String) getParam(MrcpHeaderName.RECOGNITION_MODE, request, "normal");
+                    if (hw.equals("hotword")) {
+                       hotword = true;
+                    }
+                    _logger.debug("Recognition Mode is : "+hw+ "  So hotword flag is now: "+hotword);
+                    _logger.debug("No input timeout value is "+noInputTimeout.longValue());
+                    _rtpChannel.recognize(new Listener(session), grammarLocation, noInputTimeout.longValue(), hotword);
                     statusCode = MrcpResponse.STATUS_SUCCESS;
                     requestState = MrcpRequestState.IN_PROGRESS;
                     _state = RECOGNIZING;
