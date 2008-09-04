@@ -69,7 +69,7 @@ public class ResourceServerImpl implements SessionListener {
      */
     public ResourceServerImpl(ResourceRegistry registryImpl) throws RemoteException, SipException {
         super();
-        _ua = new SipAgent(this, cairoSipAddress, "Cairo SIP Stack", 5060, "udp");
+        _ua = new SipAgent(this, cairoSipAddress, "Cairo SIP Stack", 5050, "udp");
 
         _registryImpl = registryImpl;
     }
