@@ -89,7 +89,7 @@ public class SpeechSynthClient implements MrcpEventListener {
     
     private static int _myPort = 5070;
     private static String _host = null;
-    private static int _peerPort = 5060;
+    private static int _peerPort = 5050;
     private static String _mySipAddress ="sip:speechSynthClient@speechforge.org";
     private static String _cairoSipAddress="sip:cairo@speechforge.org";
 

@@ -127,7 +127,7 @@ public class MrcpSpeechSynthChannel extends MrcpGenericChannel implements Speech
             } else if (contentType.equalsIgnoreCase("text/uri-list")) {
                 String text = request.getContent();
                 String[] uris = text.split("\\r");
-                System.out.println(text);
+                _logger.debug(text);
                 //TODO: Handle multiple URI's in a URI list
                 //should there be just one listener for the last prompt?  for now limiting to one.
                 if (uris.length > 1) {
@@ -139,7 +139,7 @@ public class MrcpSpeechSynthChannel extends MrcpGenericChannel implements Speech
 
                         URL url = new URL(uris[i]);
                         URLConnection uc = url.openConnection();
-                        System.out.println(uris[i]+"  "+uc.getContentType());
+                        _logger.debug(uris[i]+"  "+uc.getContentType());
                         
                         if (uc.getContentType().equals("text/plain")) {                        
                            BufferedReader in = new BufferedReader(

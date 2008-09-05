@@ -26,8 +26,13 @@ import org.speechforge.cairo.exception.UnsupportedHeaderException;
 import org.speechforge.cairo.server.MrcpGenericChannel;
 import org.speechforge.cairo.exception.ResourceUnavailableException;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.EnumSet;
 import java.util.concurrent.TimeoutException;
 
@@ -118,6 +123,61 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
                     } catch (IOException e) {
                         _logger.debug(e, e);
                         statusCode = MrcpResponse.STATUS_SERVER_INTERNAL_ERROR;
+                    }
+                } else if (contentType.equalsIgnoreCase("text/uri-list")) {
+                    String text = request.getContent();
+                    String[] uris = text.split("\\r");
+                    _logger.debug(text);
+                    //TODO: Handle multiple URI's in a URI list
+                    //should there be just one listener for the last prompt?  for now limiting to one.
+                    if (uris.length > 1) {
+                       _logger.warn("Multiple URIs not supported yet.  Just playing the first URI.");
+                    }
+                    //for (int i=0; i<uris.length;i++) {
+                    for (int i=0; i<1;i++) {
+                        try {
+
+                            URL url = new URL(uris[i]);
+                            URLConnection uc = url.openConnection();
+                            _logger.debug(uris[i]+"  "+uc.getContentType());
+                            
+                            if ((uc.getContentType().equals("text/plain")) ||                //TODO: Remove this should not assume text/plain is jsgf
+                                (uc.getContentType().equals("application/jsgf"))){
+                               BufferedReader in = new BufferedReader(
+                                                    new InputStreamReader(
+                                                    uc.getInputStream()));
+                               
+                               //TODO: Make this more efficient
+                               String inputLine;
+                               String grammarText = new String();
+                               while ((inputLine = in.readLine()) != null) {
+                                   grammarText = grammarText +inputLine+"\n";
+                               }
+                               in.close();
+                              _logger.debug(grammarText);
+                               
+                               // save grammar to file
+                               MrcpHeader contentIdHeader = request.getHeader(MrcpHeaderName.CONTENT_ID);
+                               String grammarID = (contentIdHeader == null) ? null : contentIdHeader.getValueString();
+                               try {
+                                   grammarLocation = _grammarManager.saveGrammar(grammarID, grammarText);
+                               } catch (IOException e) {
+                                   _logger.debug(e, e);
+                                   statusCode = MrcpResponse.STATUS_SERVER_INTERNAL_ERROR;
+                               }
+                           
+                            } else {
+                                _logger.warn("Unsupported content type for in the recognize request: "+ uc.getContentType());
+                            }
+                      
+                            
+                        } catch (MalformedURLException e) {
+                            _logger.debug(e, e);
+                            statusCode = MrcpResponse.STATUS_OPERATION_FAILED;
+                        } catch (IOException e) {
+                            _logger.debug(e, e);
+                            statusCode = MrcpResponse.STATUS_OPERATION_FAILED;
+                        }
                     }
                 } else {
                     statusCode = MrcpResponse.STATUS_UNSUPPORTED_HEADER_VALUE;

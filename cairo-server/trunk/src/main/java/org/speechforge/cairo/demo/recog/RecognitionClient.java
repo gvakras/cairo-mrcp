@@ -78,9 +78,11 @@ public class RecognitionClient implements MrcpEventListener {
     private static Logger _logger = Logger.getLogger(RecognitionClient.class);
 
     private static final String BEEP_OPTION = "beep";
+    private static final String URL_OPTION = "url";
 
     private static boolean _beep = false;
     private static Toolkit _toolkit = null;
+    private static boolean _url;
 
     private MrcpChannel _recogChannel;
     private MrcpEvent _mrcpEvent;
@@ -92,7 +94,7 @@ public class RecognitionClient implements MrcpEventListener {
     private static int _peerPort = 5050;
     private static String _mySipAddress ="sip:speechSynthClient@speechforge.org";
     private static String _cairoSipAddress="sip:cairo@speechforge.org";
-
+    private static NativeMediaClient mediaClient;
     
     /**
      * TODOC
@@ -151,7 +153,11 @@ public class RecognitionClient implements MrcpEventListener {
         // recog request
         MrcpRequest request = _recogChannel.createRequest(MrcpMethodName.RECOGNIZE);
         request.addHeader(MrcpHeaderName.NO_INPUT_TIMEOUT.constructHeader(new Long(30000)));
-        request.setContent("application/jsgf", null, grammarUrl);
+        if (_url) {
+            request.setContent("text/uri-list", null, grammarUrl.toExternalForm());
+        } else {
+           request.setContent("application/jsgf", null, grammarUrl);
+        }
         MrcpResponse response = _recogChannel.sendRequest(request);
 
         if (_beep) {
@@ -206,6 +212,9 @@ public class RecognitionClient implements MrcpEventListener {
 
         Option option = new Option(BEEP_OPTION, "play response/event timing beep");
         options.addOption(option);
+        
+        option = new Option(URL_OPTION, "include the grammar in mrcp message or just include the url to the grammar");
+        options.addOption(option);
 
         return options;
     }
@@ -221,6 +230,8 @@ public class RecognitionClient implements MrcpEventListener {
         // unexpected crash (ie ctrl-c)
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
+                _logger.debug("Running shutdown hook");
+                mediaClient.shutdown();
                 if (!sentBye && sipAgent!=null) {
                     try {
                         sipAgent.sendBye();
@@ -250,6 +261,9 @@ public class RecognitionClient implements MrcpEventListener {
             _toolkit = Toolkit.getDefaultToolkit();
         }
 
+        
+        _url = line.hasOption(URL_OPTION);
+        
         int localRtpPort = -1;
         try {
             localRtpPort = Integer.parseInt(args[0]);
@@ -314,7 +328,7 @@ public class RecognitionClient implements MrcpEventListener {
             }
 
             _logger.debug("Starting NativeMediaClient...");
-            NativeMediaClient mediaClient = new NativeMediaClient(localRtpPort, rserverHost, remoteRtpPort);
+            mediaClient = new NativeMediaClient(localRtpPort, rserverHost, remoteRtpPort);
             mediaClient.startTransmit();
 
             //Construct the MRCP Channel
