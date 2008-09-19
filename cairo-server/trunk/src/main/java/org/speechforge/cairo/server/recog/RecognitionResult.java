@@ -168,7 +168,7 @@ public class RecognitionResult {
     public static  RecognitionResult constructResultFromString(String inputString) throws InvalidRecognitionResultException {
         
 
-        
+
         if (inputString == null)
             throw new InvalidRecognitionResultException();
         
@@ -178,27 +178,30 @@ public class RecognitionResult {
             result._text = "out of grammar";
             return result;
         }
-        
+        inputString = inputString.trim();
         int firstBracketIndex =inputString.indexOf("<");
         if (firstBracketIndex >0) {
             result._text = inputString.substring(0, firstBracketIndex);      //raw result are at the begining before the first ruleMatch
             if (result == null)
                 throw new InvalidRecognitionResultException();
-            //System.out.println(result._text);
+            _logger.debug(result._text);
             String theTags = inputString.substring(inputString.indexOf("<"));
-            //System.out.println(theTags);
+            theTags = theTags.trim();
+            _logger.debug(theTags);
             String ruleMatches[] = theTags.split("<|>|><");
-            //System.out.println("number of rule matches: " + ruleMatches.length);
+            _logger.debug("number of rule matches: " + ruleMatches.length);
             for (int i=0; i<ruleMatches.length;i++) {
+                _logger.debug("**** "+ i + "th **** " + ruleMatches[i]);
                 //if ((ruleMatches[i].length() > 3) &&(ruleMatches[i].contains(tagRuleDelimiter)) ){
                 if (ruleMatches[i].length() > 3  ){
-                   //System.out.println(" rule match # "+i+"  " +ruleMatches[i]);
+                    _logger.debug(" rule match # "+i+"  " +ruleMatches[i]);
                    String rule[] = ruleMatches[i].split(tagRuleDelimiter);
                    if (rule.length == 2 ) {
                       result._ruleMatches.add(new RuleMatch(rule[0],rule[1]));
-                     //System.out.println(" rule match # "+i+"  " + rule.length);
+                      _logger.debug(" rule match # "+i+"  " + rule.length+ " "+ruleMatches[i]);
                    } else {
-                       throw new InvalidRecognitionResultException();
+                       _logger.debug(" Invalid rule match # "+i+"  " + rule.length+ " "+ruleMatches[i]);
+                       //throw new InvalidRecognitionResultException();
                    }
                 } else {
                     _logger.debug("Bad Tag Rule In Result: "+ruleMatches[i]);
