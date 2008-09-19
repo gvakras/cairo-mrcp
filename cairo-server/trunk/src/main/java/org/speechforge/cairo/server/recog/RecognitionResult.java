@@ -201,7 +201,7 @@ public class RecognitionResult {
                       _logger.debug(" rule match # "+i+"  " + rule.length+ " "+ruleMatches[i]);
                    } else {
                        _logger.debug(" Invalid rule match # "+i+"  " + rule.length+ " "+ruleMatches[i]);
-                       //throw new InvalidRecognitionResultException();
+                       throw new InvalidRecognitionResultException();
                    }
                 } else {
                     _logger.debug("Bad Tag Rule In Result: "+ruleMatches[i]);
