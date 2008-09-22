@@ -28,7 +28,7 @@ import org.apache.log4j.Logger;
 import org.speechforge.cairo.server.recog.RTPRecogChannel;
 import org.speechforge.cairo.server.rtp.RTPStreamReplicator;
 import org.speechforge.cairo.server.tts.RTPSpeechSynthChannel;
-import org.speechforge.cairo.util.sip.SdpMessage;
+import org.speechforge.cairo.sip.SdpMessage;
 
 /**
  * Represents a SIP session.

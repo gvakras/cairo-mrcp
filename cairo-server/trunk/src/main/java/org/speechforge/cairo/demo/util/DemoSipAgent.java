@@ -27,10 +27,10 @@ import javax.sip.ObjectInUseException;
 import javax.sip.SipException;
 import javax.sip.TimeoutEvent;
 import org.apache.log4j.Logger;
-import org.speechforge.cairo.util.sip.SdpMessage;
-import org.speechforge.cairo.util.sip.SessionListener;
-import org.speechforge.cairo.util.sip.SipAgent;
-import org.speechforge.cairo.util.sip.SipSession;
+import org.speechforge.cairo.sip.SdpMessage;
+import org.speechforge.cairo.sip.SessionListener;
+import org.speechforge.cairo.sip.SipAgent;
+import org.speechforge.cairo.sip.SipSession;
 
 public class DemoSipAgent implements SessionListener {
         private static Logger _logger = Logger.getLogger(DemoSipAgent.class);

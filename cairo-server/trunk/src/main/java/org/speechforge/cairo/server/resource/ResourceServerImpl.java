@@ -22,11 +22,13 @@
  */
 package org.speechforge.cairo.server.resource;
 
-import org.speechforge.cairo.exception.ResourceUnavailableException;
-import org.speechforge.cairo.util.sip.SipAgent;
-import org.speechforge.cairo.util.sip.SdpMessage;
-import org.speechforge.cairo.util.sip.SessionListener;
-import org.speechforge.cairo.util.sip.SipSession;
+
+import org.speechforge.cairo.sip.ResourceUnavailableException;
+import org.speechforge.cairo.sip.SipAgent;
+import org.speechforge.cairo.sip.SdpMessage;
+import org.speechforge.cairo.sip.SessionListener;
+import org.speechforge.cairo.sip.SipResource;
+import org.speechforge.cairo.sip.SipSession;
 
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -107,7 +109,6 @@ public class ResourceServerImpl implements SessionListener {
     private SdpMessage invite(SdpMessage request, SipSession session) throws ResourceUnavailableException, RemoteException,
             SdpException {
 
-
         // determine if there receivers and/or transmitter channel requests in the invite
         // and preprocess the message so that it can be sent back as a response to the inviter
         // (i.e. set the channel and setup attributes).
@@ -135,13 +136,25 @@ public class ResourceServerImpl implements SessionListener {
 
         // process the invitation (transmiiiter and/or receiver)
         if (transmitter) {
-            Resource resource = _registryImpl.getResource(Resource.Type.TRANSMITTER);
+            Resource resource;
+            try {
+                resource = _registryImpl.getResource(Resource.Type.TRANSMITTER);
+            } catch (org.speechforge.cairo.exception.ResourceUnavailableException e) {
+                e.printStackTrace();
+                throw new org.speechforge.cairo.sip.ResourceUnavailableException("Could not get a transmitter resource");
+            }
             request = resource.invite(request, session.getId());
             session.getResources().add(resource);
         }
 
         if (receiver) {
-            Resource resource = _registryImpl.getResource(Resource.Type.RECEIVER);
+            Resource resource;
+            try {
+                resource = _registryImpl.getResource(Resource.Type.RECEIVER);
+            } catch (org.speechforge.cairo.exception.ResourceUnavailableException e) {
+                e.printStackTrace();
+                throw new org.speechforge.cairo.sip.ResourceUnavailableException("Could not get a receiver resource");
+            }
             request = resource.invite(request, session.getId());
             session.getResources().add(resource);
         } // TODO: catch exception and release transmitter resources
@@ -158,7 +171,7 @@ public class ResourceServerImpl implements SessionListener {
     }
 
     public void processByeRequest(SipSession session) throws RemoteException, InterruptedException {
-        for (Resource r : session.getResources()) {
+        for (SipResource r : session.getResources()) {
             r.bye(session.getId());
         }
     }

@@ -25,7 +25,7 @@ package org.speechforge.cairo.server.recog;
 import org.mrcp4j.MrcpResourceType;
 import org.speechforge.cairo.server.recog.sphinx.AbstractTestCase;
 import org.speechforge.cairo.util.rule.RuleMatch;
-import org.speechforge.cairo.util.sip.SdpMessage;
+import org.speechforge.cairo.sip.SdpMessage;
 import javax.sdp.Media;
 import javax.sdp.MediaDescription;
 import javax.sdp.Origin;

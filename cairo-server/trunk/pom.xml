@@ -226,6 +226,13 @@
     </dependency>
 
     <dependency>
+      <groupId>org.speechforge</groupId>
+      <artifactId>cairo-sip</artifactId>
+      <version>SNAPSHOT</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <dependency>
       <groupId>sphinx</groupId>
       <artifactId>sphinx4</artifactId>
       <version>1.0beta</version>

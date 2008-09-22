@@ -22,7 +22,7 @@
  */
 package org.speechforge.cairo.server.resource;
 
-import org.speechforge.cairo.exception.ResourceUnavailableException;
+
 import org.speechforge.cairo.server.config.CairoConfig;
 import org.speechforge.cairo.server.config.ReceiverConfig;
 import org.speechforge.cairo.server.recog.MrcpRecogChannel;
@@ -33,8 +33,9 @@ import org.speechforge.cairo.server.rtp.RTPStreamReplicator;
 import org.speechforge.cairo.server.rtp.RTPStreamReplicatorFactory;
 import org.speechforge.cairo.util.CairoUtil;
 import org.speechforge.cairo.util.sip.AudioFormats;
-import org.speechforge.cairo.util.sip.SdpMessage;
-import org.speechforge.cairo.util.sip.SipSession;
+import org.speechforge.cairo.sip.ResourceUnavailableException;
+import org.speechforge.cairo.sip.SdpMessage;
+import org.speechforge.cairo.sip.SipSession;
 
 import java.io.File;
 import java.io.IOException;

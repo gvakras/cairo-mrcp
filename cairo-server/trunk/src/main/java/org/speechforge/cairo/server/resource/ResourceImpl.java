@@ -29,6 +29,7 @@ import java.rmi.server.UnicastRemoteObject;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.log4j.Logger;
+import org.speechforge.cairo.sip.SipResource;
 
 /**
  * Base class for resource implementations.

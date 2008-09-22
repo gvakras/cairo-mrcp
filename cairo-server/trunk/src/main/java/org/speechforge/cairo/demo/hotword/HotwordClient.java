@@ -27,9 +27,9 @@ import org.speechforge.cairo.demo.util.NativeMediaClient;
 import org.speechforge.cairo.server.recog.RecognitionResult;
 import org.speechforge.cairo.server.resource.ResourceImpl;
 import org.speechforge.cairo.server.rtp.RTPConsumer;
-import org.speechforge.cairo.util.sip.SipAgent;
-import org.speechforge.cairo.util.sip.SdpMessage;
-import org.speechforge.cairo.util.sip.SipSession;
+import org.speechforge.cairo.sip.SipAgent;
+import org.speechforge.cairo.sip.SdpMessage;
+import org.speechforge.cairo.sip.SipSession;
 
 import java.awt.Toolkit;
 import java.io.IOException;
