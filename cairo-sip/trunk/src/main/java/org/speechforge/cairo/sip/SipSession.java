@@ -52,7 +52,7 @@ public class SipSession {
     private Dialog sipDialog;
     private RequestEvent request;
     private ServerTransaction stx;
-    private List<Resource> resources;
+    private List<SipResource> resources;
     private SipSession forward;
     
     private String channelName;
@@ -71,7 +71,7 @@ public class SipSession {
     private static Map<String, SipSession> pendingSessions = new Hashtable<String, SipSession>();
 
     public SipSession() {
-        resources = new ArrayList<Resource>();
+        resources = new ArrayList<SipResource>();
     } 
     
     /**
@@ -122,14 +122,14 @@ public class SipSession {
     /**
      * @return the resources
      */
-    public List<Resource> getResources() {
+    public List<SipResource> getResources() {
         return resources;
     }
 
     /**
      * @param resources the resources to set
      */
-    public void setResources(List<Resource> resources) {
+    public void setResources(List<SipResource> resources) {
         this.resources = resources;
     }
     
@@ -320,6 +320,20 @@ public class SipSession {
         this.applicationName = applicationName;
     }
 
-
+    public String toString() {
+        String s = new String();
+        s = s + this.getApplicationName()+"\n";
+        s = s + this.getChannelName() +"\n";
+        s = s + this.getId()+"\n";
+        s = s + this.getAgent()+"\n";
+        s = s + this.getCtx()+"\n";
+        s = s + this.getRequest()+"\n";
+        s = s + this.getForward()+"\n";
+        s = s + this.getResources()+"\n";
+        s = s + this.getSipDialog()+"\n";
+        s = s + this.getStx()+"\n";
+        s = s + this.getTtsChannel()+"\n";
+        return s;
+    }
 
 }

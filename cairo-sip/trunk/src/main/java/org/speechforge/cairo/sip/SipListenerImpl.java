@@ -400,7 +400,7 @@ public class SipListenerImpl implements SipListener {
 
                 //valudate the sdp message (throw sdpException if the message is invalid)
                 SdpMessageValidator.validate(sdpMessage);
-            
+                
                 //process the invitaion (the resource manager processInviteRequest method)
                 SdpMessage sdpResponse = sipClient.getSessionListener().processInviteRequest(sdpMessage, session);
                 
@@ -522,7 +522,7 @@ public class SipListenerImpl implements SipListener {
             SipAgent.sendResponse(stx, response);
 
             // release resources
-            for (Resource r: session.getResources() ){
+            for (SipResource r: session.getResources() ){
                 r.bye(session.getId());
             }
 

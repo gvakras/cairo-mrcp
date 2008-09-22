@@ -148,6 +148,7 @@ public class SdpMessageValidator {
             _logger.debug(sd.toString());
             throw new SdpException(text);
         }
+        _logger.debug("returning from Sdp message validate method.  No problems found");
     }
     
     
