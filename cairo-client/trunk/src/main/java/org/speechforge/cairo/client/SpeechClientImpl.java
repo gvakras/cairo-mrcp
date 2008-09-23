@@ -1,13 +1,13 @@
-package org.speechforge.zanzibar;
+package org.speechforge.cairo.client;
 
 
 
+import org.speechforge.cairo.client.SpeechClient;
+import org.speechforge.cairo.client.SpeechEventListener;
+import org.speechforge.cairo.client.SpeechRequest.RequestType;
+import org.speechforge.cairo.client.recog.InvalidRecognitionResultException;
+import org.speechforge.cairo.client.recog.RecognitionResult;
 import org.speechforge.cairo.sip.SipSession;
-import org.speechforge.zanzibar.SpeechClient;
-import org.speechforge.zanzibar.SpeechEventListener;
-import org.speechforge.zanzibar.SpeechRequest.RequestType;
-import org.speechforge.zanzibar.recog.InvalidRecognitionResultException;
-import org.speechforge.zanzibar.recog.RecognitionResult;
 
 import java.io.BufferedReader;
 import java.io.IOException;

@@ -1,7 +1,7 @@
-package org.speechforge.zanzibar;
+package org.speechforge.cairo.client;
 
 import org.mrcp4j.message.MrcpEvent;
-import org.speechforge.zanzibar.recog.RecognitionResult;
+import org.speechforge.cairo.client.recog.RecognitionResult;
 
 // TODO: Auto-generated Javadoc
 

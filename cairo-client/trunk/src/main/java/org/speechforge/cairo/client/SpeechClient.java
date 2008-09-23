@@ -20,7 +20,7 @@
  * Contact: ngodfredsen@users.sourceforge.net
  *
  */
-package org.speechforge.zanzibar;
+package org.speechforge.cairo.client;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -30,8 +30,8 @@ import javax.sip.SipException;
 import org.mrcp4j.MrcpRequestState;
 import org.mrcp4j.client.MrcpInvocationException;
 import org.mrcp4j.message.header.IllegalValueException;
+import org.speechforge.cairo.client.recog.RecognitionResult;
 import org.speechforge.cairo.sip.SipSession;
-import org.speechforge.zanzibar.recog.RecognitionResult;
 
 // TODO: Auto-generated Javadoc
 /**

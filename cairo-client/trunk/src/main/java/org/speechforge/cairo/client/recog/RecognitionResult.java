@@ -20,7 +20,7 @@
  * Contact: ngodfredsen@users.sourceforge.net
  *
  */
-package org.speechforge.zanzibar.recog;
+package org.speechforge.cairo.client.recog;
 
 import java.util.ArrayList;
 import java.util.List;

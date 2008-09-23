@@ -1,4 +1,4 @@
-package org.speechforge.zanzibar;
+package org.speechforge.cairo.client;
 
 /**
  * SpeechClientProvider API.  This interface is implemented by SpeechClient and is used by the underlying infrastructure.  The basic idea is that

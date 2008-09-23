@@ -1,6 +1,6 @@
-package org.speechforge.zanzibar;
+package org.speechforge.cairo.client;
 
-import org.speechforge.zanzibar.recog.RecognitionResult;
+import org.speechforge.cairo.client.recog.RecognitionResult;
 
 
 /**
