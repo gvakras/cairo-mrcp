@@ -22,6 +22,7 @@
  */
 package org.speechforge.cairo.jmf;
 
+
 import java.io.IOException;
 
 import javax.media.CannotRealizeException;
@@ -36,6 +37,7 @@ import javax.media.protocol.ContentDescriptor;
 import javax.media.protocol.DataSource;
 
 import org.apache.log4j.Logger;
+
 
 /**
  * Provides standard implementations of common JMF functionalities.
@@ -105,4 +107,29 @@ public class JMFUtil {
         return processor;
     }
 
+    
+    /**
+     * @param dataSource
+     * @return
+     * @throws NoProcessorException
+     * @throws CannotRealizeException
+     * @throws IOException
+     */
+    public static Processor createRealizedProcessor(DataSource dataSource, AudioFormat[] preferredMediaFormats)
+      throws NoProcessorException, CannotRealizeException, IOException {
+        
+        ProcessorModel pm = new ProcessorModel(
+            dataSource,
+            preferredMediaFormats,
+            JMFUtil.CONTENT_DESCRIPTOR_RAW
+        );
+        
+        _logger.debug("Creating realized processor...");
+        Processor processor = Manager.createRealizedProcessor(pm);
+        _logger.debug("Processor realized.");
+        
+        return processor;
+    }
+
+    
 }
