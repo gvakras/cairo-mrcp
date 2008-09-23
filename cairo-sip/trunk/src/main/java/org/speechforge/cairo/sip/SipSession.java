@@ -320,20 +320,4 @@ public class SipSession {
         this.applicationName = applicationName;
     }
 
-    public String toString() {
-        String s = new String();
-        s = s + this.getApplicationName()+"\n";
-        s = s + this.getChannelName() +"\n";
-        s = s + this.getId()+"\n";
-        s = s + this.getAgent()+"\n";
-        s = s + this.getCtx()+"\n";
-        s = s + this.getRequest()+"\n";
-        s = s + this.getForward()+"\n";
-        s = s + this.getResources()+"\n";
-        s = s + this.getSipDialog()+"\n";
-        s = s + this.getStx()+"\n";
-        s = s + this.getTtsChannel()+"\n";
-        return s;
-    }
-
 }
