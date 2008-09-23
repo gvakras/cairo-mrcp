@@ -231,6 +231,13 @@
       <version>SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
+    
+    <dependency>
+      <groupId>org.speechforge</groupId>
+      <artifactId>cairo-rtp</artifactId>
+      <version>SNAPSHOT</version>
+      <scope>compile</scope>
+    </dependency>
 
     <dependency>
       <groupId>sphinx</groupId>

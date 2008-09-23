@@ -23,9 +23,9 @@
 package org.speechforge.cairo.demo.recog;
 
 import org.speechforge.cairo.demo.util.DemoSipAgent;
-import org.speechforge.cairo.demo.util.NativeMediaClient;
+import org.speechforge.cairo.rtp.NativeMediaClient;
 import org.speechforge.cairo.server.resource.ResourceImpl;
-import org.speechforge.cairo.server.rtp.RTPConsumer;
+import org.speechforge.cairo.rtp.RTPConsumer;
 import org.speechforge.cairo.sip.SipAgent;
 import org.speechforge.cairo.sip.SdpMessage;
 import org.speechforge.cairo.sip.SipSession;

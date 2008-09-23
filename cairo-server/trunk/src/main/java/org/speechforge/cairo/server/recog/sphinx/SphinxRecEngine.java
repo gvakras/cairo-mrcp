@@ -23,8 +23,8 @@
 package org.speechforge.cairo.server.recog.sphinx;
 
 import static org.speechforge.cairo.server.recog.sphinx.SourceAudioFormat.PREFERRED_MEDIA_FORMATS;
-import static org.speechforge.cairo.util.jmf.JMFUtil.CONTENT_DESCRIPTOR_RAW;
-import static org.speechforge.cairo.util.jmf.JMFUtil.MICROPHONE;
+import static org.speechforge.cairo.jmf.JMFUtil.CONTENT_DESCRIPTOR_RAW;
+import static org.speechforge.cairo.jmf.JMFUtil.MICROPHONE;
 
 import org.speechforge.cairo.server.recog.GrammarLocation;
 import org.speechforge.cairo.server.recog.RecogListener;
@@ -32,7 +32,7 @@ import org.speechforge.cairo.server.recog.RecogListenerDecorator;
 import org.speechforge.cairo.server.recog.RecognitionResult;
 import org.speechforge.cairo.server.recog.SpeechEventListener;
 import org.speechforge.cairo.server.rtp.PBDSReplicator;
-import org.speechforge.cairo.util.jmf.ProcessorStarter;
+import org.speechforge.cairo.jmf.ProcessorStarter;
 import org.speechforge.cairo.util.pool.AbstractPoolableObject;
 
 import java.awt.Toolkit;

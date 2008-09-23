@@ -23,6 +23,7 @@
 package org.speechforge.cairo.server.rtp;
 
 import org.speechforge.cairo.exception.ResourceUnavailableException;
+import org.speechforge.cairo.rtp.RTPConsumer;
 
 import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;

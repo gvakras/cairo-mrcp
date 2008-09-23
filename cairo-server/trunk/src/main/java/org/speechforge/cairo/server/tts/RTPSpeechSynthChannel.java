@@ -31,7 +31,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import javax.media.rtp.InvalidSessionAddressException;
 
 import org.apache.log4j.Logger;
-import org.speechforge.cairo.util.sip.AudioFormats;
+import org.speechforge.cairo.rtp.AudioFormats;
+import org.speechforge.cairo.rtp.RTPPlayer;
 
 /**
  * Handle requests for speech synthesis (TTS) to be streamed through an outbound RTP channel.

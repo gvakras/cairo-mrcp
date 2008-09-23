@@ -32,7 +32,7 @@ import org.speechforge.cairo.server.resource.ResourceSession.ChannelResources;
 import org.speechforge.cairo.server.rtp.RTPStreamReplicator;
 import org.speechforge.cairo.server.rtp.RTPStreamReplicatorFactory;
 import org.speechforge.cairo.util.CairoUtil;
-import org.speechforge.cairo.util.sip.AudioFormats;
+import org.speechforge.cairo.rtp.AudioFormats;
 import org.speechforge.cairo.sip.ResourceUnavailableException;
 import org.speechforge.cairo.sip.SdpMessage;
 import org.speechforge.cairo.sip.SipSession;

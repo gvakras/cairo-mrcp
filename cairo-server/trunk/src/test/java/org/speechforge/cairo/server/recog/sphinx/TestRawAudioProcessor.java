@@ -22,8 +22,8 @@
  */
 package org.speechforge.cairo.server.recog.sphinx;
 
-import org.speechforge.cairo.util.jmf.JMFUtil;
-import org.speechforge.cairo.util.jmf.ProcessorStarter;
+import org.speechforge.cairo.jmf.JMFUtil;
+import org.speechforge.cairo.jmf.ProcessorStarter;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;

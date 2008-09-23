@@ -22,6 +22,7 @@
  */
 package org.speechforge.cairo.server.rtp;
 
+import org.speechforge.cairo.rtp.RTPConsumer;
 import org.speechforge.cairo.util.pool.ObjectPoolUtil;
 
 import java.util.LinkedList;

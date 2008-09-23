@@ -22,19 +22,10 @@
  */
 package org.speechforge.cairo.server.recorder;
 
-import static org.speechforge.cairo.server.recog.sphinx.SourceAudioFormat.PREFERRED_MEDIA_FORMATS;
-import static org.speechforge.cairo.util.jmf.JMFUtil.MICROPHONE;
-
-import org.speechforge.cairo.server.rtp.RTPConsumer;
-import org.speechforge.cairo.server.tts.RTPPlayer;
-
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.URL;
 import java.util.Iterator;
-
 import javax.media.CannotRealizeException;
 import javax.media.DataSink;
 import javax.media.Manager;
@@ -42,10 +33,8 @@ import javax.media.MediaLocator;
 import javax.media.NoDataSinkException;
 import javax.media.NoPlayerException;
 import javax.media.NotRealizedError;
-import javax.media.Player;
 import javax.media.Processor;
 import javax.media.ProcessorModel;
-
 import javax.media.format.AudioFormat;
 import javax.media.protocol.DataSource;
 import javax.media.protocol.FileTypeDescriptor;

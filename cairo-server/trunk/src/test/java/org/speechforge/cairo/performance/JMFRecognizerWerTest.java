@@ -22,8 +22,8 @@ import org.speechforge.cairo.server.recog.GrammarLocation;
 import org.speechforge.cairo.server.recog.RecognitionResult;
 import org.speechforge.cairo.server.recog.sphinx.SphinxRecEngine;
 import org.speechforge.cairo.test.sphinx.util.RecogNotifier;
-import org.speechforge.cairo.util.jmf.JMFUtil;
-import org.speechforge.cairo.util.jmf.ProcessorStarter;
+import org.speechforge.cairo.jmf.JMFUtil;
+import org.speechforge.cairo.jmf.ProcessorStarter;
 
 
 /**

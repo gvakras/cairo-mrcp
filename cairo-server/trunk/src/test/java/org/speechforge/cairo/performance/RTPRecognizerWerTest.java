@@ -1,6 +1,6 @@
 package org.speechforge.cairo.performance;
 
-import static org.speechforge.cairo.util.jmf.JMFUtil.CONTENT_DESCRIPTOR_RAW;
+import static org.speechforge.cairo.jmf.JMFUtil.CONTENT_DESCRIPTOR_RAW;
 import edu.cmu.sphinx.jsapi.JSGFGrammar;
 import edu.cmu.sphinx.recognizer.Recognizer;
 import edu.cmu.sphinx.result.ConfidenceResult;
@@ -35,9 +35,9 @@ import org.speechforge.cairo.server.recog.sphinx.SphinxRecEngine;
 import org.speechforge.cairo.server.recog.sphinx.SphinxRecEngineFactory;
 import org.speechforge.cairo.server.rtp.RTPStreamReplicator;
 import org.speechforge.cairo.server.rtp.RTPStreamReplicatorFactory;
-import org.speechforge.cairo.server.tts.RTPPlayer;
-import org.speechforge.cairo.util.jmf.ProcessorStarter;
-import org.speechforge.cairo.util.sip.AudioFormats;
+import org.speechforge.cairo.rtp.RTPPlayer;
+import org.speechforge.cairo.jmf.ProcessorStarter;
+import org.speechforge.cairo.rtp.AudioFormats;
 
 
 /**

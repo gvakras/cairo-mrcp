@@ -30,7 +30,7 @@ import org.speechforge.cairo.server.tts.MrcpSpeechSynthChannel;
 import org.speechforge.cairo.server.tts.PromptGeneratorFactory;
 import org.speechforge.cairo.server.tts.RTPSpeechSynthChannel;
 import org.speechforge.cairo.util.CairoUtil;
-import org.speechforge.cairo.util.sip.AudioFormats;
+import org.speechforge.cairo.rtp.AudioFormats;
 import org.speechforge.cairo.sip.ResourceUnavailableException;
 import org.speechforge.cairo.sip.SdpMessage;
 import org.speechforge.cairo.sip.SipSession;

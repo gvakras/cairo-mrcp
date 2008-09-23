@@ -22,12 +22,12 @@
  */
 package org.speechforge.cairo.server.recog.sphinx;
 
-import static org.speechforge.cairo.util.jmf.JMFUtil.MICROPHONE;
+import static org.speechforge.cairo.jmf.JMFUtil.MICROPHONE;
 
 import org.speechforge.cairo.server.recog.RecognitionResult;
 import org.speechforge.cairo.test.sphinx.util.RecogNotifier;
-import org.speechforge.cairo.util.jmf.JMFUtil;
-import org.speechforge.cairo.util.jmf.ProcessorStarter;
+import org.speechforge.cairo.jmf.JMFUtil;
+import org.speechforge.cairo.jmf.ProcessorStarter;
 
 import java.net.URL;
 

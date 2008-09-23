@@ -24,15 +24,15 @@ package org.speechforge.cairo.demo.standalone;
 
 import static org.speechforge.cairo.server.recog.sphinx.SourceAudioFormat.PREFERRED_MEDIA_FORMATS;
 import static org.speechforge.cairo.server.resource.ResourceImpl.HELP_OPTION;
-import static org.speechforge.cairo.util.jmf.JMFUtil.MICROPHONE;
+import static org.speechforge.cairo.jmf.JMFUtil.MICROPHONE;
 
 import org.speechforge.cairo.server.recog.GrammarLocation;
 import org.speechforge.cairo.server.recog.RecogListenerDecorator;
 import org.speechforge.cairo.server.recog.RecognitionResult;
 import org.speechforge.cairo.server.recog.sphinx.SphinxRecEngine;
 import org.speechforge.cairo.server.rtp.PBDSReplicator;
-import org.speechforge.cairo.util.jmf.JMFUtil;
-import org.speechforge.cairo.util.jmf.ProcessorStarter;
+import org.speechforge.cairo.jmf.JMFUtil;
+import org.speechforge.cairo.jmf.ProcessorStarter;
 
 import java.awt.Toolkit;
 import java.io.IOException;
@@ -118,7 +118,7 @@ public class StandaloneRecogClient extends RecogListenerDecorator {
         _result = null;
         _engine.activate();
 
-        Processor processor2 = JMFUtil.createRealizedProcessor(_replicator.replicate());
+        Processor processor2 = JMFUtil.createRealizedProcessor(_replicator.replicate(),PREFERRED_MEDIA_FORMATS);
         processor2.addControllerListener(new ProcessorStarter());
 
         PushBufferDataSource pbds2 = (PushBufferDataSource) processor2.getDataOutput();

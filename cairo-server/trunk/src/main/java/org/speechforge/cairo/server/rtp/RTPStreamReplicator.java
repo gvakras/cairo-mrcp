@@ -23,10 +23,11 @@
 package org.speechforge.cairo.server.rtp;
 
 import static org.speechforge.cairo.server.recog.sphinx.SourceAudioFormat.PREFERRED_MEDIA_FORMATS;
-import static org.speechforge.cairo.util.jmf.JMFUtil.CONTENT_DESCRIPTOR_RAW;
+import static org.speechforge.cairo.jmf.JMFUtil.CONTENT_DESCRIPTOR_RAW;
 
+import org.speechforge.cairo.rtp.RTPConsumer;
 import org.speechforge.cairo.server.recorder.RecorderMediaClient;
-import org.speechforge.cairo.util.jmf.ProcessorStarter;
+import org.speechforge.cairo.jmf.ProcessorStarter;
 
 import java.io.IOException;
 

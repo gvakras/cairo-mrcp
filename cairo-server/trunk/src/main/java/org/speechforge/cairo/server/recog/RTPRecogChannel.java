@@ -22,12 +22,12 @@
  */
 package org.speechforge.cairo.server.recog;
 
-import static org.speechforge.cairo.util.jmf.JMFUtil.CONTENT_DESCRIPTOR_RAW;
+import static org.speechforge.cairo.jmf.JMFUtil.CONTENT_DESCRIPTOR_RAW;
 
 import org.speechforge.cairo.exception.ResourceUnavailableException;
 import org.speechforge.cairo.server.recog.sphinx.SphinxRecEngine;
 import org.speechforge.cairo.server.rtp.RTPStreamReplicator;
-import org.speechforge.cairo.util.jmf.ProcessorStarter;
+import org.speechforge.cairo.jmf.ProcessorStarter;
 
 import java.io.IOException;
 import java.util.Timer;
