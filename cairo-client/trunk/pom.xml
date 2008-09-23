@@ -160,6 +160,16 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-report-plugin</artifactId>
       </plugin>
+      
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <descriptors>
+            <descriptor>settings/assembly/bin.xml</descriptor>
+            <descriptor>settings/assembly/src.xml</descriptor>
+          </descriptors>
+        </configuration>
+      </plugin>
 
     </plugins>
 
@@ -209,6 +219,20 @@
       <version>SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
+    
+    <dependency>
+      <groupId>org.speechforge</groupId>
+      <artifactId>cairo-rtp</artifactId>
+      <version>SNAPSHOT</version>
+      <scope>compile</scope>
+    </dependency>
+    
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <version>1.2.13</version>
+      <scope>compile</scope>
+    </dependency>
 
 
     <!-- Need to install this artifact separately for license reasons! -->
@@ -221,14 +245,14 @@
     </dependency-->
 
 
-    <!--dependency>
+    <dependency>
       <groupId>commons-cli</groupId>
       <artifactId>commons-cli</artifactId>
       <version>1.0</version>
       <scope>compile</scope>
     </dependency>
 
-    <dependency>
+    <!--dependency>
       <groupId>commons-collections</groupId>
       <artifactId>commons-collections</artifactId>
       <version>3.1</version>
@@ -270,14 +294,9 @@
       <scope>compile</scope>
     </dependency-->
 
-    <!--dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <version>1.2.13</version>
-      <scope>compile</scope>
-    </dependency>
 
-    <dependency>
+
+    <!--dependency>
       <groupId>javax.sip</groupId>
       <artifactId>jain-sip-api</artifactId>
       <version>1.2</version>
