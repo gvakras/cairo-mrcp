@@ -297,6 +297,18 @@ public class RTPPlayer implements ControllerListener {
         _rtpManager.removeTargets("Disconnecting...");
         _rtpManager.dispose();
         _rtpManager = null;
+          _processor.stop();
+          _processor.close();
+          _processor.deallocate();
+         _processor = null;
+          if (_dataSource != null) {
+              _dataSource.disconnect();
+              _dataSource=null;
+          }
+          if (_sendStream != null) {
+              _sendStream.close();
+              _sendStream = null;
+          }  
 
     }
 }

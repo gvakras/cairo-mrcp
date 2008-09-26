@@ -84,6 +84,20 @@ public class NativeMediaClient extends RTPConsumer {
             new TransmitThread().start();
         }
     }
+    
+    public void stop() {
+        super.shutdown();
+        _rtpPlayer.shutdown();
+        if (_player != null) {
+           _player.stop();
+           _player.deallocate();
+           _player.close();
+        }
+    }
+    
+    public void stopTransmit() {
+        _rtpPlayer.shutdown();
+    }
 
     private class TransmitThread extends Thread {
         public void run() {
