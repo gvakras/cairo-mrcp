@@ -102,6 +102,8 @@ public class BargeInClient implements MrcpEventListener {
     private static String _mySipAddress ="sip:speechSynthClient@speechforge.org";
     private static String _cairoSipAddress="sip:cairo@speechforge.org";    
     
+    private static NativeMediaClient mediaClient;
+    
     /**
      * TODOC
      * @param ttsChannel 
@@ -352,6 +354,9 @@ public class BargeInClient implements MrcpEventListener {
         // unexpected crash (ie ctrl-c)
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
+                if (mediaClient != null) {
+                    mediaClient.stop();
+                }
                 if (!sentBye && sipAgent!=null) {
                     try {
                         sipAgent.sendBye();
@@ -522,6 +527,8 @@ public class BargeInClient implements MrcpEventListener {
             sipAgent.dispose();
             sentBye = true;
          }
+        if (mediaClient != null)
+            mediaClient.stop();
         System.exit(0);
     }
 

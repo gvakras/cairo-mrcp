@@ -231,7 +231,8 @@ public class RecognitionClient implements MrcpEventListener {
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
                 _logger.debug("Running shutdown hook");
-                mediaClient.shutdown();
+                if (mediaClient != null)
+                   mediaClient.shutdown();
                 if (!sentBye && sipAgent!=null) {
                     try {
                         sipAgent.sendBye();

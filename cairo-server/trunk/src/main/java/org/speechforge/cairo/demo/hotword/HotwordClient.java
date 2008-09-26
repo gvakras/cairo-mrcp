@@ -102,6 +102,8 @@ public class HotwordClient implements MrcpEventListener {
     private static int _peerPort = 5050;
     private static String _mySipAddress ="sip:speechSynthClient@speechforge.org";
     private static String _cairoSipAddress="sip:cairo@speechforge.org";    
+
+    private static NativeMediaClient mediaClient;
     
     /**
      * TODOC
@@ -357,6 +359,9 @@ public class HotwordClient implements MrcpEventListener {
         // unexpected crash (ie ctrl-c)
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
+                if (mediaClient != null) {
+                    mediaClient.stop();
+                }
                 if (!sentBye && sipAgent!=null) {
                     try {
                         sipAgent.sendBye();
@@ -457,7 +462,7 @@ public class HotwordClient implements MrcpEventListener {
             }   
 
             _logger.debug("Starting NativeMediaClient...");
-            NativeMediaClient mediaClient = new NativeMediaClient(localRtpPort, rserverHost, remoteRtpPort);
+            mediaClient = new NativeMediaClient(localRtpPort, rserverHost, remoteRtpPort);
             mediaClient.startTransmit();
 
             //Construct the MRCP Channels
@@ -527,6 +532,8 @@ public class HotwordClient implements MrcpEventListener {
             sipAgent.dispose();
             sentBye = true;
          }
+        if (mediaClient != null)
+            mediaClient.stop();
         System.exit(0);
     }
 
