@@ -238,16 +238,16 @@ public class BargeInClient  {
                 //TODO:  handle no media channel in the response corresponding tp the mrcp channel (sip/sdp error)
             }   
 
+            //construct a media client to stream the audio (both ways) and start streaming
             _logger.debug("Starting NativeMediaClient...");
             NativeMediaClient mediaClient = new NativeMediaClient(localRtpPort, rserverHost, remoteRtpPort);
             mediaClient.startTransmit();
 
             //Construct the MRCP Channels
             String protocol = MrcpProvider.PROTOCOL_TCP_MRCPv2;
-            MrcpFactory factory = MrcpFactory.newInstance();
-            MrcpProvider provider = factory.createProvider();
-            MrcpChannel ttsChannel = provider.createChannel(xmitterChannelId, rserverHost, xmitterPort, protocol);
-            MrcpChannel recogChannel = provider.createChannel(receiverChannelId, rserverHost, receiverPort, protocol);
+     
+            MrcpChannel recogChannel = SpeechClientImpl.createRecogChannel(receiverChannelId, rserverHost, receiverPort, protocol);
+            MrcpChannel ttsChannel = SpeechClientImpl.createTtsChannel(xmitterChannelId, rserverHost, xmitterPort, protocol);
             
             
             //populate teh sipSession with the mrcpv2 channels
@@ -257,7 +257,7 @@ public class BargeInClient  {
             
             
             //construct the speech client with this session
-            SpeechClient _client = new SpeechClientImpl(session);
+            SpeechClient _client = new SpeechClientImpl(ttsChannel, recogChannel);
             
 
             //now we can run the demo...

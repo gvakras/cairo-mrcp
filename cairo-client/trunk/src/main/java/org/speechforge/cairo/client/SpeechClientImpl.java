@@ -7,11 +7,13 @@ import org.speechforge.cairo.client.SpeechEventListener;
 import org.speechforge.cairo.client.SpeechRequest.RequestType;
 import org.speechforge.cairo.client.recog.InvalidRecognitionResultException;
 import org.speechforge.cairo.client.recog.RecognitionResult;
+import org.speechforge.cairo.rtp.NativeMediaClient;
 import org.speechforge.cairo.sip.SipSession;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Timer;
@@ -27,7 +29,9 @@ import org.mrcp4j.MrcpMethodName;
 import org.mrcp4j.MrcpRequestState;
 import org.mrcp4j.client.MrcpChannel;
 import org.mrcp4j.client.MrcpEventListener;
+import org.mrcp4j.client.MrcpFactory;
 import org.mrcp4j.client.MrcpInvocationException;
+import org.mrcp4j.client.MrcpProvider;
 import org.mrcp4j.message.MrcpEvent;
 import org.mrcp4j.message.MrcpResponse;
 import org.mrcp4j.message.header.CompletionCause;
@@ -51,9 +55,6 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
     //private  String _cairoSipHostName;
     //private  int _peerHostPort;
     
-    /** The _session. */
-    private SipSession _session;
-    
     /** The _tts channel. */
     private MrcpChannel _ttsChannel;
     
@@ -63,6 +64,11 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
     /** The _barge in flag */
     private boolean _bargeIn = false;
 
+    //used to construct mrcp channels (in the static metods below)
+    private static String protocol = MrcpProvider.PROTOCOL_TCP_MRCPv2;
+    private static MrcpFactory factory = MrcpFactory.newInstance();
+    private static MrcpProvider provider = factory.createProvider();
+    
     
     /**
      * The Enum DtmfState.
@@ -120,12 +126,12 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
      * 
      * @param session the session
      */
-    public SpeechClientImpl(SipSession session) {
+    public SpeechClientImpl(MrcpChannel tts, MrcpChannel recog) {
         super();
-        _session = session;
-        _ttsChannel = _session.getTtsChannel();
+
+        _ttsChannel = tts;
         _ttsChannel.addEventListener(this);
-        _recogChannel = _session.getRecogChannel();
+        _recogChannel = recog;
         _recogChannel.addEventListener(this); 
         //activeRequests = new HashMap<String,SpeechRequest>();
     }
@@ -529,23 +535,7 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
 
     
     /**
-     * Gets the session.
-     * 
-     * @return the session
-     */
-    public SipSession getSession() {
-        return _session;
-    }
 
-
-    /**
-     * Sets the session.
-     * 
-     * @param session the session to set
-     */
-    public void setSession(SipSession session) {
-        this._session = session;
-    }
 
 
     /* (non-Javadoc)
@@ -666,13 +656,6 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
     }
 
 
-    /* (non-Javadoc)
-     * @see org.speechforge.zanzibar.SpeechClient#hangup()
-     */
-    public void hangup() throws SipException {
-        _session.getAgent().sendBye(_session);
-        //_session.getAgent().dispose();
-    }
 
 
     /* (non-Javadoc)
@@ -992,4 +975,23 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
     }
 
     
+    //Utility methods
+    
+    public static MrcpChannel createTtsChannel(String xmitterChannelId, InetAddress remoteHostAdress, int xmitterPort, String protocol) throws IllegalArgumentException, IllegalValueException, IOException {
+        //Construct the MRCP Channels    
+        MrcpChannel ttsChannel = provider.createChannel(xmitterChannelId, remoteHostAdress, xmitterPort, protocol);
+        return ttsChannel;
+    }
+    
+    public static MrcpChannel createRecogChannel(String receiverChannelId, InetAddress remoteHostAdress, int receiverPort, String protocol) throws IllegalArgumentException, IllegalValueException, IOException {
+        //Construct the MRCP Channels
+        MrcpChannel recogChannel = provider.createChannel(receiverChannelId, remoteHostAdress, receiverPort, protocol);
+        return recogChannel;
+    }
+    
+    public static NativeMediaClient createMediaClient(int localRtpPort, InetAddress rserverHost, int remoteRtpPort) throws IllegalArgumentException, IllegalValueException, IOException {
+       NativeMediaClient mediaClient = new NativeMediaClient(localRtpPort, rserverHost, remoteRtpPort);
+       mediaClient.startTransmit();
+       return mediaClient;
+    }
 }

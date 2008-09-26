@@ -131,20 +131,6 @@ public interface SpeechClient {
     public void turnOffBargeIn();
 
 
-    /**
-     * Gets the session.
-     * 
-     * @return the session
-     */
-    public SipSession getSession();
-    
-    /**
-     * Hangup.  Terminates the session, releases the server resources and sends the sip bye.
-     * 
-     * @throws SipException the sip exception
-     */
-    public void hangup() throws SipException;
-    
 
     /**
      * Send start input timers request.
