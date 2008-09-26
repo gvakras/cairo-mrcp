@@ -31,6 +31,7 @@ import javax.sip.ClientTransaction;
 import javax.sip.Dialog;
 import javax.sip.RequestEvent;
 import javax.sip.ServerTransaction;
+import javax.sip.SipException;
 import javax.sip.message.Request;
 
 import org.apache.log4j.Logger;
@@ -152,8 +153,8 @@ public class SipSession {
     }
     
     
-    public void bye() {
-        // TODO: implement hanging up (re-nvite and info too)
+    public void bye() throws SipException {
+        agent.sendBye(this);
     }
 
     public void reInvite() {
