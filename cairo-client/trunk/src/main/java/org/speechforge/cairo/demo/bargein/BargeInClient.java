@@ -50,9 +50,7 @@ import org.apache.commons.cli.Options;
 import org.apache.log4j.Logger;
 import org.mrcp4j.MrcpResourceType;
 import org.mrcp4j.client.MrcpChannel;
-import org.mrcp4j.client.MrcpFactory;
 import org.mrcp4j.client.MrcpInvocationException;
-import org.mrcp4j.client.MrcpProvider;
 import org.mrcp4j.message.MrcpResponse;
 
 
@@ -87,7 +85,7 @@ public class BargeInClient  {
     private static String _mySipAddress ="sip:speechSynthClient@speechforge.org";
     private static String _cairoSipAddress="sip:cairo@speechforge.org";    
 
-
+    private static NativeMediaClient mediaClient;
     
     private static SdpMessage constructResourceMessage(int localRtpPort, Vector format) throws UnknownHostException, SdpException {
         SdpMessage sdpMessage = SdpMessage.createNewSdpSessionMessage(_mySipAddress, _host, "The session Name");
@@ -136,14 +134,19 @@ public class BargeInClient  {
         // unexpected crash (ie ctrl-c)
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
+                if (mediaClient != null) {
+                    mediaClient.stop();
+                }
                 if (!sentBye && sipAgent!=null) {
                     try {
                         sipAgent.sendBye();
                         sipAgent.dispose();
+
                     } catch (SipException e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
                     }
+
 
                 }
             }
@@ -240,26 +243,17 @@ public class BargeInClient  {
 
             //construct a media client to stream the audio (both ways) and start streaming
             _logger.debug("Starting NativeMediaClient...");
-            NativeMediaClient mediaClient = new NativeMediaClient(localRtpPort, rserverHost, remoteRtpPort);
+            mediaClient = new NativeMediaClient(localRtpPort, rserverHost, remoteRtpPort);
             mediaClient.startTransmit();
 
-            //Construct the MRCP Channels
-            String protocol = MrcpProvider.PROTOCOL_TCP_MRCPv2;
-     
-            MrcpChannel recogChannel = SpeechClientImpl.createRecogChannel(receiverChannelId, rserverHost, receiverPort, protocol);
-            MrcpChannel ttsChannel = SpeechClientImpl.createTtsChannel(xmitterChannelId, rserverHost, xmitterPort, protocol);
-            
-            
-            //populate teh sipSession with the mrcpv2 channels
-            SipSession session = sipAgent.getSipSession();
-            session.setTtsChannel(ttsChannel);
-            session.setRecogChannel(recogChannel);
-            
+            MrcpChannel recogChannel = SpeechClientImpl.createRecogChannel(receiverChannelId, rserverHost, receiverPort);
+            MrcpChannel ttsChannel = SpeechClientImpl.createTtsChannel(xmitterChannelId, rserverHost, xmitterPort);
+           
             
             //construct the speech client with this session
             SpeechClient _client = new SpeechClientImpl(ttsChannel, recogChannel);
             
-
+            _client.tunOnBargeIn();
             //now we can run the demo...
             try {
 
@@ -320,6 +314,8 @@ public class BargeInClient  {
             sipAgent.dispose();
             sentBye = true;
          }
+        if (mediaClient != null)
+            mediaClient.stop();
         System.exit(0);
     }
 

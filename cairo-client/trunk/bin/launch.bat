@@ -27,27 +27,27 @@ goto error
 
 :chkCairoHome
 
-if not "%CAIRO_HOME%"=="" goto valCairoHome
+if not "%CAIRO_CLIENT_HOME%"=="" goto valCairoHome
 
-if "%OS%"=="Windows_NT" set CAIRO_HOME=%~dp0..
-if not "%CAIRO_HOME%"=="" goto valCairoHome
+if "%OS%"=="Windows_NT" set CAIRO_CLIENT_HOME=%~dp0..
+if not "%CAIRO_CLIENT_HOME%"=="" goto valCairoHome
 
 echo.
-echo ERROR: CAIRO_HOME not found in your environment.
-echo Please set the CAIRO_HOME variable in your environment to match the
+echo ERROR: CAIRO_CLIENT_HOME not found in your environment.
+echo Please set the CAIRO_CLIENT_HOME variable in your environment to match the
 echo location of the Cairo installation
 echo.
 goto error
 
 :valCairoHome
-set CAIRO_JAR=%CAIRO_HOME%\cairo-%CAIRO_VERSION%.jar
-if exist "%CAIRO_JAR%" goto chkJavaHome
+set CAIRO_CLIENT_JAR=%CAIRO_CLIENT_HOME%\cairo-client-%CAIRO_VERSION%.jar
+if exist "%CAIRO_CLIENT_JAR%" goto chkJavaHome
 
 echo.
-echo ERROR: CAIRO_HOME is set to an invalid directory.
-echo CAIRO_HOME = %CAIRO_HOME%
-echo %CAIRO_JAR% not found!
-echo Please set the CAIRO_HOME variable in your environment to match the
+echo ERROR: CAIRO_CLIENT_HOME is set to an invalid directory.
+echo CAIRO_CLIENT_HOME = %CAIRO_CLIENT_HOME%
+echo %CAIRO_CLIENT_JAR% not found!
+echo Please set the CAIRO_CLIENT_HOME variable in your environment to match the
 echo location of the Cairo installation
 echo.
 goto error
@@ -91,7 +91,7 @@ goto error
 
 if exist "%JAVA_HOME%\jre\lib\ext\jsapi.jar" goto setClasspath
 if exist "%JAVA_HOME%\lib\ext\jsapi.jar" goto setClasspath
-if exist "%CAIRO_HOME%\lib\jsapi.jar" goto setClasspath
+if exist "%CAIRO_CLIENT_HOME%\lib\jsapi.jar" goto setClasspath
 
 echo.
 echo ERROR: Java Speech API (JSAPI) is not installed.
@@ -104,10 +104,10 @@ goto error
 
 :setClasspath
 
-set CLASSPATH=%CAIRO_JAR%
-for %%b in (%CAIRO_HOME%\lib\*.jar) do set CLASSPATH=!CLASSPATH!;%%b
+set CLASSPATH=%CAIRO_CLIENT_JAR%
+for %%b in (%CAIRO_CLIENT_HOME%\lib\*.jar) do set CLASSPATH=!CLASSPATH!;%%b
 
-set CLASSPATH=!CLASSPATH!;%CAIRO_HOME%\config
+set CLASSPATH=!CLASSPATH!;%CAIRO_CLIENT_HOME%\config
 @REM echo CLASSPATH=%CLASSPATH%
 
 :run
