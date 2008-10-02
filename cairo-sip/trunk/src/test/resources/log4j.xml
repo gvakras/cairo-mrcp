@@ -11,32 +11,12 @@
      </layout>
   </appender>
 
-  <category name="org.speechforge.cairo.server.recog.sphinx.RawAudioProcessor">
-    <priority value="debug"/>
-  </category>
-
-  <category name="org.speechforge.cairo.server.recog.sphinx.TestRawAudioProcessor">
-    <priority value="debug"/>
-  </category>
-
-  <category name="org.speechforge.cairo.server.rtp.TestPBDSReplicator">
-    <priority value="debug"/>
-  </category>
-
-  <category name="org.speechforge.cairo.server.recog.sphinx.RawAudioTransferHandler">
-    <priority value="debug"/>
-  </category>
-
-  <category name="org.speechforge.cairo.test.sphinx.util">
-    <priority value="debug"/>
-  </category>
-
-  <category name="org.speechforge.cairo.test.sphinx.visualize.SonogramModel">
-    <priority value="debug"/>
+  <category name="org.speechforge.cairo.sip.TestSipCalls">
+    <priority value="info"/>
   </category>
 
   <root>
-    <priority value="debug"/>
+    <priority value="info"/>
     <appender-ref ref="Console"/>
   </root>
 

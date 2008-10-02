@@ -12,6 +12,7 @@ import javax.sip.SipException;
 import javax.sip.TimeoutEvent;
 import javax.sip.message.Request;
 
+import org.apache.log4j.Logger;
 import org.cafesip.sipunit.SipCall;
 import org.cafesip.sipunit.SipPhone;
 import org.cafesip.sipunit.SipResponse;
@@ -20,6 +21,8 @@ import org.cafesip.sipunit.SipTestCase;
 
 
 public class TestSipCalls extends SipTestCase implements SessionListener {
+
+    private static Logger _logger = Logger.getLogger(TestSipCalls.class);
 
     String host;
 
@@ -76,7 +79,7 @@ public class TestSipCalls extends SipTestCase implements SessionListener {
                 SdpTestMessages.inviteRequest3, "application", "sdp", null, null);
         assertLastOperationSuccess(ua.format(), ua);
 
-        // System.out.println( SdpTestMessages.inviteRequest3);
+        // _logger.debug( SdpTestMessages.inviteRequest3);
 
         // poll for an OK response (200)
         boolean notDone = true;
@@ -90,7 +93,7 @@ public class TestSipCalls extends SipTestCase implements SessionListener {
             }
 
             int rcode = call.getReturnCode();
-             System.out.println("The return code is: " +rcode);
+             _logger.debug("The return code is: " +rcode);
             if (rcode == 200) { // ok code
                 notDone = false;
             }
@@ -130,11 +133,11 @@ public class TestSipCalls extends SipTestCase implements SessionListener {
 
         // check all of the responses along the way (should be two)
         ArrayList responses = call.getAllReceivedResponses();
-        // System.out.println("Got "+responses.size()+ " responses");
+        _logger.debug("Got "+responses.size()+ " responses");
         for (Object o : responses) {
             SipResponse response = (SipResponse) o;
-            // System.out.println("-----------------------------------------------------------");
-            // System.out.println("Status code & reason: " + response.getStatusCode() + " "
+            // _logger.debug("-----------------------------------------------------------");
+            // _logger.debug("Status code & reason: " + response.getStatusCode() + " "
             // +response.getReasonPhrase());
             // Message message =response.getMessage();
 
@@ -145,7 +148,7 @@ public class TestSipCalls extends SipTestCase implements SessionListener {
             assertHeaderPresent(SIPHeaderNames.CALL_ID + " Header not present", response,
                     SIPHeaderNames.CALL_ID);
 
-            // System.out.println(message);
+            // _logger.debug(message);
         }
 
         // check for contact header, content header adn body on teh invike ok resposne only
@@ -249,16 +252,16 @@ public class TestSipCalls extends SipTestCase implements SessionListener {
     }
 
     public SdpMessage processInviteRequest(SdpMessage request, SipSession session) {
-         System.out.println("Got a invite Request");
-         System.out.println(request.getSessionDescription().toString());
+         _logger.debug("Got a invite Request");
+         _logger.debug(request.getSessionDescription().toString());
         cairoUA.sendResponse(session,  SdpMessage.createSdpSessionMessage(request.getSessionDescription()));
         return SdpMessage.createSdpSessionMessage(request.getSessionDescription());
 
     }
 
     public SdpMessage processInviteResponse(boolean ok, SdpMessage response, SipSession session) {
-        // System.out.println("Got a invite Response");
-        // System.out.println(response.getSessionDescription().toString());
+        // _logger.debug("Got a invite Response");
+        // _logger.debug(response.getSessionDescription().toString());
         return null;
 
     }
