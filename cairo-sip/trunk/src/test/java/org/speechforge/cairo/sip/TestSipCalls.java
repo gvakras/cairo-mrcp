@@ -79,7 +79,7 @@ public class TestSipCalls extends SipTestCase implements SessionListener {
                 SdpTestMessages.inviteRequest3, "application", "sdp", null, null);
         assertLastOperationSuccess(ua.format(), ua);
 
-        // _logger.debug( SdpTestMessages.inviteRequest3);
+        _logger.debug("SDP Test message: "+ SdpTestMessages.inviteRequest3);
 
         // poll for an OK response (200)
         boolean notDone = true;
@@ -136,10 +136,7 @@ public class TestSipCalls extends SipTestCase implements SessionListener {
         _logger.debug("Got "+responses.size()+ " responses");
         for (Object o : responses) {
             SipResponse response = (SipResponse) o;
-            // _logger.debug("-----------------------------------------------------------");
-            // _logger.debug("Status code & reason: " + response.getStatusCode() + " "
-            // +response.getReasonPhrase());
-            // Message message =response.getMessage();
+            _logger.debug("Status code & reason: " + response.getStatusCode() + " "+response.getReasonPhrase());
 
             assertHeaderPresent(SIPHeaderNames.FROM + " Header not present", response, SIPHeaderNames.FROM);
             assertHeaderPresent(SIPHeaderNames.TO + " Header not present", response, SIPHeaderNames.TO);
@@ -148,7 +145,7 @@ public class TestSipCalls extends SipTestCase implements SessionListener {
             assertHeaderPresent(SIPHeaderNames.CALL_ID + " Header not present", response,
                     SIPHeaderNames.CALL_ID);
 
-            // _logger.debug(message);
+ 
         }
 
         // check for contact header, content header adn body on teh invike ok resposne only
@@ -252,16 +249,14 @@ public class TestSipCalls extends SipTestCase implements SessionListener {
     }
 
     public SdpMessage processInviteRequest(SdpMessage request, SipSession session) {
-         _logger.debug("Got a invite Request");
-         _logger.debug(request.getSessionDescription().toString());
+         _logger.debug("Got a invite Request "+request.getSessionDescription().toString());
         cairoUA.sendResponse(session,  SdpMessage.createSdpSessionMessage(request.getSessionDescription()));
         return SdpMessage.createSdpSessionMessage(request.getSessionDescription());
 
     }
 
     public SdpMessage processInviteResponse(boolean ok, SdpMessage response, SipSession session) {
-        // _logger.debug("Got a invite Response");
-        // _logger.debug(response.getSessionDescription().toString());
+        _logger.debug("Got a invite Response "+ response.getSessionDescription().toString());
         return null;
 
     }
