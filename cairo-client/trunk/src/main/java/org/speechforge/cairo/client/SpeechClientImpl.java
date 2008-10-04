@@ -977,13 +977,13 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
     
     //Utility methods
     
-    public static MrcpChannel createTtsChannel(String xmitterChannelId, InetAddress remoteHostAdress, int xmitterPort, String protocol) throws IllegalArgumentException, IllegalValueException, IOException {
+    public static MrcpChannel createTtsChannel(String xmitterChannelId, InetAddress remoteHostAdress, int xmitterPort) throws IllegalArgumentException, IllegalValueException, IOException {
         //Construct the MRCP Channels    
         MrcpChannel ttsChannel = provider.createChannel(xmitterChannelId, remoteHostAdress, xmitterPort, protocol);
         return ttsChannel;
     }
     
-    public static MrcpChannel createRecogChannel(String receiverChannelId, InetAddress remoteHostAdress, int receiverPort, String protocol) throws IllegalArgumentException, IllegalValueException, IOException {
+    public static MrcpChannel createRecogChannel(String receiverChannelId, InetAddress remoteHostAdress, int receiverPort) throws IllegalArgumentException, IllegalValueException, IOException {
         //Construct the MRCP Channels
         MrcpChannel recogChannel = provider.createChannel(receiverChannelId, remoteHostAdress, receiverPort, protocol);
         return recogChannel;
