@@ -24,14 +24,11 @@ package org.speechforge.cairo.client;
 
 import java.io.IOException;
 import java.io.Reader;
-
-import javax.sip.SipException;
-
 import org.mrcp4j.MrcpRequestState;
 import org.mrcp4j.client.MrcpInvocationException;
 import org.mrcp4j.message.header.IllegalValueException;
 import org.speechforge.cairo.client.recog.RecognitionResult;
-import org.speechforge.cairo.sip.SipSession;
+
 
 // TODO: Auto-generated Javadoc
 /**
@@ -145,9 +142,18 @@ public interface SpeechClient {
     public MrcpRequestState sendStartInputTimersRequest() throws MrcpInvocationException, IOException, InterruptedException;
 
     /**
+     * Sets the  listener.  To set the listener for methods that don't have a listener parameter.
+     * 
+     * @param listener the new default listener
+     */
+    public void setListener(SpeechEventListener listener);
+    
+    
+    /**
      * Sets the default listener.  To set the listener for methods that don't have a listener parameter.
      * 
      * @param listener the new default listener
+     * @deprecated
      */
     public void setDefaultListener(SpeechEventListener listener);
     
@@ -165,7 +171,7 @@ public interface SpeechClient {
      * @throws MrcpInvocationException the mrcp invocation exception
      * @throws InterruptedException the interrupted exception
      */
-    public SpeechRequest queuePrompt(boolean urlPormpt, String prompt, SpeechEventListener listener)  throws IOException, MrcpInvocationException, InterruptedException;    
+    public SpeechRequest queuePrompt(boolean urlPormpt, String prompt)  throws IOException, MrcpInvocationException, InterruptedException;    
 
    
     /**
@@ -185,50 +191,14 @@ public interface SpeechClient {
      */
     public void disableDtmf();
     
-    public SpeechRequest recognize(String grammarUrl, boolean hotword, boolean attachGrammar, SpeechEventListener listener) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException ;
+    public SpeechRequest recognize(String grammarUrl, boolean hotword, boolean attachGrammar) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException ;
 
-
-    //Methods not implemented yet....
+    public SpeechRequest recognize(Reader reader, boolean hotword, boolean attachGrammar) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException ;
     
-    /**
-     * Init.
-     * 
-     * @param urlPrompt the url prompt
-     * @param prompt the prompt
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
-     * @throws MrcpInvocationException the mrcp invocation exception
-     * @throws InterruptedException the interrupted exception
-     */
-    //public void initLocalSipAgent(int localSipPort, String mySipAddress);
+    public void cancelRequest(SpeechRequest request);
     
-    /**
-     * Start session.
-     * 
-     * @param cairoSipPort the cairo sip port
-     * @param cairoSipHostName the cairo sip host name
-     * @param cairoSipAddress the cairo sip address
-     * @param localRtpPort the local rtp port
-     * @param sessionName the session name
-     */
-    //public  void startSession(int cairoSipPort, String cairoSipHostName, String cairoSipAddress, int localRtpPort, String sessionName);
- 
+    public void shutdown();
     
-    /**
-     * Recognize.  Non-blocking method.
-     * 
-     * @param grammarUrl the grammar url
-     * 
-     * @return the recognition result
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
-     * @throws MrcpInvocationException the mrcp invocation exception
-     * @throws InterruptedException the interrupted exception
-     * @throws IllegalValueException the illegal value exception
-     */
-    //TODO: add a timeout value to the recognize commands (or perhasp to the sendStartTimer method
-    //public SpeechRequest recognize(String grammarUrl, SpeechEventListener listener)throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException;  
-    
-    //public  SpeechRequest playAndRecognize(String prompt, String grammarUrl, SpeechEventListener listener) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException;
-
+    public MrcpRequestState sendBargeinRequest() throws IOException, MrcpInvocationException, InterruptedException;
+  
 }

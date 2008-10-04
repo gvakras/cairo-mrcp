@@ -11,7 +11,5 @@ package org.speechforge.cairo.client;
 public interface SpeechClientProvider {
     
     public void characterEventReceived(char code);
-    
-    public void bye();
 
 }

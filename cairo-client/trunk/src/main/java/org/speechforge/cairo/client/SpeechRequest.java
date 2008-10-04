@@ -22,12 +22,11 @@ public class SpeechRequest {
     //TODO: Add status of the call that initiated the request. 
     
 
-    public SpeechRequest(long requestId, RequestType type, boolean completed, SpeechEventListener listener) {
+    public SpeechRequest(long requestId, RequestType type, boolean completed) {
         super();
         this.requestId = requestId;
         this.requestType = type;
         this.completed = completed;
-        this.listener = listener;
     }
     
     
@@ -45,20 +44,7 @@ public class SpeechRequest {
         this.completed = completed;
     }
 
-    /**
-     * @return the listener
-     */
-    public SpeechEventListener getListener() {
-        return listener;
-    }
-    
-    /**
-     * @param listener the listener to set
-     */
-    public void setListener(SpeechEventListener listener) {
-        this.listener = listener;
-    }
-    
+  
     /**
      * @return the requestId
      */

@@ -87,18 +87,6 @@ public class BargeInClient  {
 
     private static NativeMediaClient mediaClient;
     
-    private static SdpMessage constructResourceMessage(int localRtpPort, Vector format) throws UnknownHostException, SdpException {
-        SdpMessage sdpMessage = SdpMessage.createNewSdpSessionMessage(_mySipAddress, _host, "The session Name");
-        MediaDescription rtpChannel = SdpMessage.createRtpChannelRequest(localRtpPort, format);
-        MediaDescription synthControlChannel = SdpMessage.createMrcpChannelRequest(MrcpResourceType.SPEECHSYNTH);
-        MediaDescription recogControlChannel = SdpMessage.createMrcpChannelRequest(MrcpResourceType.SPEECHRECOG);
-        Vector v = new Vector();
-        v.add(synthControlChannel);
-        v.add(recogControlChannel);
-        v.add(rtpChannel);
-        sdpMessage.getSessionDescription().setMediaDescriptions(v);
-        return sdpMessage;
-    }
 
     private static Options getOptions() {
 
@@ -207,7 +195,7 @@ public class BargeInClient  {
         // Construct the SDP message that will be sent in the SIP invitation
         Vector format = new Vector();
         format.add(SdpConstants.PCMU);
-        SdpMessage message = constructResourceMessage(localRtpPort,format);
+        SdpMessage message = SpeechClientImpl.constructResourceMessage(localRtpPort,format, _mySipAddress, _host, "Session Name");
 
         // Send the sip invitation (This method on the SimpleSipAgent blocks until a response is received or timeout occurs) 
         _logger.info("Sending a SIP invitation to the cairo server.");

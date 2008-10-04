@@ -26,7 +26,7 @@ public interface SpeechEventListener {
      * 
      * @param event the mrcp event
      */
-    public void ttsCompletedEventReceived(MrcpEvent event);
+    public void speechSynthEventReceived(MrcpEvent event);
 
     
 
