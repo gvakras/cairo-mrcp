@@ -312,7 +312,7 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
     }
 
     /* (non-Javadoc)
-     * @see org.speechforge.zanzibar.SpeechClient#sendStartInputTimersRequest()
+     * @see org.speechforge.cairo.client.SpeechClient#sendStartInputTimersRequest()
      */
     public MrcpRequestState sendStartInputTimersRequest()
       throws MrcpInvocationException, IOException, InterruptedException {
@@ -485,7 +485,8 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
      * @throws InterruptedException the interrupted exception
      */
     private SpeechRequest internalPlayAndRecogize(boolean urlPrompt, String prompt, MrcpRequest request) throws IOException, MrcpInvocationException, InterruptedException {
-          MrcpResponse response = _recogChannel.sendRequest(request);
+        // TODO delay start of recognition if barge-in is disabled!
+    	MrcpResponse response = _recogChannel.sendRequest(request);
 
           if (_logger.isDebugEnabled()) {
               _logger.debug("MRCP response received:\n" + response.toString());
@@ -594,13 +595,8 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
         return request;
     } 
 
-    
-    /**
-
-
-
     /* (non-Javadoc)
-     * @see org.speechforge.zanzibar.SpeechClient#playBlocking(java.lang.Boolean, java.lang.String)
+     * @see org.speechforge.cairo.client.SpeechClient#playBlocking(boolean, java.lang.String)
      */
     public synchronized void playBlocking(boolean urlPrompt, String prompt) throws IOException, MrcpInvocationException, InterruptedException {
         _activeBlockingTts = this.play(urlPrompt, prompt);
@@ -620,9 +616,8 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
         return;
     }
 
-
     /* (non-Javadoc)
-     * @see org.speechforge.zanzibar.SpeechClient#recognizeBlocking(java.lang.String)
+     * @see org.speechforge.cairo.client.SpeechClient#recognizeBlocking(java.lang.String, boolean, boolean)
      */
     public synchronized RecognitionResult recognizeBlocking(String grammarUrl, boolean hotword, boolean attachGrammar) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException {
         _activeRecognition = this.recognize(grammarUrl, hotword, attachGrammar);
@@ -644,9 +639,8 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
         return _activeRecognition.getResult();
     }
     
-
     /* (non-Javadoc)
-     * @see org.speechforge.zanzibar.SpeechClient#playAndRecognizeBlocking(java.lang.Boolean, java.lang.String, java.lang.String)
+     * @see org.speechforge.cairo.client.SpeechClient#playAndRecognizeBlocking(boolean, java.lang.String, java.lang.String, boolean)
      */
     public synchronized RecognitionResult playAndRecognizeBlocking(boolean urlPrompt, String prompt, String grammarUrl, boolean hotword) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException {
         MrcpRequest mrcpRequest = constructRecogRequest(grammarUrl, hotword, true);
@@ -670,17 +664,15 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
         return _activeRecognition.getResult();
     }
     
-
-    
     /* (non-Javadoc)
-     * @see org.speechforge.zanzibar.SpeechClient#tunOnBargeIn()
+     * @see org.speechforge.cairo.client.SpeechClient#turnOnBargeIn()
      */
-    public void tunOnBargeIn() {
+    public void turnOnBargeIn() {
         _bargeIn = true;    
     }
 
     /* (non-Javadoc)
-     * @see org.speechforge.zanzibar.SpeechClient#turnOffBargeIn()
+     * @see org.speechforge.cairo.client.SpeechClient#turnOffBargeIn()
      */
     public void turnOffBargeIn() {
        _bargeIn = false;
@@ -688,19 +680,22 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
 
 
     /* (non-Javadoc)
-     * @see org.speechforge.zanzibar.SpeechClient#setDefaultListener(org.speechforge.zanzibar.SpeechEventListener)
+     * @see org.speechforge.cairo.client.SpeechClient#setListener(org.speechforge.cairo.client.SpeechEventListener)
      */
     public void setListener(SpeechEventListener listener) {
         this.defaultListener = listener;
     }
 
+    /* (non-Javadoc)
+     * @see org.speechforge.cairo.client.SpeechClient#setDefaultListener(org.speechforge.cairo.client.SpeechEventListener)
+     */
     public void setDefaultListener(SpeechEventListener listener) {
         this.setListener(listener);
         
     }
 
     /* (non-Javadoc)
-     * @see org.speechforge.zanzibar.SpeechClient#playAndRecognizeBlocking(java.lang.String, java.io.Reader)
+     * @see org.speechforge.cairo.client.SpeechClient#playAndRecognizeBlocking(boolean, java.lang.String, java.io.Reader, boolean)
      */
     public synchronized RecognitionResult playAndRecognizeBlocking(boolean urlPrompt, String prompt, Reader reader, boolean hotword) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException {
         MrcpRequest mrcpRequest = constructRecogRequest(reader,hotword);
@@ -726,7 +721,7 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
 
 
     /* (non-Javadoc)
-     * @see org.speechforge.zanzibar.SpeechClient#recognizeBlocking(java.io.Reader)
+     * @see org.speechforge.cairo.client.SpeechClient#recognizeBlocking(java.io.Reader, boolean)
      */
     public synchronized RecognitionResult recognizeBlocking(Reader reader, boolean hotword) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException {
         _logger.warn("The recognize blocking(reader,hotwordFlag) method is not implemented");
@@ -735,7 +730,7 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
 
 
     /* (non-Javadoc)
-     * @see org.speechforge.zanzibar.SpeechClient#queuePrompt(java.lang.Boolean, java.lang.String, org.speechforge.zanzibar.SpeechEventListener)
+     * @see org.speechforge.cairo.client.SpeechClient#queuePrompt(boolean, java.lang.String)
      */
     public SpeechRequest queuePrompt(boolean urlPrompt, String prompt) throws IOException, MrcpInvocationException, InterruptedException {
         return play(urlPrompt, prompt);
@@ -744,7 +739,7 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
 
 
     /* (non-Javadoc)
-     * @see org.speechforge.zanzibar.SpeechClientProvider#characterEventReceived(java.lang.String)
+     * @see org.speechforge.cairo.client.SpeechClientProvider#characterEventReceived(char)
      */
     public void characterEventReceived(char c) {
         _logger.info("speechclient.chareventreceived: "+c);
@@ -835,7 +830,7 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
 
 
     /* (non-Javadoc)
-     * @see org.speechforge.zanzibar.SpeechClient#disableDtmf()
+     * @see org.speechforge.cairo.client.SpeechClient#disableDtmf()
      */
     public void disableDtmf() {
         _dtmfState = DtmfState.notActive;
@@ -850,7 +845,7 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
 
 
     /* (non-Javadoc)
-     * @see org.speechforge.zanzibar.SpeechClient#enableDtmf(java.lang.String, org.speechforge.zanzibar.SpeechEventListener, long, long)
+     * @see org.speechforge.cairo.client.SpeechClient#enableDtmf(java.lang.String, org.speechforge.cairo.client.SpeechEventListener, long, long)
      */
     public void enableDtmf(String pattern, SpeechEventListener listener, long inputTimeout, long recogTimeout) {
         
@@ -993,14 +988,6 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
     }
 
 
-    /* (non-Javadoc)
-     * @see org.speechforge.zanzibar.SpeechEventListener#characterEventReceived(java.lang.String, org.speechforge.zanzibar.SpeechEventListener.EventType)
-     */
-    public void characterEventReceived(String c, EventType status) {
-        // TODO Auto-generated method stub
-        
-    }
-    
     //Utility methods
     
     public static MrcpChannel createTtsChannel(String xmitterChannelId, InetAddress remoteHostAdress, int xmitterPort) throws IllegalArgumentException, IllegalValueException, IOException {
@@ -1036,20 +1023,29 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
     }
 
 
+    /* (non-Javadoc)
+     * @see org.speechforge.cairo.client.SpeechClient#cancelRequest(org.speechforge.cairo.client.SpeechRequest)
+     */
     public void cancelRequest(SpeechRequest request) {
         // TODO Auto-generated method stub
         
     }
 
 
+    /* (non-Javadoc)
+     * @see org.speechforge.cairo.client.SpeechClient#shutdown()
+     */
     public void shutdown() {
-        // Determine if there are active requests and if there are terminate them
+        // TODO Determine if there are active requests and if there are terminate them
         
         //shutdown the timers
         
     }
 
 
+    /* (non-Javadoc)
+     * @see org.speechforge.cairo.client.SpeechClient#recognize(java.io.Reader, boolean, boolean)
+     */
     public SpeechRequest recognize(Reader reader, boolean hotword, boolean attachGrammar) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException {
         MrcpRequest mrcpRequest = constructRecogRequest(reader,hotword);
         MrcpResponse response = _recogChannel.sendRequest(mrcpRequest);

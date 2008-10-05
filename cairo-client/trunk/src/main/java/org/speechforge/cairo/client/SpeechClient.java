@@ -1,5 +1,5 @@
 /*
- * Zanzibar - Open source client for control of speech media resources.
+ * cairo-client - Open source client for control of speech media resources.
  *
  * Copyright (C) 2005-2006 SpeechForge - http://www.speechforge.org
  *
@@ -118,9 +118,9 @@ public interface SpeechClient {
         
     
     /**
-     * Tun on barge in.
+     * Turn on barge in.
      */
-    public void tunOnBargeIn();
+    public void turnOnBargeIn();
     
     /**
      * Turn off barge in.

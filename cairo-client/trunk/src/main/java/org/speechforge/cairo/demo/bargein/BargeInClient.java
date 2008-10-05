@@ -241,7 +241,7 @@ public class BargeInClient  {
             //construct the speech client with this session
             SpeechClient _client = new SpeechClientImpl(ttsChannel, recogChannel);
             
-            _client.tunOnBargeIn();
+            _client.turnOnBargeIn();
             //now we can run the demo...
             try {
 
