@@ -262,9 +262,9 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
                     r = null; 
                 } else {
                     try {
-                        _logger.info("Recognition event content: "+event.getContent());
+                        _logger.debug("Recognition event content: "+event.getContent());
                         r = RecognitionResult.constructResultFromString(event.getContent());
-                        _logger.info("recognition result text: "+r.getText());
+                        _logger.debug("recognition result text: "+r.getText());
                     } catch (InvalidRecognitionResultException e) {
                         e.printStackTrace();
                         r = null;
@@ -282,27 +282,28 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
         
         //else it is a non blocking requests, just forward on the event (with the recognition results)
         } else {
-            MrcpHeader completionCauseHeader = event.getHeader(MrcpHeaderName.COMPLETION_CAUSE);
-            CompletionCause completionCause = null;
-            try {
-                completionCause = (CompletionCause) completionCauseHeader.getValueObject();
-            } catch (IllegalValueException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
             RecognitionResult r = null;
-            if (completionCause.getCauseCode() != 0) { 
-                r = null; 
-            } else {
+            if (MrcpEventName.RECOGNITION_COMPLETE.equals(eventName)) {
+                MrcpHeader completionCauseHeader = event.getHeader(MrcpHeaderName.COMPLETION_CAUSE);
+                CompletionCause completionCause = null;
                 try {
-                    _logger.info("Recognition event content: "+event.getContent());
-                    r = RecognitionResult.constructResultFromString(event.getContent());
-                    _logger.info("recognition result text: "+r.getText());
-                } catch (InvalidRecognitionResultException e) {
+                    completionCause = (CompletionCause) completionCauseHeader.getValueObject();
+                } catch (IllegalValueException e) {
+                    // TODO Auto-generated catch block
                     e.printStackTrace();
-                    r = null;
+                }
+                if (completionCause.getCauseCode() == 0) { 
+                    try {
+                        _logger.debug("Recognition event content: "+event.getContent());
+                        r = RecognitionResult.constructResultFromString(event.getContent());
+                        _logger.debug("recognition result text: "+r.getText());
+                    } catch (InvalidRecognitionResultException e) {
+                        e.printStackTrace();
+                        r = null;
+                    }
                 }
             }
+            
             if (defaultListener!=null) {
                defaultListener.recognitionEventReceived(event, r);  
             } else {
@@ -419,7 +420,7 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
         }
         
         
-        _logger.info("REQUEST: "+request.toString());
+        _logger.debug("REQUEST: "+request.toString());
         MrcpResponse response = _recogChannel.sendRequest(request);
 
         if (_logger.isDebugEnabled()) {
@@ -431,17 +432,10 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
             
         }
         //_activeRequestType = RequestType.recognize;
-        _activeRecognition = new SpeechRequest(response.getRequestID(),RequestType.recognize,false);   
-        _activeRecognition.setBlockingCall(false);
-        
-        
-        //activeRequests.put(String.valueOf(response.getRequestID()),call);   
-
-//      MrcpHeader completionCauseHeader = _mrcpEvent.getHeader(MrcpHeaderName.COMPLETION_CAUSE);
-//      CompletionCause completionCause = (CompletionCause) completionCauseHeader.getValueObject();          
-//      return (completionCause.getCauseCode() == 0) ? _mrcpEvent.getContent() : null ;
-        
-        return _activeRecognition;
+        SpeechRequest queuedRecognition = new SpeechRequest(response.getRequestID(),RequestType.recognize,false);   
+        queuedRecognition.setBlockingCall(false);
+               
+        return queuedRecognition;
     }
 
     
@@ -742,10 +736,10 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
      * @see org.speechforge.cairo.client.SpeechClientProvider#characterEventReceived(char)
      */
     public void characterEventReceived(char c) {
-        _logger.info("speechclient.chareventreceived: "+c);
+        _logger.debug("speechclient.chareventreceived: "+c);
         
         if (_dtmfState == DtmfState.waitingForInput) {
-            _logger.info("   waitingfor input...");
+            _logger.debug("   waitingfor input...");
             //if the first char, 
             //  1.  cancel the no input timer  and
             //  2.  start the no recognition timer and 
@@ -773,21 +767,21 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
             _charArray[0] = c;
             _length=1;    
             _inBuf =  new String(_charArray);
-            _logger.info("The first inBuf is : "+ _inBuf);
+            _logger.debug("The first inBuf is : "+ _inBuf);
 
 
             // do the DTMF pattern matching
             checkForDtmfMatch(_inBuf);
             
         } else if (_dtmfState == DtmfState.waitingForMatch) {
-            _logger.info("   waiting for match...");
+            _logger.debug("   waiting for match...");
             try {
                 //concatenate the new char to end of the dtmf string receievd up till now
 
               
                 _charArray[_length++] = c;
                 _inBuf =  new String(_charArray);
-                _logger.info("The new inBuf is: "+_inBuf);
+                _logger.debug("The new inBuf is: "+_inBuf);
                 
                 // do the DTMF pattern matching
                 checkForDtmfMatch(_inBuf);
@@ -808,7 +802,7 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
 
         //if it matches
         if (m.find()) {
-            _logger.info("Got a dtmf match : "+_inBuf);
+            _logger.debug("Got a dtmf match : "+_inBuf);
             
             //cancel the recog timer
             if (_noRecogTimeoutTask != null) {
@@ -824,7 +818,7 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
            _dtmfListener = null;
            _dtmfState = DtmfState.notActive;
         }  else {
-            _logger.info("No match : "+_inBuf); 
+            _logger.debug("No match : "+_inBuf); 
         }
     }
 
@@ -1059,11 +1053,11 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
         }
    
         //_activeRequestType = RequestType.recognize;
-        _activeRecognition = new SpeechRequest(response.getRequestID(),RequestType.recognize,false);   
-        _activeRecognition.setBlockingCall(false);
+        SpeechRequest queuedRecognition = new SpeechRequest(response.getRequestID(),RequestType.recognize,false);   
+        queuedRecognition.setBlockingCall(false);
         
            
-        return _activeRecognition;
+        return queuedRecognition;
         
     }
 
