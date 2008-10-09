@@ -98,26 +98,30 @@ fi
 fi
 
 #setClasspath
+#NOTE: OS and OSTYPE do not seem to work on my installation so the
+#check below is commented out.  Will add a item in issue tracker
+#In any case, it is unlikey that shell scripts will be needed on windows anyway.
+#scripts work on Ubuntu linux.
 CPATH=$CAIRO_JAR
 for file in $( find $CAIRO_HOME -name '*.jar' |sort)
 do
    # classpath delimiter different in windows
-   if [ $OS = "Windows_NT" ]; then
-       CPATH="$CPATH;$file"
-   else 
+   #if [ $OS = "Windows_NT" ]; then
+       #CPATH="$CPATH;$file"
+   #else 
       CPATH="$CPATH:$file"
-   fi
+   #fi
    #echo $file
 done
 
 # classpath delimiter different in windows
-if [ $OS = "Windows_NT" ]; then
-    CPATH="$CPATH;$CAIRO_HOME/config"
-else 
+#if [ $OS = "Windows_NT" ]; then
+    #CPATH="$CPATH;$CAIRO_HOME/config"
+#else 
    CPATH="$CPATH:$CAIRO_HOME/config"
-fi
+#fi
 
-echo CPATH=$CPATH
+#echo CPATH=$CPATH
 #export CLASSPATH=$CPATH
 
 #run
