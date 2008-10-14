@@ -10,6 +10,18 @@ Welcome to Project Cairo
 
   The purpose of Cairo is not to duplicate functionality provided by existing open source speech projects such as {{{http://freetts.sourceforge.net}FreeTTS}} and {{{http://cmusphinx.sourceforge.net/sphinx4/}Sphinx}}, but rather to build upon them and provide additional functionality such as clustering, load balancing and failover support in order to meet the requirements necessary for use in enterprise scale deployments of speech/telephony applications.
 
+About Cairo
+
+  Cairo is comprised of 4 projects.
+  
+  * Cairo-server is the server it self.  This is the main project and most likey is what you want to download
+  
+  * Cairo-client is library that you can use to build your own cairo clients.  Note that you can also use the mrcp4j library directly to build mrcpv2 clients.
+  
+  * Cairo-sip is a library uses by both cairo-server and cairo-client to do sip processing.  It is a layer on top of JAIN-SIP.
+  
+  * Cairo-rtp is a library used by the cairo-server and cairo-client demo to do rtp processing.  It is a layer on top of JMF.
+
 Latest News
 
 *Cairo v0.2 Released - November 13, 2007

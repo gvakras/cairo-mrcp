@@ -90,4 +90,10 @@ Running the Demo MRCPv2 Clients
 
   Each client can be started by running the appropriate batch script located in the <<<demo/bin>>> directory of your Cairo installation.  Source code for the demos is also included in the installation and can be found in the <<<demo/src/java>>> directory.
 
+Running the Cairo-client Demo
+
+   A version of demo-bargein and demo-parrot is available in the cairo-client.  These can either be run directly or they may be used as example code to write your own client.
+   
+   Unpack the seperately available download in the directory of your choice and then run one of the scripts in the /bin directory.
+
 ~~Please see the Demo Clients Guide for further information.

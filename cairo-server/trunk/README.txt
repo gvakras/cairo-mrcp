@@ -11,15 +11,33 @@ The purpose of Cairo is not to replace existing open source speech projects such
 
 New Features for Cairo v${project.version}
 --------------------------
-   * SIP support has been added.  Session initiation is now done with SIP invitation request and response. (See specific limitations below.)
-
-   * The default audio format has been changed from 16Khz to 8Khz sample rate.  Also the Sphinx configuration has been updated to use the 8kHz voice models.  This now matches the sampling rate of the codec used for RTP audio data and as a result recognition performance has been much improved.
+	* Adds seperate cairo-sip and cairo-rtp jars that can be shared between servers and clients.  Adds the cairo-client jar for ease the developmentof mrcpv2 clients.
+	
+	* Adds the ability to handles BYE requests and releases speech resources at the end of sessions.
+	
+	* Adds support fo detecting out of grammar respnses.
+	
+	* Adds support for hotword barge-in mode.
+	
+	* Adds shell scripts for running on Unix
+	
+	* Adds basic support for the SIP Info method (to support SIP based DTMF).
+	
+	* Adds support for the SIP Register method (to support demos using SIP softphones like Xlite)
+	
+	* Improves recognition detection by cofiguring garbace collection and improved endpoint detection and configuring the endpointer.
+	
+	* Improves rtp transmit with JMF workaround to ensure 20ms packet size. 
+	
+	* Adds support for pre-recorded prompts
+	
+	* Adds a simple natural language processing to obtain a semantic interpretion of the utterance based on the grammar.
 
 
 Limitations for Cairo v${project.version}
 --------------------------
 
-This second release for the Cairo project addresses a number of limitations found in Cairo v0.1.  This release continues to provide support for speech synthesis and speech recognition functionality using Media Resource Control Protocol Version 2 (MRCPv2) for the control channel between the speech client and the speech resource and Real-time Transport Protocol (RTP) for streaming audio to and from the media sink/source.  Additionally SIP is now used for session initiation and recognition performance has been improved by using a different voice model.
+This third release for the Cairo project addresses a number of limitations found in Cairo v0.2.  This release continues to provide support for speech synthesis and speech recognition functionality using Media Resource Control Protocol Version 2 (MRCPv2) for the control channel between the speech client and the speech resource and Real-time Transport Protocol (RTP) for streaming audio to and from the media sink/source.  More improvements have been made to ecognition performance has been by improving and configuring the endpointer and using a more appropriate garbage collector.
 
 General limitations of this release:
 
@@ -46,15 +64,13 @@ Limitations of the SIP support
 
    * Register method not implemented.  Cairo server does not register itself with a registrar.  Client must know the server's address.
 
-   * BYE method not implemented
-
    * Security (authentication and encryption/SIPS) not implemented
 
    * Options method not implemented
 
 Limitations for the speechrecog resource:
 
-  * Recognition results are provided in plain text only.  Natural Language Semantics Markup Language (NLSML) is not yet supported.
+  * A simple Semantic interpretation of the Recognition results are provided.  Natural Language Semantics Markup Language (NLSML) is not yet supported.
 
   * Only Java Speech Grammar Format (JSGF) is supported for specifying grammars to be used for recognition. Speech Recognition Grammar Specification (SRGS) is not yet supported.
 

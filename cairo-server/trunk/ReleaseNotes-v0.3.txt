@@ -1,0 +1,73 @@
+Release Notes for Cairo v0.3:
+=============================
+
+Project Cairo sets out to provide an enterprise grade, Media Resource
+Control Protocol Version 2 (MRCPv2) compliant speech server solution
+utilizing existing open source speech resources.
+
+Version History
+---------------
+
+Cairo v0.3 adds the improved support for speech clients by adding support for 
+hotwword mode, pre-recorded prompts, SIP session shutdown (via BYE commands), 
+DTMF (via INFO) and basic register method for softphone integration.  There has also
+been further improvements with recognition performance.  This release also introduces 
+3 new subprojects: cairo-rtp, cairo-sip and cairo-client.
+
+Cairo v0.2 adds support for establishing sessions using Session Initiation
+Protocol (SIP) signalling and improves speech recognition performance by
+matching the voice models used by Sphinx to the sampling rate of the
+received audio data.
+
+Cairo v0.1 implemented support for speech synthesis and speech recognition
+functionality using Media Resource Control Protocol Version 2 (MRCPv2) for
+the control channel between the speech client and the speech resource and
+Real-time Transport Protocol (RTP) for streaming audio to and from the
+media sink/source.
+
+
+Change Log for Project Cairo:
+=============================
+
+Cairo v0.3:
+
+* Adds seperate cairo-sip and cairo-rtp jars that can be shared between 
+servers and clients.  Adds the cairo-client jar for ease the development
+of mrcpv2 clients.
+
+* Adds the ability to handles BYE requests and releases speech resources at 
+the end of sessions.
+
+* Adds support fo detecting out of grammar respnses.
+
+* Adds support for hotword barge-in mode.
+
+* Adds shell scripts for running on Unix
+
+* Adds basic support for the SIP Info method (to support SIP based DTMF).
+
+* Adds support for the SIP Register method (to support demos using SIP softphones like Xlite)
+
+* Improves recognition detection by cofiguring garbace collection and improved endpoint detection
+and configuring the endpointer.
+
+* Improves rtp transmit with JMF workaround to ensure 20ms packet size. 
+
+* Adds support for pre-recorded prompts
+
+* Adds a simple natural language processing to obtain a semantic interpretion of the utterance based
+on the grammar.
+
+Cairo v0.2:
+-----------
+* Use SIP instead of Java RMI for session initiation.
+
+* Use the WSJ 8khz acoustic model instead of the 16khz model for speech
+recognition processing.  The 8khz model matches the sampling rate of the
+codec used for RTP audio data and as a result recognition performance is
+much improved.
+
+
+Cairo v0.1:
+-----------
+No prior release to compare with.

@@ -27,7 +27,6 @@
       <item name="Getting Started" href="intro.html"/>
       <item name="FAQ" href="faq.html"/>
       <item name="API Documentation" href="docs/apidocs/index.html?overview-summary.html"/>
-      <item name="Architecture" href="architecture.html"/>
     </menu>
 
     <menu name="Project Documentation">
