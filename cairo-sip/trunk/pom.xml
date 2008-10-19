@@ -160,6 +160,16 @@
         <artifactId>maven-surefire-report-plugin</artifactId>
       </plugin>
 
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <descriptors>
+            <descriptor>settings/assembly/bin.xml</descriptor>
+            <descriptor>settings/assembly/src.xml</descriptor>
+          </descriptors>
+        </configuration>
+      </plugin>
+
     </plugins>
 
   </build>
@@ -219,48 +229,6 @@
       <version>1.0</version>
       <scope>compile</scope>
     </dependency>
-
-    <dependency>
-      <groupId>commons-collections</groupId>
-      <artifactId>commons-collections</artifactId>
-      <version>3.1</version>
-      <scope>compile</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>commons-configuration</groupId>
-      <artifactId>commons-configuration</artifactId>
-      <version>1.2</version>
-      <scope>compile</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>commons-lang</groupId>
-      <artifactId>commons-lang</artifactId>
-      <version>2.3</version>
-      <scope>compile</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>commons-pool</groupId>
-      <artifactId>commons-pool</artifactId>
-      <version>1.3</version>
-      <scope>compile</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>commons-validator</groupId>
-      <artifactId>commons-validator</artifactId>
-      <version>1.2.0</version>
-      <scope>compile</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>jdom</groupId>
-      <artifactId>jdom</artifactId>
-      <version>1.0</version>
-      <scope>compile</scope>
-    </dependency-->
 
     <dependency>
       <groupId>log4j</groupId>
