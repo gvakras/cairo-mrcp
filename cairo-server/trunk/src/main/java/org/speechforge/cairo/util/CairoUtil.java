@@ -55,7 +55,7 @@ public class CairoUtil {
 
         if (arg.indexOf(':') < 0) {
             File file = new File(arg);
-            return file.toURL();
+            return file.toURI().toURL();
         }
 
         return new URL(arg);
