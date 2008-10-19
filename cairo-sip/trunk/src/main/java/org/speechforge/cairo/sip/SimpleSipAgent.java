@@ -53,10 +53,8 @@ public class SimpleSipAgent implements SessionListener {
         
         public SdpMessage sendInviteWithoutProxy(String to, SdpMessage message, String peerAddress, int peerPort) throws SipException {
 
-            // Construct a SIP agent to be used to send a SIP Invitation to the ciaro server
-            //DemoSipListener listener = new DemoSipListener();
-
-            _sipAgent =new SipAgent(this, _mySipAddress, _stackName, _port, _transport);
+            // Construct a SIP agent to be used to send a SIP Invitation to the cairo server
+            _sipAgent = new SipAgent(this, _mySipAddress, _stackName, _port, _transport);
 
             // Send the sip invitation
             SipSession session = _sipAgent.sendInviteWithoutProxy(to, message, peerAddress, peerPort);
