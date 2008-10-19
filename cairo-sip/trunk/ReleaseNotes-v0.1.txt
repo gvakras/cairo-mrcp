@@ -1,0 +1,17 @@
+Release Notes for cairo-sip v0.1:
+=============================
+Cairo-sip provides a sip libarary that is useful for building enterprise grade, 
+MRCPv2 compliant speech server solutions.  This libary can be useful for the client
+and server side processing.
+
+This is the first release for the cairo-sip project.  This release provides
+a libarary of basic sip and sdp capabilities for MRCPv2 applications (both
+server and client side).  SIP is an important part MRCPv2 system.  The following
+is a direct quote from the MRCPv2 specification
+
+   "MRCPv2 is not a "stand-alone" protocol - it relies on a session management protocol
+   such as the Session Initiation Protocol (SIP) to establish the MRCPv2
+   control session between the client and the server, and for rendezvous
+   and capability discovery. It also depends on SIP and SDP to
+   establish the media sessions and associated parameters between the
+   media source or sink and the media server."
