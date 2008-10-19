@@ -22,10 +22,10 @@
  */
 package org.speechforge.cairo.demo.recog;
 
-import org.speechforge.cairo.demo.util.DemoSipAgent;
 import org.speechforge.cairo.rtp.NativeMediaClient;
 import org.speechforge.cairo.server.resource.ResourceImpl;
 import org.speechforge.cairo.rtp.RTPConsumer;
+import org.speechforge.cairo.sip.SimpleSipAgent;
 import org.speechforge.cairo.sip.SipAgent;
 import org.speechforge.cairo.sip.SdpMessage;
 import org.speechforge.cairo.sip.SipSession;
@@ -86,7 +86,7 @@ public class RecognitionClient implements MrcpEventListener {
 
     private MrcpChannel _recogChannel;
     private MrcpEvent _mrcpEvent;
-    private static DemoSipAgent sipAgent;
+    private static SimpleSipAgent sipAgent;
     private static  boolean sentBye=false;
 
     private static int _myPort = 5080;
@@ -292,17 +292,15 @@ public class RecognitionClient implements MrcpEventListener {
         }
         String peerAddress = rserverHost.getHostAddress();
 
-        //DemoSipListener listener = new DemoSipListener();
-
-        // Construct a SIP agent to be used to send a SIP Invitation to the ciaro server
-        sipAgent = new DemoSipAgent(_mySipAddress, "Synth Client Sip Stack", _myPort, "UDP");
+        // Construct a SIP agent to be used to send a SIP Invitation to the cairo server
+        sipAgent = new SimpleSipAgent(_mySipAddress, "Synth Client Sip Stack", _myPort, "UDP");
 
         // Construct the SDP message that will be sent in the SIP invitation
         Vector format = new Vector();
         format.add(SdpConstants.PCMU);
         SdpMessage message = constructResourceMessage(localRtpPort,format);
 
-        // Send the sip invitation (This method on the demoSipAgent blocks until a response is received or a timeout occurs) 
+        // Send the sip invitation (This method on the SipAgent blocks until a response is received or a timeout occurs) 
         _logger.info("Sending a SIP invitation to the cairo server.");
         SdpMessage inviteResponse = sipAgent.sendInviteWithoutProxy(_cairoSipAddress, message, peerAddress, _peerPort);
         if (inviteResponse != null) {
