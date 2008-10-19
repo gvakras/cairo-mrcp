@@ -159,6 +159,16 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-report-plugin</artifactId>
       </plugin>
+      
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <descriptors>
+            <descriptor>settings/assembly/bin.xml</descriptor>
+            <descriptor>settings/assembly/src.xml</descriptor>
+          </descriptors>
+        </configuration>
+      </plugin>
 
     </plugins>
 
@@ -188,6 +198,12 @@
       <name>MRCP4J Deployment Repository</name>
       <url>http://mrcp4j.sourceforge.net/repository</url>
     </repository>
+    
+    <repository>
+       <id>java.net</id>
+       <url>http://download.java.net/maven/2</url>
+       <!--layout>legacy</layout-->
+    </repository>
 
   </repositories>
 
@@ -203,6 +219,14 @@
       <version>1.0</version>
       <scope>compile</scope>
     </dependency-->
+
+
+    <dependency>
+      <groupId>javax.media</groupId>
+      <artifactId>jmf</artifactId>
+      <version>2.1.1e</version>
+      <scope>compile</scope>
+    </dependency>
 
     <dependency>
       <groupId>log4j</groupId>
