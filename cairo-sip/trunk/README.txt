@@ -1,74 +1,86 @@
-=======================================================
-Readme for cairo-sip, a Sip Library for Speech v${project.version}
-=======================================================
+=========================
+Readme for cairo-sip v${project.version}
+=========================
 
 Overview
 --------
 
-Cairo-sip provides a sip libarary that is useful for building enterprise grade, MRCPv2 compliant speech server solutions.  
-This libary can be useful for the client and server side processing.   SIP is an important part MRCPv2 system.  The following
-is a direct quote from the MRCPv2 specification
+The cairo-sip library provides a simple Java API for supporting SIP/SDP message
+communication between MRCPv2 clients and servers.
 
-   "MRCPv2 is not a "stand-alone" protocol - it relies on a session management protocol
-   such as the Session Initiation Protocol (SIP) to establish the MRCPv2
-   control session between the client and the server, and for rendezvous
-   and capability discovery. It also depends on SIP and SDP to
-   establish the media sessions and associated parameters between the
-   media source or sink and the media server."
+The Session Initiation Protocol (SIP) and the Session Description Protocol
+(SDP) are critical elements of the Media Resource Control Protocol Version 2
+(MRCPv2) standard as described in the MRCPv2 specification:
 
-
-Cairo-sip is written entirely in the Java programming language.
+   "MRCPv2 is not a "stand-alone" protocol - it relies on a session management
+   protocol such as the Session Initiation Protocol (SIP) to establish the
+   MRCPv2 control session between the client and the server, and for rendezvous
+   and capability discovery. It also depends on SIP and SDP to establish the
+   media sessions and associated parameters between the media source or sink
+   and the media server."
 
 
 Limitations for Cairo v${project.version}
 --------------------------
 
-This is the first release of cairo-sip.  See General limitation section.
+This is the first release for the cairo-sip project.  This release provides the
+necessary SIP and SDP capabilities required for implementing MRCPv2 clients and
+servers.
+
+See the General limitations section for a description of functionality not yet
+supported in this release.
 
 
 General limitations of this release:
 ------------------------------------
-   * Re-invite not implemented
 
-   * Register method not implemented.  Cairo server does not register itself with a registrar.  Client must know the server's address.
+   * re-INVITE not yet implemented
 
-   * Security (authentication and encryption/SIPS) not implemented
+   * REGISTER method not yet implemented.  (Cairo server does not register
+     itself with a registrar.  Client must know the server's address.)
 
-   * Options method not implemented
+   * Secure SIP (SIPS) not yet implemented.
+
+   * OPTIONS method not yet implemented.
 
 
 Prerequisites
 -------------
 
-Cairo-sip requires Java Runtime Environment (JRE) 5.0 or higher which can be downloaded here:
+Cairo-sip requires Java Runtime Environment (JRE) 5.0 or higher which can be
+downloaded here:
 
   http://java.sun.com/javase/downloads/
-
-If you have not already, you will need to set your JAVA_HOME environment variable to point to the installed location of your JRE/JDK.
 
 
 Installation
 ------------
 
-1. Extract Cairo-sip
+Extract cairo-sip-${project.version}.jar from the download archive and add it to the
+classpath of your application.
 
 
 Getting Started
 ---------------
 
-cairo-sip is not a standalone installation.  It is a library that is used by cairo-server, zanzibar and cairo-client.  IF you wish to use it your self in your own applciation, include the jar in your class path.
-   
-Perhaps a good place to start would be to look at the the exmaple demo in cairo-client.
+The cairo-sip library is intendended as a common component to be used by MRCPv2
+clients and servers such as cairo-client and cairo-server.   If you are using
+either of those packages you will not need to use cairo-sip directly.
+
+If you wish to use cairo-sip in your own client or server application the best
+place to start would be to look at the the example demo code in cairo-server or
+cairo-client.
 
 
 Further Information
 -------------------
 
-For more information please see the Cairo Project Home at http://cairo.speechforge.org.
+For more information please see the Cairo Project Home at:
+
+http://cairo.speechforge.org
 
 
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 + Copyright (C) 2005-2008 SpeechForge. All Rights Reserved. +
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  
-
