@@ -1,10 +1,8 @@
 Release Notes for cairo-rtp v0.1:
-=============================
-Cairo-rtp provides a RTP library that is useful for building enterprise grade, 
-MRCPv2 compliant speech server solutions.  This libary can be useful for both client
-and server side processing.
+=================================
+The cairo-rtp library provides a simple Java API for supporting RTP audio
+streaming between a media source and a media sink.
 
-This is the first release for the cairo-rtp project.  This release provides
-a libarary of basic rtp capabilities for MRCPv2 applications.
-
-This release uses Suns Java Media Framework (JMF).
+This is the first release for the cairo-rtp project.   This release provides
+the necessary RTP streaming capabilities required for implementing MRCPv2
+clients and servers.
