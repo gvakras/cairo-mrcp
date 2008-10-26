@@ -6,7 +6,7 @@
   <artifactId>cairo-rtp</artifactId>
   <packaging>jar</packaging>
   <name>Cairo RTP Module</name>
-  <version>SNAPSHOT</version>
+  <version>0.1</version>
   <description>The module that provides RTP capabilities for speech recognition applications, clients and servers.</description>
   <url>http://${pom.artifactId}.sourceforge.net</url>
   <inceptionYear>2008</inceptionYear>
