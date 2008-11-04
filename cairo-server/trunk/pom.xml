@@ -183,7 +183,55 @@
         </configuration>
       </plugin>
 
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.1</version>
+        <executions>
+          <execution>
+            <phase>site</phase>
+            <configuration>
+		  <tasks>
+                <!--echo message="Hello from ant"/-->
+                <replace dir="${basedir}/target/site">
+                   <include name="**/*.html"/>
+			 <replacetoken><![CDATA[</body>]]></replacetoken>
+		       <replacevalue><![CDATA[
+
+    <!--Google Analytics Script -->
+       <script type="text/javascript">
+           var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+           document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+       </script>
+       <script type="text/javascript">
+           var pageTracker = _gat._getTracker("UA-5160702-1");
+           pageTracker._trackPageview();
+       </script>
+    <!-- End Google Analytics Script -->
+
+    </body> ]]></replacevalue>
+                 </replace>    
+               </tasks>
+             </configuration>
+             <goals>
+               <goal>run</goal>
+             </goals>
+           </execution>
+         </executions>
+      </plugin>
     </plugins>
+    <extensions>
+       <extension>
+         <groupId>org.apache.maven.wagon</groupId>
+         <artifactId>wagon-ftp</artifactId>
+         <version>1.0-beta-4</version>
+       </extension>
+       <extension>
+         <groupId>org.apache.maven.wagon</groupId>
+         <artifactId>wagon-ssh-external</artifactId>
+         <version>1.0-alpha-5</version>
+       </extension>
+  </extensions>
+
 
   </build>
 
@@ -318,27 +366,6 @@
       <scope>compile</scope>
     </dependency>
 
-    <dependency>
-      <groupId>javax.sip</groupId>
-      <artifactId>jain-sip-api</artifactId>
-      <version>1.2</version>
-      <scope>compile</scope>
-    </dependency>
-    
-    <dependency>
-      <groupId>javax.sip</groupId>
-      <artifactId>jain-sip-ri</artifactId>
-      <version>1.2</version>
-      <scope>compile</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>javax.sdp</groupId>
-      <artifactId>nist-sdp</artifactId>
-      <version>1.0</version>
-      <scope>compile</scope>
-    </dependency>
-
     <!-- runtime scope dependencies -->
 
     <dependency>
@@ -410,9 +437,8 @@
       <url>scp://shell.sf.net/home/groups/c/ca/cairo/htdocs/repository</url>
     </repository>
     <site>
-      <id>cairo-site</id>
-      <!--url>scp://shell.sf.net/home/groups/${pom.artifactId.substring(0,1)}/${pom.artifactId.substring(0,2)}/${pom.artifactId}/htdocs/</url-->
-      <url>scp://shell.sf.net/home/groups/c/ca/cairo/htdocs</url>
+      <id>speechforge-site</id>
+      <url>scp://www.speechforge.org/home/webadmin/speechforge.org/html/staging/projects/cairo</url>
     </site>
     <downloadUrl>https://sourceforge.net/project/showfiles.php?group_id=${project.group.id}</downloadUrl>
   </distributionManagement>
