@@ -247,9 +247,10 @@ public class BargeInClient  {
 
                 RecognitionResult result = null;
 
-                String parrotString;
+                String parrotString = "";
                 do {
-                    result = _client.playAndRecognizeBlocking(false, prompt, grammar, false);
+                    String completePrompt = parrotString+ "  " +prompt;
+                    result = _client.playAndRecognizeBlocking(false,completePrompt, grammar,false);
 
                     if (_logger.isInfoEnabled()) {
                         StringBuilder sb = new StringBuilder();
@@ -267,16 +268,16 @@ public class BargeInClient  {
                        if (result.isOutOfGrammar()) {
                            parrotString = "I'm sorry, I could not understand.  Your response was out of grammar.";
                        } else {
-                           parrotString = result.getText(); 
+                           parrotString = result.getText()+"."; 
                        }
-                    }
-                    if (_parrot) {
-                        _client.playBlocking(false,parrotString);
                     }
 
                     //TODO: check the natural language elements in recognition result for tag:value == main:quit
                 } while (_loop && !parrotString.contains("exit") && !parrotString.contains("quit"));
 
+                if (_parrot) {
+                    _client.playBlocking(false,parrotString);
+                }
 
             } catch (Exception e){
                 if (e instanceof MrcpInvocationException) {
