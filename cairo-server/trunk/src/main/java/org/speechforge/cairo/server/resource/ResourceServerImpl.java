@@ -239,7 +239,6 @@ public class ResourceServerImpl implements SessionListener {
         CommandLine line = parser.parse(options, args, true);
         args = line.getArgs();
 
-        System.out.println(args.length+" ->"+ line.toString());
         /*if (args.length < 3 || args.length > 5 || line.hasOption(ResourceImpl.HELP_OPTION)) {
             HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp("ResourceServerImpl [options] ", options);
@@ -258,7 +257,7 @@ public class ResourceServerImpl implements SessionListener {
            sipTransport = line.getOptionValue(SIPTRANSPORT_OPTION);
         }
         
-        _logger.info("Command line specified sip port: "+sipPort+ " and sip transport: "+ sipTransport);
+        _logger.debug("Command line specified sip port: "+sipPort+ " and sip transport: "+ sipTransport);
        
         ResourceRegistryImpl rr = new ResourceRegistryImpl();
         ResourceServerImpl rs = new ResourceServerImpl(rr,sipPort,sipTransport);
