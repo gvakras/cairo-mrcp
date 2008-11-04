@@ -472,9 +472,10 @@ public class BargeInClient implements MrcpEventListener {
 
                 String result = null;
 
-                String parrotString;
+                String parrotString = "";
                 do {
-                    result = client.playAndRecognize(prompt, grammarUrl);
+                    String completePrompt = parrotString+ "  " +prompt;
+                    result = client.playAndRecognize(completePrompt, grammarUrl);
 
                     if (_logger.isInfoEnabled()) {
                         StringBuilder sb = new StringBuilder();
@@ -492,16 +493,16 @@ public class BargeInClient implements MrcpEventListener {
                        if (r.isOutOfGrammar()) {
                            parrotString = "I'm sorry, I could not understand.  Your response was out of grammar.";
                        } else {
-                           parrotString = r.getText(); 
+                           parrotString = r.getText()+"."; 
                        }
-                    }
-                    if (_parrot) {
-                        client.play(parrotString);
                     }
 
                     //TODO: check the natural language elements in recognition result for tag:value == main:quit
                 } while (_loop && !parrotString.contains("exit") && !parrotString.contains("quit"));
 
+                if (_parrot) {
+                    client.play(parrotString);
+                }
 
             } catch (Exception e){
                 if (e instanceof MrcpInvocationException) {
