@@ -191,7 +191,7 @@ public class SipAgent {
             _logger.debug(e, e);
             e.printStackTrace();
         }
-
+        
         guidPrefix = hostIpAddress + port + System.currentTimeMillis();
         SipFactory sipFactory = null;
 
@@ -205,12 +205,13 @@ public class SipAgent {
         // implementation.
         properties.setProperty("gov.nist.javax.sip.DEBUG_LOG", logFileDirectory + stackName + "debug.txt");
         properties.setProperty("gov.nist.javax.sip.SERVER_LOG", logFileDirectory + stackName + "log.txt");
+        properties.setProperty("javax.sip.USE_ROUTER_FOR_ALL_URIS","false"); 
+
 
         // Set to 0 in your production code for max speed.
         // You need 16 for logging traces. 32 for debug + traces.
         // Your code will limp at 32 but it is best for debugging.
         properties.setProperty("gov.nist.javax.sip.TRACE_LEVEL", new Integer(sipStackLogLevel).toString());
-
         try {
             sipStack = sipFactory.createSipStack(properties);
         } catch (PeerUnavailableException e) {
@@ -263,6 +264,7 @@ public class SipAgent {
             // SipURI contactUrl = addressFactory.createSipURI(from.getName(),
             // host);
             contactUri.setPort(listeningPoint.getPort());
+            contactUri.setTransportParam(transport);
             contactAddress = addressFactory.createAddress(contactUri);
         } catch (ParseException e) {
             _logger.debug(e, e);
@@ -355,7 +357,7 @@ public class SipAgent {
 
             // create and add the Route Header
             // Dont use the Outbound Proxy. Use Lr instead.
-            SipURI sipuri = addressFactory.createSipURI(null, hostIpAddress);
+            SipURI sipuri = addressFactory.createSipURI(null, peerHost);
             sipuri.setPort(peerPort);
             sipuri.setLrParam();
             sipuri.setTransportParam(transport);
@@ -375,6 +377,8 @@ public class SipAgent {
             // Create the client transaction.
             ClientTransaction ctx = sipProvider.getNewClientTransaction(request);
 
+            _logger.debug("Just before Send request: "+peerHost+":"+peerPort);
+            
             // send the request out.
             ctx.sendRequest();
 
@@ -508,14 +512,7 @@ public class SipAgent {
         ToHeader toHeader = (ToHeader) okResponse.getHeader(ToHeader.NAME);
         //toHeader.setTag(guid);
         
-        Address address = null;
-        try {
-            address = getAddressFactory().createAddress("<sip:" + getHost() + ":" + getPort() + ">");
-        } catch (ParseException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        }
-        ContactHeader contactHeader = getHeaderFactory().createContactHeader(address);
+        ContactHeader contactHeader = headerFactory.createContactHeader(contactAddress);
         okResponse.addHeader(contactHeader);
         
         // Now if there were no exceptions, we were able to process the invite

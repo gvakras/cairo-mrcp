@@ -194,7 +194,14 @@ public class SipListenerImpl implements SipListener {
             if (response.getStatusCode() == Response.OK) {
                 if (cseq.getMethod().equals(Request.INVITE)) {
                     // Got an INVITE OK
-                    Request ackRequest = dialog.createRequest(Request.ACK);
+                    //Request ackRequest = dialog.createRequest(Request.ACK);
+                    Request ackRequest = null;
+                    try {
+                        ackRequest = dialog.createAck( ((CSeqHeader) response.getHeader(CSeqHeader.NAME)).getSeqNumber() );
+                    } catch (InvalidArgumentException e1) {
+                        // TODO Auto-generated catch block
+                        e1.printStackTrace();
+                    }
                     dialog.sendAck(ackRequest);
 
                     // put the dialog into the session and remove from pending
