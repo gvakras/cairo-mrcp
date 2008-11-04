@@ -30,6 +30,9 @@ import org.speechforge.cairo.sip.SessionListener;
 import org.speechforge.cairo.sip.SipResource;
 import org.speechforge.cairo.sip.SipSession;
 
+import java.awt.Toolkit;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -39,6 +42,12 @@ import javax.sdp.SdpException;
 import javax.sip.SipException;
 import javax.sip.TimeoutEvent;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
 import org.apache.log4j.Logger;
 import org.mrcp4j.MrcpResourceType;
 
@@ -54,6 +63,10 @@ public class ResourceServerImpl implements SessionListener {
 
     private static Logger _logger = Logger.getLogger(ResourceServerImpl.class);
 
+
+    private static final String SIPPORT_OPTION = "sipPort";
+    private static final String SIPTRANSPORT_OPTION = "sipTransport";
+  
     private long _channelID = System.currentTimeMillis();
 
     private ResourceRegistry _registryImpl;
@@ -69,9 +82,22 @@ public class ResourceServerImpl implements SessionListener {
      * @throws RemoteException
      * @throws SipException
      */
-    public ResourceServerImpl(ResourceRegistry registryImpl) throws RemoteException, SipException {
+    public ResourceServerImpl(ResourceRegistry registryImpl, int sipPort, String sipTransport) throws RemoteException, SipException {
         super();
-        _ua = new SipAgent(this, cairoSipAddress, "Cairo SIP Stack", 5050, "udp");
+        String hostIpAddress = null;
+        try {
+            InetAddress addr = InetAddress.getLocalHost();
+            hostIpAddress = addr.getHostAddress();
+            //host = addr.getCanonicalHostName();
+        } catch (UnknownHostException e) {
+            hostIpAddress = "127.0.0.1";
+            _logger.debug(e, e);
+            e.printStackTrace();
+        }
+        if (sipPort == 0) sipPort = 5050;
+        if (sipTransport == null) sipTransport = "tcp";
+        cairoSipAddress = "sip:cairo@"+hostIpAddress;
+        _ua = new SipAgent(this, cairoSipAddress, "Cairo SIP Stack", sipPort, sipTransport);
 
         _registryImpl = registryImpl;
     }
@@ -187,6 +213,19 @@ public class ResourceServerImpl implements SessionListener {
         // TODO Auto-generated method stub
         return null;
     }
+    
+    private static Options getOptions() {
+        Options options = ResourceImpl.getOptions();
+
+        Option option = new Option(SIPPORT_OPTION, true, "The port the sip agent uses to listen for requests.");
+        options.addOption(option);
+
+        option = new Option(SIPTRANSPORT_OPTION, true, "The transport used by the sip agent udp or tcp.");
+        options.addOption(option);
+
+
+        return options;
+    }
 
     /**
      * TODOC
@@ -195,8 +234,34 @@ public class ResourceServerImpl implements SessionListener {
      * @throws Exception
      */
     public static void main(String[] args) throws Exception {
+        CommandLineParser parser = new GnuParser();
+        Options options = getOptions();
+        CommandLine line = parser.parse(options, args, true);
+        args = line.getArgs();
+
+        System.out.println(args.length+" ->"+ line.toString());
+        /*if (args.length < 3 || args.length > 5 || line.hasOption(ResourceImpl.HELP_OPTION)) {
+            HelpFormatter formatter = new HelpFormatter();
+            formatter.printHelp("ResourceServerImpl [options] ", options);
+            return;
+        }*/
+
+
+        int sipPort = 0;
+        String sipTransport = null;
+        if (line.hasOption(SIPPORT_OPTION)) {
+            String tmp = line.getOptionValue(SIPPORT_OPTION);
+            sipPort = Integer.valueOf(tmp);
+        }
+
+        if (line.hasOption(SIPTRANSPORT_OPTION)) {
+           sipTransport = line.getOptionValue(SIPTRANSPORT_OPTION);
+        }
+        
+        _logger.info("Command line specified sip port: "+sipPort+ " and sip transport: "+ sipTransport);
+       
         ResourceRegistryImpl rr = new ResourceRegistryImpl();
-        ResourceServerImpl rs = new ResourceServerImpl(rr);
+        ResourceServerImpl rs = new ResourceServerImpl(rr,sipPort,sipTransport);
 
         Registry registry = LocateRegistry.createRegistry(Registry.REGISTRY_PORT);
         registry.rebind(ResourceRegistry.NAME, rr);
