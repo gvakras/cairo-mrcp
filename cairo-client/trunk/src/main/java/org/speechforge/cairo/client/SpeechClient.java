@@ -32,7 +32,7 @@ import org.speechforge.cairo.client.recog.RecognitionResult;
 
 // TODO: Auto-generated Javadoc
 /**
- * SpeechClient API that does MRCP based speech recogntion.
+ * SpeechClient API that peovides MRCPv2 based speech recogntion capabilites.  Provides both blocking and non-blocking calls.
  * 
  * @author Spencer Lord {@literal <}<a href="mailto:salord@users.sourceforge.net">salord@users.sourceforge.net</a>{@literal >}
  */
@@ -43,10 +43,10 @@ public interface SpeechClient {
     
        
     /**
-     * Play blocking.
+     * Play the prompt using a speech sythesizer or play the audio file.
      * 
-     * @param urlPrompt the url prompt
-     * @param prompt the prompt
+     * @param urlPrompt if this flag is set the prompt string is an url
+     * @param prompt the prompt to play either a text string or a url
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws MrcpInvocationException the mrcp invocation exception
@@ -56,9 +56,13 @@ public interface SpeechClient {
 
     
     /**
-     * Recognize blocking.
+     * Start speech recognition with the given grammar.  This method blocks until a recognition result is returned or there is a timeout.
+     * Hotword and normal bargein mode is supported.  You can also pass the grammar along in the mrcp command
+     * or jend the uri of the gramamr.
      * 
-     * @param grammarUrl the grammar url
+     * @param grammarUrl A url to the grammar file
+     * @param hotword a flag indicating that the recognition mode is hotword mode
+     * @param attachGrammar A flag indicating that the grammar should be attached to the mrcp command (else a uri is passed)
      * 
      * @return the recognition result
      * 
@@ -71,9 +75,12 @@ public interface SpeechClient {
 
 
     /**
-     * Recognize blocking.
+     * Start speech recognition with the given grammar.  This method blocks until a recognition result is returned or there is a timeout.
+     * Hotword and normal bargein mode is supported.  You can also pass the grammar along in the mrcp command
+     * or jend the uri of the gramamr.
      * 
-     * @param reader the reader
+     * @param reader the reader for the grammar
+     * @param hotword a flag indicating that the recognition mode is hotword mode
      * 
      * @return the recognition result
      * 
@@ -86,11 +93,14 @@ public interface SpeechClient {
 
     
     /**
-     * Play and recognize blocking.  This version of play and recognize receives a url to the grammar.
+     * Play the prompt and start recognition with the given grammar.  This version of play and recognize receives a url to the grammar.
+     * This is a conveneience method that does the bargein processing for you.  (Starts the no input timer upon the completion of the prompt 
+     * or stops the prompt upon the start of speach event).
      * 
+     * @param grammarUrl A url to the grammar file
+     * @param hotword a flag indicating that the recognition mode is hotword mode
      * @param urlPrompt the url prompt. if true the prompt parameter is a url to a file containing the prompt else its the prompt itself.
-     * @param prompt the prompt
-     * @param grammarUrl the grammar url
+     * @param prompt the prompt to play
      * 
      * @return the recognition result
      * 
@@ -103,9 +113,13 @@ public interface SpeechClient {
     
     /**
      * Play and recognize blocking.  This version of play and recognize receievs a Reader to the grammar
+     * This is a conveneience method that does the bargein processing for you.  (Starts the no input timer upon the completion of the prompt 
+     * or stops the prompt upon the start of speach event).
      * 
-     * @param prompt the prompt
-     * @param reader the reader
+     * @param hotword a flag indicating that the recognition mode is hotword mode
+     * @param urlPrompt the url prompt. if true the prompt parameter is a url to a file containing the prompt else its the prompt itself.
+     * @param prompt the prompt to play
+     * @param reader the reader for the grammar
      * 
      * @return the recognition result
      * 
@@ -130,7 +144,7 @@ public interface SpeechClient {
 
 
     /**
-     * Send start input timers request.
+     * Start no input timer.
      * 
      * @return the mrcp request state
      * 
@@ -153,17 +167,18 @@ public interface SpeechClient {
      * Sets the default listener.  To set the listener for methods that don't have a listener parameter.
      * 
      * @param listener the new default listener
+     * 
      * @deprecated
      */
     public void setDefaultListener(SpeechEventListener listener);
     
  
     /**
-     * Queue prompt.  This is a non-blocking call.
+     * Queue prompt for the audio stream  This is a non-blocking call.
+     * Note that if url prompt is tue, and the content type of the url is an audio file, the audio file is played on the asudio stream.
      * 
-     * @param urlPormpt the url pormpt
+     * @param urlPormpt if true, then the prompt is a url else it is text to synthesize
      * @param prompt the prompt
-     * @param listener the listener
      * 
      * @return the speech request
      * 
@@ -175,14 +190,13 @@ public interface SpeechClient {
 
    
     /**
-     * Enable dtmf.  If dtmf is already enabled, 
-     * (replace old pattern and listener or throw exception?)
+     * Enable dtmf.
+     * If dtmf is already enabled,(replace old pattern and listener or throw exception?)
      * 
-     * @param pattern the pattern
+     * @param pattern the pattern is a regex.  Once the sequence of key clicks matches the regex, the listener is called.
      * @param listener the listener
      * @param inputTimeout the input timeout
      * @param recogTimeout the recog timeout
-     * 
      */
     public void enableDtmf(String pattern, SpeechEventListener listener, long inputTimeout, long recogTimeout) ;
    
@@ -191,14 +205,61 @@ public interface SpeechClient {
      */
     public void disableDtmf();
     
+    /**
+     * Start speech recognition with the given grammar.  This method does not block.  The listener is called with the results.
+     * Hotword and normal bargein mode is supported.  You can also pass the grammar along in the mrcp command or send the uri of the gramamr.
+     * 
+     * @param grammarUrl A url to the grammar file
+     * @param hotword a flag indicating that the recognition mode is hotword mode
+     * @param attachGrammar A flag indicating that the grammar should be attached to the mrcp command (else a uri is passed)
+     * 
+     * @return the speech request
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws MrcpInvocationException the mrcp invocation exception
+     * @throws InterruptedException the interrupted exception
+     * @throws IllegalValueException the illegal value exception
+     */
     public SpeechRequest recognize(String grammarUrl, boolean hotword, boolean attachGrammar) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException ;
 
+    /**
+     * Start speech recognition with the given grammar.  This method does not block.  The listener is called with the results.
+     * Hotword and normal bargein mode is supported.  You can also pass the grammar along in the mrcp command or send the uri of the gramamr.
+     * 
+     * @param reader the reader for the grammar
+     * @param hotword a flag indicating that the recognition mode is hotword mode
+     * @param attachGrammar A flag indicating that the grammar should be attached to the mrcp command (else a uri is passed)
+     * 
+     * @return the speech request
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws MrcpInvocationException the mrcp invocation exception
+     * @throws InterruptedException the interrupted exception
+     * @throws IllegalValueException the illegal value exception
+     */
     public SpeechRequest recognize(Reader reader, boolean hotword, boolean attachGrammar) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException ;
     
+    /**
+     * Cancel request.
+     * 
+     * @param request the request
+     */
     public void cancelRequest(SpeechRequest request);
     
+    /**
+     * Shutdown. close all channels and release all resources
+     */
     public void shutdown();
     
+    /**
+     * Send bargein request to the sythesizer (so it stops streaming audio)
+     * 
+     * @return the mrcp request state
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws MrcpInvocationException the mrcp invocation exception
+     * @throws InterruptedException the interrupted exception
+     */
     public MrcpRequestState sendBargeinRequest() throws IOException, MrcpInvocationException, InterruptedException;
   
 }

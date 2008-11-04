@@ -5,16 +5,14 @@ Readme for Cairo Client v${project.version}
 Overview
 --------
 
-Cairo client provides an open source speech resource client library written entirely in the Java programming language.  To achieve maximum compatibility with existing and future speech servers it has been designed from the ground up to comply with the MRCPv2 standard. (For more information on MRCPv2 please see http://www.ietf.org/internet-drafts/draft-ietf-speechsc-mrcpv2-14.txt)
+Cairo client provides an open source speech  client library written entirely in the Java programming language.  To achieve maximum compatibility with existing and future speech servers it has been designed from the ground up to comply with the MRCPv2 standard. (For more information on MRCPv2 please see http://www.ietf.org/internet-drafts/draft-ietf-speechsc-mrcpv2-14.txt)
 
-Cairo client can be used to build mrcpv2 clients
-
+Cairo client can be used to build mrcpv2 clients.
 
 Limitations for Cairo v${project.version}
 --------------------------
 
 This is the first release of cairo-client.  See General limitation section.
-
 
 General limitations of this release:
 ------------------------------------
@@ -78,20 +76,21 @@ Installation
 Getting Started
 ---------------
 
-Once Cairo-client is successfully installed (and you have a mrcpv2 server --like cairo-server) you can follow the instructions below to launch the  Cairo client demo MRCPv2 client.
+Once Cairo-client is successfully installed (and you have a mrcpv2 server --like cairo-server) you can follow the instructions below to launch the Cairo client demo MRCPv2 client.
 
 Notes: These instructions and the batch files provided in the Cairo-server distribution are geared towards a deployment of Cairo on Windows.  Since Cairo is written entirely in Java it should work on any operating system, however it has, as of yet, only been verified on Windows.  If you are interested in deploying Cairo on another operating system please post a message to the cairo-user forum (http://www.nabble.com/cairo-user-f15778.html) to get assistance in this process.
        You must run a mrcpv2 server for the demo.  If you are using cairo-server, see the cairo-server installation instructions for starting up the server processes.
 
-
 Library Overview
 ----------------
 
-1.  Set up the session using sip (use cairo-sip or other sip libraries)
-2   configure rtp if needed (use cairo-rtp or other rtp libraries)
-3.  construct an implementation of speechClient
-4.  Use speech client for recognition and sythesis
-5.  Close session and release resources 
+To use the cairo-client library, follow these steps.
+
+  1.  Set up the session using sip (you can use cairo-sip or another sip libraries)
+  2   Configure rtp if needed (you can use cairo-rtp or other rtp libraries)
+  3.  Construct an implementation of speechClient
+  4.  Use speech client for recognition and synthesis
+  5.  Close session and release resources
 
 The SpeechClient Interfaces provides blocking and no-blocking methods.  
 
@@ -147,8 +146,6 @@ Further Information
 -------------------
 
 For more information please see the Cairo Project Home at http://cairo.speechforge.org.
-
-
 
 
 
