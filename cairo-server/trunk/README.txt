@@ -41,8 +41,6 @@ This third release for the Cairo project addresses a number of limitations found
 
 General limitations of this release:
 
-  * No facility for closure of resource sessions is currently provided.  This will be added in conjunction with implementation of SIP BYE method support.
-
   * Resource processes must be run on the same host as the resource server in order for the MRCPv2 client to locate the resource.
 
   * This release is limited to the following MRCPv2 resource types and resource methods and events implemented:
