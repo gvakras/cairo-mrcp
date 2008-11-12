@@ -438,7 +438,7 @@
     </repository>
     <site>
       <id>speechforge-site</id>
-      <url>scp://www.speechforge.org/home/webadmin/speechforge.org/html/staging/projects/cairo</url>
+      <url>scp://www.speechforge.org/home/webadmin/speechforge.org/html/projects/cairo</url>
     </site>
     <downloadUrl>https://sourceforge.net/project/showfiles.php?group_id=${project.group.id}</downloadUrl>
   </distributionManagement>
