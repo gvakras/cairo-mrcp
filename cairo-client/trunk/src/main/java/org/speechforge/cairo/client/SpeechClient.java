@@ -71,7 +71,7 @@ public interface SpeechClient {
      * @throws InterruptedException the interrupted exception
      * @throws IllegalValueException the illegal value exception
      */
-    public RecognitionResult recognizeBlocking(String grammarUrl, boolean hotword, boolean attachGrammar)throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException;
+    public RecognitionResult recognizeBlocking(String grammarUrl, boolean hotword, boolean attachGrammar, long noInputTimeout)throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException;
 
 
     /**
@@ -89,7 +89,7 @@ public interface SpeechClient {
      * @throws InterruptedException the interrupted exception
      * @throws IllegalValueException the illegal value exception
      */
-    public RecognitionResult recognizeBlocking(Reader reader, boolean hotword)throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException;
+    public RecognitionResult recognizeBlocking(Reader reader, boolean hotword, long noInputTimeout)throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException;
 
     
     /**
@@ -220,7 +220,7 @@ public interface SpeechClient {
      * @throws InterruptedException the interrupted exception
      * @throws IllegalValueException the illegal value exception
      */
-    public SpeechRequest recognize(String grammarUrl, boolean hotword, boolean attachGrammar) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException ;
+    public SpeechRequest recognize(String grammarUrl, boolean hotword, boolean attachGrammar, long noInputTimeout) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException ;
 
     /**
      * Start speech recognition with the given grammar.  This method does not block.  The listener is called with the results.
@@ -237,19 +237,25 @@ public interface SpeechClient {
      * @throws InterruptedException the interrupted exception
      * @throws IllegalValueException the illegal value exception
      */
-    public SpeechRequest recognize(Reader reader, boolean hotword, boolean attachGrammar) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException ;
+    public SpeechRequest recognize(Reader reader, boolean hotword, boolean attachGrammar, long noInputTimeout) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException ;
     
     /**
      * Cancel request.
      * 
      * @param request the request
+     * @throws InterruptedException 
+     * @throws IOException 
+     * @throws MrcpInvocationException 
      */
-    public void cancelRequest(SpeechRequest request);
+    public void stopActiveRecognitionRequests() throws MrcpInvocationException, IOException, InterruptedException;
     
     /**
      * Shutdown. close all channels and release all resources
+     * @throws InterruptedException 
+     * @throws IOException 
+     * @throws MrcpInvocationException 
      */
-    public void shutdown();
+    public void shutdown() throws MrcpInvocationException, IOException, InterruptedException;
     
     /**
      * Send bargein request to the sythesizer (so it stops streaming audio)

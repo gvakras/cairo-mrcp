@@ -279,9 +279,10 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
                     this.notifyAll();
                 }
             }
-        
+        //try to always send anyway (if not null) good for status on client
         //else it is a non blocking requests, just forward on the event (with the recognition results)
-        } else {
+        //} else {
+        }
             RecognitionResult r = null;
             if (MrcpEventName.RECOGNITION_COMPLETE.equals(eventName)) {
                 MrcpHeader completionCauseHeader = event.getHeader(MrcpHeaderName.COMPLETION_CAUSE);
@@ -309,7 +310,7 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
             } else {
                _logger.warn("No Listener, do dropping the recognition event "+event.toString()); 
             }
-        }
+        //}
     }
 
     /* (non-Javadoc)
@@ -411,14 +412,11 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
      * @throws InterruptedException the interrupted exception
      * @throws IllegalValueException the illegal value exception
      */
-    public SpeechRequest recognize(String grammarUrl, boolean hotword, boolean attachGrammar) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException {
+    public SpeechRequest recognize(String grammarUrl, boolean hotword, boolean attachGrammar, long noInputTimeout) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException {
 
 
-        MrcpRequest request = constructRecogRequest(grammarUrl,hotword, attachGrammar);
-        if (hotword) {
-           request.addHeader(MrcpHeaderName.RECOGNITION_MODE.constructHeader("hotword"));
-        }
-        
+        MrcpRequest request = constructRecogRequest(grammarUrl,hotword, attachGrammar,  noInputTimeout);
+
         
         _logger.debug("REQUEST: "+request.toString());
         MrcpResponse response = _recogChannel.sendRequest(request);
@@ -455,8 +453,8 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
      */
     public  SpeechRequest playAndRecognize(boolean urlPrompt, String prompt, String grammarUrl, boolean hotword)
     throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException {
-
-        MrcpRequest request = constructRecogRequest(grammarUrl, hotword, true);
+        long noInputTimeout=0;
+        MrcpRequest request = constructRecogRequest(grammarUrl, hotword, true,noInputTimeout);
         SpeechRequest speechRequest = internalPlayAndRecogize(urlPrompt, prompt, request);
 
         return speechRequest;  
@@ -537,16 +535,26 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
      * @throws MalformedURLException the malformed URL exception
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    private MrcpRequest constructRecogRequest(String grammarUrl, boolean hotword, boolean attachGrammar) throws MalformedURLException, IOException {
+    private MrcpRequest constructRecogRequest(String grammarUrl, boolean hotword, boolean attachGrammar, long noInputTimeout) throws MalformedURLException, IOException {
 
           // recog request
           MrcpRequest request = _recogChannel.createRequest(MrcpMethodName.RECOGNIZE);
-          request.addHeader(MrcpHeaderName.START_INPUT_TIMERS.constructHeader(Boolean.FALSE));
+          
           if (hotword) {
               request.addHeader(MrcpHeaderName.RECOGNITION_MODE.constructHeader("hotword"));
            }
+           if (noInputTimeout != 0) {
+              request.addHeader(MrcpHeaderName.NO_INPUT_TIMEOUT.constructHeader(new Long(noInputTimeout)));
+              request.addHeader(MrcpHeaderName.START_INPUT_TIMERS.constructHeader(Boolean.TRUE)); 
+           } else {
+              request.addHeader(MrcpHeaderName.START_INPUT_TIMERS.constructHeader(Boolean.FALSE));     
+           }
+          
+           if (hotword) {
+              request.addHeader(MrcpHeaderName.RECOGNITION_MODE.constructHeader("hotword"));
+           }
 
-          if (attachGrammar) {
+           if (attachGrammar) {
               URL gUrl = new URL(grammarUrl);
               request.setContent("application/jsgf", null, gUrl);
           } else {
@@ -566,7 +574,7 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
      * @throws MalformedURLException the malformed URL exception
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    private MrcpRequest constructRecogRequest(Reader reader, boolean hotword) throws MalformedURLException, IOException {
+    private MrcpRequest constructRecogRequest(Reader reader, boolean hotword, long noInputTimeout) throws MalformedURLException, IOException {
 
         BufferedReader in  = new BufferedReader(reader);
         StringBuilder sb = new StringBuilder();
@@ -581,7 +589,12 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
         
         // recog request
         MrcpRequest request = _recogChannel.createRequest(MrcpMethodName.RECOGNIZE);
-        request.addHeader(MrcpHeaderName.START_INPUT_TIMERS.constructHeader(Boolean.FALSE));
+        if (noInputTimeout != 0) {
+            request.addHeader(MrcpHeaderName.NO_INPUT_TIMEOUT.constructHeader(new Long(noInputTimeout)));
+            request.addHeader(MrcpHeaderName.START_INPUT_TIMERS.constructHeader(Boolean.TRUE)); 
+         } else {
+            request.addHeader(MrcpHeaderName.START_INPUT_TIMERS.constructHeader(Boolean.FALSE));     
+         }
         if (hotword) {
             request.addHeader(MrcpHeaderName.RECOGNITION_MODE.constructHeader("hotword"));
          }
@@ -613,8 +626,8 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
     /* (non-Javadoc)
      * @see org.speechforge.cairo.client.SpeechClient#recognizeBlocking(java.lang.String, boolean, boolean)
      */
-    public synchronized RecognitionResult recognizeBlocking(String grammarUrl, boolean hotword, boolean attachGrammar) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException {
-        _activeRecognition = this.recognize(grammarUrl, hotword, attachGrammar);
+    public synchronized RecognitionResult recognizeBlocking(String grammarUrl, boolean hotword, boolean attachGrammar, long noInputTimeout) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException {
+        _activeRecognition = this.recognize(grammarUrl, hotword, attachGrammar, noInputTimeout);
         //Block...
         //ActiveRequest request = activeRequests.get(String.valueOf(response.getRequestID()));
         
@@ -637,7 +650,8 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
      * @see org.speechforge.cairo.client.SpeechClient#playAndRecognizeBlocking(boolean, java.lang.String, java.lang.String, boolean)
      */
     public synchronized RecognitionResult playAndRecognizeBlocking(boolean urlPrompt, String prompt, String grammarUrl, boolean hotword) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException {
-        MrcpRequest mrcpRequest = constructRecogRequest(grammarUrl, hotword, true);
+        long noInputTimeout=0;
+        MrcpRequest mrcpRequest = constructRecogRequest(grammarUrl, hotword, true,noInputTimeout);
         _activeRecognition = internalPlayAndRecogize(urlPrompt, prompt, mrcpRequest);
         
         //Block...
@@ -692,7 +706,8 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
      * @see org.speechforge.cairo.client.SpeechClient#playAndRecognizeBlocking(boolean, java.lang.String, java.io.Reader, boolean)
      */
     public synchronized RecognitionResult playAndRecognizeBlocking(boolean urlPrompt, String prompt, Reader reader, boolean hotword) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException {
-        MrcpRequest mrcpRequest = constructRecogRequest(reader,hotword);
+        long noInputTimeout=0;
+        MrcpRequest mrcpRequest = constructRecogRequest(reader,hotword,noInputTimeout);
         SpeechRequest request = internalPlayAndRecogize(urlPrompt,prompt, mrcpRequest);
         
         //Block...
@@ -717,7 +732,7 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
     /* (non-Javadoc)
      * @see org.speechforge.cairo.client.SpeechClient#recognizeBlocking(java.io.Reader, boolean)
      */
-    public synchronized RecognitionResult recognizeBlocking(Reader reader, boolean hotword) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException {
+    public synchronized RecognitionResult recognizeBlocking(Reader reader, boolean hotword, long noInputTimeout) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException {
         _logger.warn("The recognize blocking(reader,hotwordFlag) method is not implemented");
         return null;
     }
@@ -1020,28 +1035,64 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
     /* (non-Javadoc)
      * @see org.speechforge.cairo.client.SpeechClient#cancelRequest(org.speechforge.cairo.client.SpeechRequest)
      */
-    public void cancelRequest(SpeechRequest request) {
-        // TODO Auto-generated method stub
+    public void stopActiveRecognitionRequests() throws MrcpInvocationException, IOException, InterruptedException {
+
+        MrcpRequest cancelRequest = _recogChannel.createRequest(MrcpMethodName.STOP);
+        MrcpResponse response = _recogChannel.sendRequest(cancelRequest);
+
+        if (_logger.isDebugEnabled()) {
+            _logger.debug("Stopped Recognition, MRCP response received:\n" + response.toString());
+        }
         
+        //Blocking Methods need to be notified and unblocked
+        //signal for the blocking call to check for unblocking
+        if (_activeRecognition != null) {
+            synchronized (this) {
+                _activeRecognition.setCompleted(true);
+                this.notifyAll();
+            } 
+        }
     }
 
 
     /* (non-Javadoc)
      * @see org.speechforge.cairo.client.SpeechClient#shutdown()
      */
-    public void shutdown() {
-        // TODO Determine if there are active requests and if there are terminate them
+    public void shutdown() throws MrcpInvocationException, IOException, InterruptedException {
+        
+        // TODO Determine if there are active requests before stopping them
+        
+        // Stop any active requests
+        this.stopActiveRecognitionRequests();
         
         //shutdown the timers
+        //cancel the no input timer
+        if (_noInputTimeoutTask != null) {
+            _noInputTimeoutTask.cancel();
+            _noInputTimeoutTask = null;
+        }
         
+        //cancel the recog timer
+        if (_noRecogTimeoutTask != null) {
+            _noRecogTimeoutTask.cancel();
+            _noRecogTimeoutTask = null;
+        }
     }
 
 
     /* (non-Javadoc)
      * @see org.speechforge.cairo.client.SpeechClient#recognize(java.io.Reader, boolean, boolean)
      */
-    public SpeechRequest recognize(Reader reader, boolean hotword, boolean attachGrammar) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException {
-        MrcpRequest mrcpRequest = constructRecogRequest(reader,hotword);
+    public SpeechRequest recognize(Reader reader, boolean hotword, boolean attachGrammar, long noInputTimeout) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException {
+        MrcpRequest mrcpRequest = constructRecogRequest(reader,hotword,noInputTimeout);
+        
+        if (hotword) {
+            mrcpRequest.addHeader(MrcpHeaderName.RECOGNITION_MODE.constructHeader("hotword"));
+        }
+        if (noInputTimeout != 0) {
+            mrcpRequest.addHeader(MrcpHeaderName.NO_INPUT_TIMEOUT.constructHeader(new Long(noInputTimeout)));
+        }
+        
         MrcpResponse response = _recogChannel.sendRequest(mrcpRequest);
 
         if (_logger.isDebugEnabled()) {
