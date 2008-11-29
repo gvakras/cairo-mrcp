@@ -141,8 +141,11 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
                             URLConnection uc = url.openConnection();
                             _logger.debug(uris[i]+"  "+uc.getContentType());
                             
-                            if ((uc.getContentType().equals("text/plain")) ||                //TODO: Remove this should not assume text/plain is jsgf
-                                (uc.getContentType().equals("application/jsgf"))){
+                            //TODO:  Should replace this check content type and not always assume it is JSGF 
+                            //       (But using the URI-LIST as a work around for large grammars not supported in mrcp4j 
+                            //        and in some cases the uri does not hav a content type (file uri's)).
+                            //if ((uc.getContentType().equals("text/plain")) ||                //TODO: Remove this should not assume text/plain is jsgf
+                            //    (uc.getContentType().equals("application/jsgf"))){
                                BufferedReader in = new BufferedReader(
                                                     new InputStreamReader(
                                                     uc.getInputStream()));
@@ -166,9 +169,9 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
                                    statusCode = MrcpResponse.STATUS_SERVER_INTERNAL_ERROR;
                                }
                            
-                            } else {
-                                _logger.warn("Unsupported content type for in the recognize request: "+ uc.getContentType());
-                            }
+                            //} else {
+                            //    _logger.warn("Unsupported content type for in the recognize request: "+ uc.getContentType());
+                            //}
                       
                             
                         } catch (MalformedURLException e) {
@@ -279,8 +282,48 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
      * @see org.mrcp4j.server.provider.RecogOnlyRequestHandler#stop(org.mrcp4j.message.request.StopRequest, org.mrcp4j.server.MrcpSession)
      */
     public synchronized MrcpResponse stop(StopRequest request, MrcpSession session) {
-        // TODO Auto-generated method stub
-        return null;
+        
+        _logger.debug("Stop recognition called, mrcp channel state: "+_state+" rtp channel state: "+_rtpChannel._state);
+
+        //chage the state right away, but save the current state 
+        short state;
+        synchronized (MrcpRecogChannel.this) {
+            state = _state;
+            _state = IDLE;
+        }
+        
+        if (state == IDLE) {
+            //Nothing to cancel
+            _logger.warn("Stopping recognition, but nothing to cancel.  Mrcp channel state is IDLE");
+        } else if (state == RECOGNIZED) {
+            //Nothing to cancel
+            _logger.warn("Stopping recognition, but nothing to cancel.  Mrcp channel state is RECOGNIZED");            
+        } else if (state == RECOGNIZING) {
+            _logger.info("Stopping recognition.  Mrcp channel state is RECOGNIZING and rtp channel state is is "+_rtpChannel._state);
+            if (_rtpChannel._state == RTPRecogChannel.WAITING_FOR_SPEECH) {
+                if (_rtpChannel._noInputTimeoutTask != null) {
+                   _rtpChannel._noInputTimeoutTask.cancel();
+                   _logger.info("Stopping recognition, canceled no input timer");
+                }
+                _rtpChannel.closeProcessor();
+                //TODO: Add  active-request-id-list header containing the request-id of the RECOGNIZE request that was terminated.
+            } else if (_rtpChannel._state == RTPRecogChannel.SPEECH_IN_PROGRESS) {
+                _rtpChannel.closeProcessor();
+                //TODO: Add  active-request-id-list header containing the request-id of the RECOGNIZE request that was terminated.
+            } else if (_rtpChannel._state == RTPRecogChannel.COMPLETE) {
+                _logger.warn("Stopping recognition, but nothing to cancel.  Mrcp channel state is recognizing, but rtp chan state is complete");
+            } else {
+                _logger.warn("Stopping recognition, but invalid rtp channel state: "+_rtpChannel._state);
+            }
+            
+        } else {
+            _logger.warn("Stopping recognition, but invalid mrcp channel state: "+_state);
+        }
+        
+        MrcpResponse response = null;
+        response = session.createResponse(MrcpResponse.STATUS_SUCCESS, MrcpRequestState.COMPLETE);
+
+        return response;
     }
     
     private class Listener implements RecogListener {
