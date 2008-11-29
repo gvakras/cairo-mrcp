@@ -63,6 +63,14 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
     private SessionAddress _localAddress;
     private SessionAddress _targetAddress;
 
+    /**
+     * Instantiates a new RTP consumer.  Just needs a remote port.  
+     * Assumes the local and remote host is the localhost.
+     * 
+     * @param port the port
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
     public RTPConsumer(int port) throws IOException {
         if (port < 0 || port >= TCP_PORT_MAX) {
             throw new IllegalArgumentException("Invalid port value: " + port);
@@ -72,6 +80,43 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
         init();
     }
 
+    
+    /**
+     * Instantiates a new RTP consumer.  It needs both the local and remote host names 
+     * as well ast the local and remote port.
+     * 
+     * @param localHost the local host
+     * @param localPort the local port
+     * @param remoteAddress the remote address
+     * @param remotePort the remote port
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    public RTPConsumer(String localHost, int localPort, InetAddress remoteAddress, int remotePort) throws IOException {
+        if (localPort < 0 || localPort > TCP_PORT_MAX) {
+            throw new IllegalArgumentException("Invalid local port value: " + localPort);
+        }
+        if (remoteAddress == null) {
+            throw new IllegalArgumentException("Remote address supplied must not be null!");
+        }
+        if (remotePort < 0 || remotePort > TCP_PORT_MAX) {
+            throw new IllegalArgumentException("Invalid remote port value: " + remotePort);
+        }
+        _localAddress = new SessionAddress(InetAddress.getByName(localHost), localPort);
+        _targetAddress = new SessionAddress(remoteAddress, remotePort);
+        init();
+    }
+    
+    /**
+     * Instantiates a new RTP consumer.  Requires the remote host name and the local and remote port.  
+     * It uses localhost for the local host name.
+     * 
+     * @param localPort the local port
+     * @param remoteAddress the remote address
+     * @param remotePort the remote port
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
     public RTPConsumer(int localPort, InetAddress remoteAddress, int remotePort) throws IOException {
         if (localPort < 0 || localPort > TCP_PORT_MAX) {
             throw new IllegalArgumentException("Invalid local port value: " + localPort);
@@ -84,11 +129,12 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
         }
         _localAddress = new SessionAddress(InetAddress.getLocalHost(), localPort);
         _targetAddress = new SessionAddress(remoteAddress, remotePort);
+     
         init();
     }
     
     private void init() throws IOException {
-
+           
         _rtpManager = RTPManager.newInstance();
         if (_logger.isDebugEnabled()) {
             _logger.debug("RTPManager class: " + _rtpManager.getClass().getName());

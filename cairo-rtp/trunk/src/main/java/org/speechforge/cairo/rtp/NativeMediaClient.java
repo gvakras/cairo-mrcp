@@ -52,6 +52,12 @@ public class NativeMediaClient extends RTPConsumer {
 
     private Player _player;
     private RTPPlayer _rtpPlayer;
+    
+    public NativeMediaClient(String localHost, int localPort, InetAddress remoteAddress, int remotePort)
+    throws IOException {
+      super(localHost, localPort, remoteAddress, remotePort);
+      _rtpPlayer = new RTPPlayer(_rtpManager);
+  }
 
     /**
      * Constructs media client in send/receive mode.
@@ -86,8 +92,8 @@ public class NativeMediaClient extends RTPConsumer {
     }
     
     public void stop() {
-        super.shutdown();
         _rtpPlayer.shutdown();
+        super.shutdown();
         if (_player != null) {
            _player.stop();
            _player.deallocate();

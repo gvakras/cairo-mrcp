@@ -294,21 +294,33 @@ public class RTPPlayer implements ControllerListener {
     }
 
     public void shutdown() {
-        _rtpManager.removeTargets("Disconnecting...");
-        _rtpManager.dispose();
-        _rtpManager = null;
+     
+        try {
+            this.close();
+        } catch (InterruptedException e) {
+            _logger.warn("Interrupted while closing rtp processor, exception message: "+e.getLocalizedMessage())
+        }
+        
+        /* Some of the possible methods that may be needed for shutting down the rp player
+         * All that seems to be needed, is to close the processor.  The RTPManager gets shutdown by the RTPConsumer
+         * (RTPManager is shared with this class and the NativeMediaClient which is a subclass of the RTPCOnsumer).
+         * 
+          _rtpManager.removeTargets("Disconnecting...");
+          _rtpManager.dispose();
+          _rtpManager = null;
           _processor.stop();
           _processor.close();
           _processor.deallocate();
-         _processor = null;
-          if (_dataSource != null) {
-              _dataSource.disconnect();
-              _dataSource=null;
+          _processor = null;
+           if (_dataSource != null) {
+               _dataSource.disconnect();
+               _dataSource=null;
           }
           if (_sendStream != null) {
               _sendStream.close();
               _sendStream = null;
-          }  
+          }
+          */  
 
     }
 }
