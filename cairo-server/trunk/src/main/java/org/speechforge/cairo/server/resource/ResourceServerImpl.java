@@ -66,6 +66,9 @@ public class ResourceServerImpl implements SessionListener {
 
     private static final String SIPPORT_OPTION = "sipPort";
     private static final String SIPTRANSPORT_OPTION = "sipTransport";
+    private static final String SIPPUBLICADDESS_OPTION = "publicAddress";
+
+
   
     private long _channelID = System.currentTimeMillis();
 
@@ -82,7 +85,7 @@ public class ResourceServerImpl implements SessionListener {
      * @throws RemoteException
      * @throws SipException
      */
-    public ResourceServerImpl(ResourceRegistry registryImpl, int sipPort, String sipTransport) throws RemoteException, SipException {
+    public ResourceServerImpl(ResourceRegistry registryImpl, int sipPort, String sipTransport, String publicAddress) throws RemoteException, SipException {
         super();
         String hostIpAddress = null;
         try {
@@ -97,7 +100,7 @@ public class ResourceServerImpl implements SessionListener {
         if (sipPort == 0) sipPort = 5050;
         if (sipTransport == null) sipTransport = "tcp";
         cairoSipAddress = "sip:cairo@"+hostIpAddress;
-        _ua = new SipAgent(this, cairoSipAddress, "Cairo SIP Stack", sipPort, sipTransport);
+        _ua = new SipAgent(this, cairoSipAddress, "Cairo SIP Stack", hostIpAddress, publicAddress, sipPort, sipTransport);
 
         _registryImpl = registryImpl;
     }
@@ -223,6 +226,8 @@ public class ResourceServerImpl implements SessionListener {
         option = new Option(SIPTRANSPORT_OPTION, true, "The transport used by the sip agent udp or tcp.");
         options.addOption(option);
 
+        option = new Option(SIPPUBLICADDESS_OPTION, true, "The public address of the server (use this if the server is using NAT).");
+        options.addOption(option);
 
         return options;
     }
@@ -248,6 +253,7 @@ public class ResourceServerImpl implements SessionListener {
 
         int sipPort = 0;
         String sipTransport = null;
+        String publicAddress = null;
         if (line.hasOption(SIPPORT_OPTION)) {
             String tmp = line.getOptionValue(SIPPORT_OPTION);
             sipPort = Integer.valueOf(tmp);
@@ -257,10 +263,14 @@ public class ResourceServerImpl implements SessionListener {
            sipTransport = line.getOptionValue(SIPTRANSPORT_OPTION);
         }
         
+        if (line.hasOption(SIPPUBLICADDESS_OPTION)) {
+            publicAddress = line.getOptionValue(SIPPUBLICADDESS_OPTION);
+         }
+        
         _logger.debug("Command line specified sip port: "+sipPort+ " and sip transport: "+ sipTransport);
        
         ResourceRegistryImpl rr = new ResourceRegistryImpl();
-        ResourceServerImpl rs = new ResourceServerImpl(rr,sipPort,sipTransport);
+        ResourceServerImpl rs = new ResourceServerImpl(rr,sipPort,sipTransport,publicAddress);
 
         Registry registry = LocateRegistry.createRegistry(Registry.REGISTRY_PORT);
         registry.rebind(ResourceRegistry.NAME, rr);
