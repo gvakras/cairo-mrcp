@@ -296,17 +296,8 @@ public class SdpMessage implements Serializable {
     public static SdpMessage createNewSdpSessionMessage(String user, String address, String sessionName)
             throws SdpException {
         SdpMessage message = new SdpMessage();
-        String ipAddress = null;
         long sessionId = (System.currentTimeMillis() / 1000) + SdpConstants.NTP_CONST;
         long sessionVersion = (System.currentTimeMillis() / 1000) + SdpConstants.NTP_CONST;
-
-        try {
-            InetAddress addr = InetAddress.getLocalHost();
-            ipAddress = addr.getHostAddress();
-        } catch (UnknownHostException e) {
-            _logger.info("could not get Inet address.  Using localhost address", e);
-            ipAddress = "127.0.0.1";
-        }
 
         try {
             Version v = new ProtoVersionField();
@@ -322,7 +313,7 @@ public class SdpMessage implements Serializable {
             message._sd.setOrigin(o);
 
             Connection c = new ConnectionField();
-            c.setAddress(ipAddress);
+            c.setAddress(address);
             c.setAddressType("IP4");
             c.setNetworkType("IN");
             message._sd.setConnection(c);

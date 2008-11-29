@@ -117,9 +117,9 @@ public class SipAgent {
 
     private String stackName = "SipStack";
 
-    private String hostIpAddress;
-
     private String host;
+    
+    private String publicHost;
 
     private SessionListener sessionListener;
 
@@ -128,17 +128,24 @@ public class SipAgent {
     public SipAgent(SessionListener sessionListener, String mySipAddress) throws SipException {
         this(sessionListener, mySipAddress, "CairoSipStack", 5060, "udp");
     }
-
+ 
     public SipAgent(SessionListener sessionListener, String mySipAddress, String stackName, int port,
+            String transport) throws SipException {
+        this(sessionListener, mySipAddress, stackName, null, null, port, transport);
+    }
+
+    public SipAgent(SessionListener sessionListener, String mySipAddress, String stackName, String host, String publicHost, int port,
             String transport) throws SipException {
         this.sessionListener = sessionListener;
         this.stackName = stackName;
         this.port = port;
+        this.host = host;
+        this.publicHost = publicHost;
         this.transport = transport;
         this.mySipAddress = mySipAddress;
         init();
     }
-
+    
     public String getHost() {
         return host;
     }
@@ -181,18 +188,20 @@ public class SipAgent {
 
     private void init() throws SipException {
 
-        try {
-            InetAddress addr = InetAddress.getLocalHost();
-            hostIpAddress = addr.getHostAddress();
-            host = addr.getCanonicalHostName();
-        } catch (UnknownHostException e) {
-            hostIpAddress = "127.0.0.1";
-            host = "localhost";
-            _logger.debug(e, e);
-            e.printStackTrace();
+        if (host == null) {
+            try {
+                InetAddress addr = InetAddress.getLocalHost();
+                host = addr.getHostAddress();
+                //host = addr.getCanonicalHostName();
+            } catch (UnknownHostException e) {
+                host = "127.0.0.1";
+                //host = "localhost";
+                _logger.debug(e, e);
+                e.printStackTrace();
+            }
         }
         
-        guidPrefix = hostIpAddress + port + System.currentTimeMillis();
+        guidPrefix = host + port + System.currentTimeMillis();
         SipFactory sipFactory = null;
 
         sipFactory = SipFactory.getInstance();
@@ -229,7 +238,7 @@ public class SipAgent {
         }
 
         try {
-            listeningPoint = sipStack.createListeningPoint(hostIpAddress, port, transport);
+            listeningPoint = sipStack.createListeningPoint(host, port, transport);
             sipProvider = sipStack.createSipProvider(listeningPoint);
         } catch (TransportNotSupportedException e) {
             _logger.debug(e, e);
@@ -259,10 +268,20 @@ public class SipAgent {
                 throw new SipException("Invalid sip uri: " + mySipAddress);
             }
             myAddress = addressFactory.createAddress(uri);
+
             // create a contact address (for contact header)
-            SipURI contactUri = addressFactory.createSipURI(((SipURI) uri).getUser(), this.hostIpAddress);
-            // SipURI contactUrl = addressFactory.createSipURI(from.getName(),
-            // host);
+            SipURI contactUri = null;
+            
+            //poor mans STUN
+            if (publicHost != null) {
+               contactUri = addressFactory.createSipURI(((SipURI) uri).getUser(), this.publicHost);
+               URI tmpUri =  addressFactory.createSipURI(((SipURI) uri).getUser(), this.publicHost);
+               myAddress = addressFactory.createAddress(tmpUri);
+            } else {
+               myAddress = addressFactory.createAddress(uri);
+               contactUri = addressFactory.createSipURI(((SipURI) uri).getUser(), this.host);
+               // SipURI contactUrl = addressFactory.createSipURI(from.getName(),host);
+            }
             contactUri.setPort(listeningPoint.getPort());
             contactUri.setTransportParam(transport);
             contactAddress = addressFactory.createAddress(contactUri);
@@ -317,7 +336,15 @@ public class SipAgent {
             URI toUri = null;
             Address toAddress = null;
 
-            toUri = addressFactory.createURI(to);
+
+            URI tmpUri = addressFactory.createURI(to);
+            //poor mans STUN
+            if (publicHost != null) {
+                toUri = addressFactory.createSipURI(((SipURI) tmpUri).getUser(), this.publicHost);
+            } else {
+                toUri = tmpUri;
+            }
+            
             if (toUri.isSipURI() == false) {
                 _logger.error("Invalid sip uri: " + mySipAddress);
                 throw new SipException("Invalid sip uri: " + mySipAddress);
@@ -326,13 +353,25 @@ public class SipAgent {
             ToHeader toHeader = headerFactory.createToHeader(toAddress, null);
 
             // create Request URI
-            String peerHostPort = peerHost + ":" + peerPort;
+            //poor mans STUN
+            String peerHostPort = null;
+            if (publicHost != null) {
+                peerHostPort = publicHost + ":" + sipProvider.getListeningPoint(transport).getPort();
+            } else {
+                peerHostPort = host + ":" + sipProvider.getListeningPoint(transport).getPort();
+            }
+
             SipURI requestURI = addressFactory.createSipURI(((SipURI) toUri).getUser(), peerHostPort);
 
             // Create ViaHeaders
 
             ArrayList viaHeaders = new ArrayList();
-            ViaHeader viaHeader = headerFactory.createViaHeader(hostIpAddress, sipProvider.getListeningPoint(
+            //poor mans STUN
+            String useHost = host;
+            if (publicHost != null) {
+                useHost = publicHost;
+            }
+            ViaHeader viaHeader = headerFactory.createViaHeader(useHost, sipProvider.getListeningPoint(
                     transport).getPort(), transport, null);
 
             // add via headers
@@ -379,10 +418,7 @@ public class SipAgent {
 
             _logger.debug("Just before Send request: "+peerHost+":"+peerPort);
             
-            // send the request out.
-            ctx.sendRequest();
 
-            Dialog dialog = ctx.getDialog();
             if (_logger.isDebugEnabled()) {
                 _logger.debug("------------- SENDING A SIP REQUEST ---------------");
                 _logger.debug("Sending a "+ ctx.getRequest().getMethod()+" SIP Request");
@@ -398,6 +434,12 @@ public class SipAgent {
                    _logger.debug(contentString);
                 } 
              } 
+            
+            // send the request out.
+            ctx.sendRequest();
+
+            Dialog dialog = ctx.getDialog();
+            
             session = SipSession.createSipSession(this, ctx, dialog, null,null,null,null);
             SipSession.addPendingSession(session);
 

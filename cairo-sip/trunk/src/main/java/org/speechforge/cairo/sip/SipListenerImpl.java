@@ -179,7 +179,6 @@ public class SipListenerImpl implements SipListener {
            } 
         }
         
-
         
         if (ctx != null) {
             dialog = ctx.getDialog();
@@ -202,6 +201,27 @@ public class SipListenerImpl implements SipListener {
                         // TODO Auto-generated catch block
                         e1.printStackTrace();
                     }
+                    
+                    if (_logger.isDebugEnabled()) {
+                        _logger.debug("------------- SENDING A SIP ACK REQUEST ---------------");
+                     
+                        Iterator headers = ackRequest.getHeaderNames();
+                        while (headers.hasNext()) {
+                            _logger.debug(ackRequest.getHeader((String) headers.next()).toString());
+                        }
+                        
+                        byte[] contentBytes = ackRequest.getRawContent();
+
+                        if (contentBytes == null) {
+                            _logger.debug("No content in the response.");
+                        } else {
+                            String contentString = new String(contentBytes);
+                            _logger.debug(contentString);
+                        } 
+                        
+                     }
+                    
+                    
                     dialog.sendAck(ackRequest);
 
                     // put the dialog into the session and remove from pending

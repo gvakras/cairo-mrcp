@@ -37,11 +37,19 @@ public class SimpleSipAgent implements SessionListener {
         private String _mySipAddress;
         private String _stackName;
         private int _port;
+        private String _localHost;
+        private String _publicLocalHost;
         private String _transport;
         private SipAgent _sipAgent;
         
         private SdpMessage sipResponse;
         private SipSession sipSession;
+        
+        public SimpleSipAgent(String mySipAddress, String stackName, String host, String publicLocalHost, int port, String transport) throws SipException {
+            this(mySipAddress, stackName, port, transport);
+            _localHost = host;
+            _publicLocalHost = publicLocalHost;
+        }
 
         public SimpleSipAgent(String mySipAddress, String stackName, int port, String transport) throws SipException {
 
@@ -49,13 +57,18 @@ public class SimpleSipAgent implements SessionListener {
             _stackName = stackName;
             _port = port;
             _transport = transport;
+            _localHost = null;
+            _publicLocalHost = null;
         }
+
         
         public SdpMessage sendInviteWithoutProxy(String to, SdpMessage message, String peerAddress, int peerPort) throws SipException {
 
             // Construct a SIP agent to be used to send a SIP Invitation to the cairo server
-            _sipAgent = new SipAgent(this, _mySipAddress, _stackName, _port, _transport);
-
+            if (_sipAgent == null) {
+               _sipAgent = new SipAgent(this, _mySipAddress, _stackName, _localHost, _publicLocalHost, _port, _transport);
+            }
+            
             // Send the sip invitation
             SipSession session = _sipAgent.sendInviteWithoutProxy(to, message, peerAddress, peerPort);
 
