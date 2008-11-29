@@ -298,7 +298,7 @@ public class RTPPlayer implements ControllerListener {
         try {
             this.close();
         } catch (InterruptedException e) {
-            _logger.warn("Interrupted while closing rtp processor, exception message: "+e.getLocalizedMessage())
+            _logger.warn("Interrupted while closing rtp processor, exception message: "+e.getLocalizedMessage());
         }
         
         /* Some of the possible methods that may be needed for shutting down the rp player
