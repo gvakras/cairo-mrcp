@@ -188,16 +188,10 @@
     </repository>
 
     <repository>
-      <id>cairo</id>
-      <name>Cairo Deployment Repository</name>
-      <url>http://cairo.sourceforge.net/repository</url>
-    </repository>
-
-    <repository>
-      <id>mrcp4j</id>
-      <name>MRCP4J Deployment Repository</name>
-      <url>http://mrcp4j.sourceforge.net/repository</url>
-    </repository>
+      <id>speechforge-repository</id>
+      <name>SpeechForge Repository</name>
+      <url>http://www.speechforge.org/repository/</url>
+    </repository>  
     
     <repository>
        <id>java.net</id>
@@ -275,15 +269,10 @@
   <distributionManagement>
     <repository>
       <uniqueVersion>false</uniqueVersion>
-      <id>cairo-repository</id>
-      <name>Cairo Deployment Repository</name>
-      <url>scp://shell.sf.net/home/groups/c/ca/cairo/htdocs/repository</url>
+      <id>speechforge-repository</id>
+      <name>Speechforge Repository</name>
+      <url>scp://www.speechforge.org/home/webadmin/speechforge.org/html/repository</url>
     </repository>
-    <site>
-      <id>cairo-site</id>
-      <!--url>scp://shell.sf.net/home/groups/${pom.artifactId.substring(0,1)}/${pom.artifactId.substring(0,2)}/${pom.artifactId}/htdocs/</url-->
-      <url>scp://shell.sf.net/home/groups/c/ca/cairo/htdocs</url>
-    </site>
     <downloadUrl>https://sourceforge.net/project/showfiles.php?group_id=${project.group.id}</downloadUrl>
   </distributionManagement>
 
