@@ -249,16 +249,10 @@
     </repository>
 
     <repository>
-      <id>cairo</id>
-      <name>Cairo Deployment Repository</name>
-      <url>http://cairo.sourceforge.net/repository</url>
-    </repository>
-
-    <repository>
-      <id>mrcp4j</id>
-      <name>MRCP4J Deployment Repository</name>
-      <url>http://mrcp4j.sourceforge.net/repository</url>
-    </repository>
+      <id>speechforge-repository</id>
+      <name>SpeechForge Repository</name>
+      <url>http://www.speechforge.org/repository/</url>
+    </repository>    
 
   </repositories>
 
@@ -432,9 +426,9 @@
   <distributionManagement>
     <repository>
       <uniqueVersion>false</uniqueVersion>
-      <id>cairo-repository</id>
-      <name>Cairo Deployment Repository</name>
-      <url>scp://shell.sf.net/home/groups/c/ca/cairo/htdocs/repository</url>
+      <id>speechforge-repository</id>
+      <name>Speechforge Repository</name>
+      <url>scp://www.speechforge.org/home/webadmin/speechforge.org/html/repository</url>
     </repository>
     <site>
       <id>speechforge-site</id>
