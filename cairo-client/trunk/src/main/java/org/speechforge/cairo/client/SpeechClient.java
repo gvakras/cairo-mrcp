@@ -155,10 +155,18 @@ public interface SpeechClient {
     //TODO: Move the MrcpRequestState out of the interface (hide MRCP)
     public MrcpRequestState sendStartInputTimersRequest() throws MrcpInvocationException, IOException, InterruptedException;
 
+
+    
+    public void addListener(SpeechEventListener listener);
+    
+    public void removeListener(SpeechEventListener listener);
+    
     /**
      * Sets the  listener.  To set the listener for methods that don't have a listener parameter.
      * 
      * @param listener the new default listener
+     * 
+     * @deprecated
      */
     public void setListener(SpeechEventListener listener);
     

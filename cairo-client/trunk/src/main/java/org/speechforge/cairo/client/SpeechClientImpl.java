@@ -1,16 +1,12 @@
 package org.speechforge.cairo.client;
 
-
-
 import org.speechforge.cairo.client.SpeechClient;
 import org.speechforge.cairo.client.SpeechEventListener;
-import org.speechforge.cairo.client.SpeechEventListener.EventType;
 import org.speechforge.cairo.client.SpeechRequest.RequestType;
 import org.speechforge.cairo.client.recog.InvalidRecognitionResultException;
 import org.speechforge.cairo.client.recog.RecognitionResult;
 import org.speechforge.cairo.rtp.NativeMediaClient;
 import org.speechforge.cairo.sip.SdpMessage;
-import org.speechforge.cairo.sip.SipSession;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
@@ -18,6 +14,7 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.Collection;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
@@ -25,7 +22,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.sdp.MediaDescription;
 import javax.sdp.SdpException;
-import javax.sip.SipException;
 import org.apache.log4j.Logger;
 import org.mrcp4j.MrcpEventName;
 import org.mrcp4j.MrcpMethodName;
@@ -122,8 +118,7 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
     /** The _active recognition. */
     SpeechRequest _activeRecognition;
 
-    /** The default listener. */
-    private SpeechEventListener defaultListener;
+    private final Collection<SpeechEventListener> listenerList;
     
     /**
      * Instantiates a new speech client impl.
@@ -137,7 +132,8 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
         _ttsChannel.addEventListener(this);
         _recogChannel = recog;
         _recogChannel.addEventListener(this); 
-        //activeRequests = new HashMap<String,SpeechRequest>();
+        listenerList = new java.util.ArrayList<SpeechEventListener>();
+        
     }
 
 
@@ -205,11 +201,8 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
             //else an event from an asynch request, just send the event on
         } else {
             
-            if (defaultListener!= null) {
-               defaultListener.speechSynthEventReceived(event);          
-            } else {
-                _logger.warn("No Listener, do dropping the tts event "+event.toString()); 
-            }
+        	fireSynthEvent(event);
+
         }
         
    
@@ -305,11 +298,8 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
                 }
             }
             
-            if (defaultListener!=null) {
-               defaultListener.recognitionEventReceived(event, r);  
-            } else {
-               _logger.warn("No Listener, do dropping the recognition event "+event.toString()); 
-            }
+            fireRecogEvent(event,r);
+
         //}
     }
 
@@ -691,7 +681,7 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
      * @see org.speechforge.cairo.client.SpeechClient#setListener(org.speechforge.cairo.client.SpeechEventListener)
      */
     public void setListener(SpeechEventListener listener) {
-        this.defaultListener = listener;
+        addListener(listener);
     }
 
     /* (non-Javadoc)
@@ -1112,6 +1102,43 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
         
     }
 
+
+  
+	public void addListener(SpeechEventListener listener) {
+        synchronized (listenerList) {
+        	listenerList.add(listener);
+        }
+	    
+    }
+
+
+	public void removeListener(SpeechEventListener listener) {
+        synchronized (listenerList) {
+        	listenerList.remove(listener);
+        }
+    }
+
+
+    private void fireSynthEvent(final MrcpEvent event) {
+        synchronized (listenerList) {
+            Collection<SpeechEventListener> copy =  new java.util.ArrayList<SpeechEventListener>();        
+            copy.addAll(listenerList);
+            for (SpeechEventListener current : copy) {
+                current.speechSynthEventReceived(event);
+            }
+        }
+    }
+    
+
+    private void fireRecogEvent(final MrcpEvent event,RecognitionResult result) {
+        synchronized (listenerList) {
+            Collection<SpeechEventListener> copy =  new java.util.ArrayList<SpeechEventListener>();        
+            copy.addAll(listenerList);
+            for (SpeechEventListener current : copy) {
+                current.recognitionEventReceived(event, result);
+            }
+        }
+    }
 
 
 }
