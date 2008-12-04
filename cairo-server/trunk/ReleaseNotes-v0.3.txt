@@ -8,10 +8,10 @@ utilizing existing open source speech resources.
 Version History
 ---------------
 
-Cairo v0.3 adds the improved support for speech clients by adding support for 
-hotwword mode, pre-recorded prompts, SIP session shutdown (via BYE commands), 
-DTMF (via INFO) and basic register method for softphone integration.  There has also
-been further improvements with recognition performance.  This release also introduces 
+Cairo v0.3 adds improved support for speech clients by adding support for 
+hotword recognition mode, pre-recorded prompt playback, active session termination (via SIP BYE commands), 
+SIP based DTMF detection using the SIP INFO method and basic register method for softphone integration.  There has also
+been further improvements made in speech recognition performance and endpointing.  This release also factors out some common code into  
 3 new subprojects: cairo-rtp, cairo-sip and cairo-client.
 
 Cairo v0.2 adds support for establishing sessions using Session Initiation
@@ -30,36 +30,33 @@ Change Log for Project Cairo:
 =============================
 
 Cairo v0.3:
+-----------
 
-* Adds seperate cairo-sip and cairo-rtp jars that can be shared between 
-servers and clients.  Adds the cairo-client jar for ease the development
-of mrcpv2 clients.
-
-* Adds the ability to handles BYE requests and releases speech resources at 
-the end of sessions.
-
-* Adds support fo detecting out of grammar respnses.
-
-* Adds support for hotword barge-in mode.
-
-* Adds shell scripts for running on Unix
-
-* Adds basic support for the SIP Info method (to support SIP based DTMF).
-
-* Adds support for the SIP Register method (to support demos using SIP softphones like Xlite)
-
-* Improves recognition detection by cofiguring garbace collection and improved endpoint detection
-and configuring the endpointer.
-
-* Improves rtp transmit with JMF workaround to ensure 20ms packet size. 
-
-* Adds support for pre-recorded prompts
-
-* Adds a simple natural language processing to obtain a semantic interpretion of the utterance based
-on the grammar.
+	* Re-usable SIP and RTP related functionaliy has been factored out into separate cairo-sip and cairo-rtp sub-projects that can be re-used by both speech servers and clients.
+	
+	* Adds the ability to handle SIP BYE requests which are used to trigger the release of speech resources at the end of an active session.
+	
+	* Adds support for detection of out-of-grammar responses.
+	
+	* Adds support for hotword barge-in mode.
+	
+	* Adds shell scripts for launching speech server processes on Unix/Linux.
+	
+	* Adds support for SIP based DTMF detection using the SIP INFO method.
+	
+	* Adds support for direct connection from SIP softphones like Xlite by implementing the SIP REGISTER method.
+	
+	* Improved recognition performance has been achieved by a number of methods, including adjusting the garbage collection strategy and better start and end of speech detection (endpointing).
+	
+	* Improves RTP transmit with JMF workaround to ensure 20ms packet size. 
+	
+	* Adds support for playback of pre-recorded prompts on the speechsynth channel.
+	
+	* Adds natural language processing to obtain a semantic interpretion of the utterance based on the grammar.
 
 Cairo v0.2:
 -----------
+
 * Use SIP instead of Java RMI for session initiation.
 
 * Use the WSJ 8khz acoustic model instead of the 16khz model for speech
@@ -70,4 +67,6 @@ much improved.
 
 Cairo v0.1:
 -----------
+
 No prior release to compare with.
+
