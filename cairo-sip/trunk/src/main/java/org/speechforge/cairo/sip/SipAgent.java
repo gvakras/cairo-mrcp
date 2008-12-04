@@ -420,19 +420,23 @@ public class SipAgent {
             
 
             if (_logger.isDebugEnabled()) {
-                _logger.debug("------------- SENDING A SIP REQUEST ---------------");
-                _logger.debug("Sending a "+ ctx.getRequest().getMethod()+" SIP Request");
+                StringBuilder sb = new StringBuilder(); 
+                sb.append("------------- SENDING A SIP REQUEST ---------------");
+                sb.append("\nSending a "+ ctx.getRequest().getMethod()+" SIP Request");
                 Iterator headers = ctx.getRequest().getHeaderNames();
                 while (headers.hasNext()) {
-                    _logger.debug(ctx.getRequest().getHeader((String) headers.next()).toString());
+                	sb.append("\n");
+                	sb.append(ctx.getRequest().getHeader((String) headers.next()).toString());
                 }
                 byte[] contentBytes = ctx.getRequest().getRawContent();
                 if (contentBytes == null) {
-                    _logger.debug("No content in the request.");
+                	sb.append("\nNo content in the request.");
                 } else {
                    String contentString = new String(contentBytes);
-                   _logger.debug(contentString);
+                   sb.append("\n");
+                   sb.append(contentString);
                 } 
+                _logger.debug(sb);
              } 
             
             // send the request out.
@@ -441,6 +445,7 @@ public class SipAgent {
             Dialog dialog = ctx.getDialog();
             
             session = SipSession.createSipSession(this, ctx, dialog, null,null,null,null);
+            session.setState(SipSession.SessionState.waitingForInviteResponse);
             SipSession.addPendingSession(session);
 
         } catch (TransactionUnavailableException e) {
@@ -571,39 +576,47 @@ public class SipAgent {
     }
     
     public static void sendResponse(ServerTransaction serverTransaction, Response response) throws SipException, InvalidArgumentException {
-        if (SipListenerImpl._logger.isDebugEnabled()) {
-            SipListenerImpl._logger.debug("------------- SENDING A SIP RESPONSE ---------------");
-            SipListenerImpl._logger.debug("Sending a SIP Response.  Status: "+response.getStatusCode()+", "+response.getReasonPhrase());
+        if (_logger.isDebugEnabled()) {
+            StringBuilder sb = new StringBuilder(); 
+            sb.append("------------- SENDING A SIP RESPONSE ---------------");
+            sb.append("\nSending a SIP Response.  Status: "+response.getStatusCode()+", "+response.getReasonPhrase());
             Iterator headers = response.getHeaderNames();
             while (headers.hasNext()) {
-                SipListenerImpl._logger.debug(response.getHeader((String) headers.next()).toString());
+            	sb.append("\n");
+            	sb.append(response.getHeader((String) headers.next()).toString());
             }
             byte[] contentBytes = response.getRawContent();
             if (contentBytes == null) {
-                SipListenerImpl._logger.debug("No content in the response.");
+            	sb.append("\nNo content in the response.");
             } else {
-               String contentString = new String(contentBytes);
-               SipListenerImpl._logger.debug(contentString);
+            	sb.append("\n");
+                String contentString = new String(contentBytes);
+                sb.append(contentString);
             } 
+            _logger.debug(sb);
          }
         serverTransaction.sendResponse(response);
     }
 
     public static void sendRequest(Dialog dialog, ClientTransaction ctx) throws TransactionDoesNotExistException, SipException {
         if (_logger.isDebugEnabled()) {
-            _logger.debug("------------- SENDING A SIP REQUEST ---------------");
-            _logger.debug("Sending a "+ ctx.getRequest().getMethod()+" SIP Request");
+        	StringBuilder sb = new StringBuilder(); 
+        	sb.append("------------- SENDING A SIP REQUEST ---------------");
+        	sb.append("\nSending a "+ ctx.getRequest().getMethod()+" SIP Request");
             Iterator headers = ctx.getRequest().getHeaderNames();
             while (headers.hasNext()) {
-                _logger.debug(ctx.getRequest().getHeader((String) headers.next()).toString());
+            	sb.append("\n");
+            	sb.append(ctx.getRequest().getHeader((String) headers.next()).toString());
             }
             byte[] contentBytes = ctx.getRequest().getRawContent();
             if (contentBytes == null) {
-                _logger.debug("No content in the request.");
+            	sb.append("\nNo content in the request.");
             } else {
                String contentString = new String(contentBytes);
-               _logger.debug(contentString);
+           	   sb.append("\n");
+               sb.append(contentString);
             } 
+            _logger.debug(sb);
          } 
         dialog.sendRequest(ctx);
     }

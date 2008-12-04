@@ -96,23 +96,27 @@ public class SipListenerImpl implements SipListener {
          */
         
         if (_logger.isDebugEnabled()) {
-            _logger.debug("------------- RECEIVED A SIP REQUEST ---------------");
+        	  StringBuilder sb = new StringBuilder(); 
+        	  sb.append("\n------------- RECEIVED A SIP REQUEST ---------------");
 
-            _logger.debug("Received a "+ request.getMethod() +" SIP request");
+        	  sb.append("\nReceived a "+ request.getMethod() +" SIP request");
             if (requestEvent.getDialog() != null) {
-               _logger.debug("Pre-existing Dialog: "+requestEvent.getDialog().toString());
+            	sb.append("\nPre-existing Dialog: "+requestEvent.getDialog().toString());
             }
             Iterator headers = request.getHeaderNames();
             while (headers.hasNext()) {
-                _logger.debug(request.getHeader((String) headers.next()).toString());
+           	    sb.append("\n");
+            	sb.append(request.getHeader((String) headers.next()).toString());
             }
             byte[] contentBytes = request.getRawContent();
             if (contentBytes == null) {
-                _logger.debug("No content in the request.");
+            	sb.append("\nNo content in the request.");
             } else {
                String contentString = new String(contentBytes);
-               _logger.debug(contentString);
-            } 
+               sb.append("\n");
+               sb.append(contentString);
+            }
+            _logger.debug(sb);
          }
 
         if (request.getMethod().equals(Request.INVITE)) {
@@ -161,22 +165,26 @@ public class SipListenerImpl implements SipListener {
         CSeqHeader cseq = (CSeqHeader) response.getHeader(CSeqHeader.NAME);
 
         if (_logger.isDebugEnabled()) {
-           _logger.debug("------------- RECEIVED A SIP RESPONSE ---------------");
-            _logger.debug("Sip Response received : Status:" + response.getStatusCode()+", "+response.getReasonPhrase());
+        	 StringBuilder sb = new StringBuilder();
+        	 sb.append("\n------------- RECEIVED A SIP RESPONSE ---------------");
+        	 sb.append("\nSip Response received : Status:" + response.getStatusCode()+", "+response.getReasonPhrase());
            
            Iterator headers = response.getHeaderNames();
            while (headers.hasNext()) {
-               _logger.debug(response.getHeader((String) headers.next()).toString());
+        	   sb.append("\n");
+        	   sb.append(response.getHeader((String) headers.next()).toString());
            }
            
            byte[] contentBytes = response.getRawContent();
 
            if (contentBytes == null) {
-               _logger.debug("No content in the response.");
+        	   sb.append("\nNo content in the response.");
            } else {
                String contentString = new String(contentBytes);
-               _logger.debug(contentString);
+               sb.append("\n");
+               sb.append(contentString);
            } 
+           _logger.debug(sb);
         }
         
         
@@ -203,22 +211,25 @@ public class SipListenerImpl implements SipListener {
                     }
                     
                     if (_logger.isDebugEnabled()) {
-                        _logger.debug("------------- SENDING A SIP ACK REQUEST ---------------");
+                        StringBuilder sb = new StringBuilder(); 
+                        sb.append("\n------------- SENDING A SIP ACK REQUEST ---------------");
                      
                         Iterator headers = ackRequest.getHeaderNames();
                         while (headers.hasNext()) {
-                            _logger.debug(ackRequest.getHeader((String) headers.next()).toString());
+                        	   sb.append("\n");
+                        	 sb.append(ackRequest.getHeader((String) headers.next()).toString());
                         }
                         
                         byte[] contentBytes = ackRequest.getRawContent();
 
                         if (contentBytes == null) {
-                            _logger.debug("No content in the response.");
+                        	sb.append("\nNo content in the response.");
                         } else {
                             String contentString = new String(contentBytes);
-                            _logger.debug(contentString);
+                            sb.append("\n");
+                            sb.append(contentString);
                         } 
-                        
+                        _logger.debug(sb);
                      }
                     
                     
@@ -249,6 +260,7 @@ public class SipListenerImpl implements SipListener {
 
                         SdpMessage sdpMessage = SdpMessage.createSdpSessionMessage(sd);
                         _logger.debug(sdpMessage.toString());
+                        session.setState(SipSession.SessionState.inviteResponseReceived);
                         SdpMessage sdpResponse = sipClient.getSessionListener().processInviteResponse(true, sdpMessage, session);
                     } else {
                         // TODO: handle error condition where the session was
@@ -276,6 +288,7 @@ public class SipListenerImpl implements SipListener {
                     session = SipSession.getSessionFromPending(ctx.toString());
                     if (session != null) {
                        SipSession.removeSessionFromPending(session) ;
+                       session.setState(SipSession.SessionState.inviteResponseReceived);
                        SdpMessage sdpResponse = sipClient.getSessionListener().processInviteResponse(false, null, session);
                     }
                 } else { //methods not handled for this repsonse code
@@ -301,6 +314,7 @@ public class SipListenerImpl implements SipListener {
             SipSession session = SipSession.getSessionFromPending(ctx.toString());
             if (session != null) {
                 SipSession.removeSessionFromPending(session);
+                session.setState(SipSession.SessionState.inviteTimedOut);
             }
         }
         //TODO: should send a cancel request too
