@@ -32,7 +32,6 @@ import javax.sip.Dialog;
 import javax.sip.RequestEvent;
 import javax.sip.ServerTransaction;
 import javax.sip.SipException;
-import javax.sip.message.Request;
 
 import org.apache.log4j.Logger;
 import org.mrcp4j.client.MrcpChannel;
@@ -46,6 +45,17 @@ public class SipSession {
 
     private static Logger _logger = Logger.getLogger(SipSession.class);
 
+    
+    // Note.  Considered adding additional states (active and inactive).  decided against it
+    // since that would be additional comblexity that is not used.  
+    // TODO: Revisit design decision to have only 3 states.  Maybe  additional states are useful
+    public enum SessionState {
+        waitingForInviteResponse,
+        inviteTimedOut,
+        inviteResponseReceived}
+    
+    private SessionState state;
+    
     //common to server and client tx
     private SipAgent agent;
     
@@ -59,6 +69,7 @@ public class SipSession {
     private String channelName;
     private String applicationName;
     
+    private int remoteRtpPort;
     
     //client side transaction
     private ClientTransaction ctx;
@@ -319,6 +330,34 @@ public class SipSession {
      */
     public void setApplicationName(String applicationName) {
         this.applicationName = applicationName;
+    }
+
+	/**
+     * @return the state
+     */
+    public SessionState getState() {
+    	return state;
+    }
+
+	/**
+     * @param state the state to set
+     */
+    public void setState(SessionState state) {
+    	this.state = state;
+    }
+
+	/**
+     * @return the remoteRtpPort
+     */
+    public int getRemoteRtpPort() {
+    	return remoteRtpPort;
+    }
+
+	/**
+     * @param remoteRtpPort the remoteRtpPort to set
+     */
+    public void setRemoteRtpPort(int remoteRtpPort) {
+    	this.remoteRtpPort = remoteRtpPort;
     }
 
 }
