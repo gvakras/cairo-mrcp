@@ -1,43 +1,41 @@
-===================================
-Readme for Cairo Speech Server v${project.version}
-===================================
+============================
+Readme for cairo-server v${project.version}
+============================
 
 Overview
 --------
 
-Cairo provides an open source speech resource server written entirely in the Java programming language. To achieve maximum compatibility with existing and future speech clients the Cairo server has been designed from the ground up to comply with the MRCPv2 standard. (For more information on MRCPv2 please see http://tools.ietf.org/html/draft-ietf-speechsc-mrcpv2)
+Cairo-server is an open source speech resource server written entirely in the Java programming language.  Cairo-server builds upon pre-existing open source speech projects such as FreeTTS and Sphinx and adds additional functionality to meet the requirements necessary for use in enterprise scale deployments of speech/telephony applications.
 
-The purpose of Cairo is not to duplicate functionality provided by existing open source speech projects such as FreeTTS and Sphinx, but rather to build upon them and provide additional functionality such as clustering, load balancing and failover support in order to meet the requirements necessary for use in enterprise scale deployments of speech/telephony applications.
+To achieve maximum compatibility with existing and future speech clients cairo-server has been designed from the ground up to comply with the MRCPv2 standard. (For more information on MRCPv2 please see http://tools.ietf.org/html/draft-ietf-speechsc-mrcpv2)
 
 
-New Features for Cairo v${project.version}
---------------------------
+New Features for cairo-server v${project.version}
+----------------------------------
 
-	* Re-usable SIP and RTP related functionaliy has been factored out into separate cairo-sip and cairo-rtp sub-projects that can be re-used by both speech servers and clients.
-	
-	* Adds the ability to handle SIP BYE requests which are used to trigger the release of speech resources at the end of an active session.
+	* Cairo has been renamed to cairo-server and re-usable SIP and RTP related functionality has been factored out into separate cairo-sip and cairo-rtp projects for use by both speech servers and speech clients.
 	
 	* Adds support for detection of out-of-grammar responses.
 	
 	* Adds support for hotword barge-in mode.
 	
-	* Adds shell scripts for launching speech server processes on Unix/Linux.
-	
-	* Adds support for SIP based DTMF detection using the SIP INFO method.
+	* Now runs on Linux out of the box with provided shell scripts for launching speech server processes.
 	
 	* Adds support for direct connection from SIP softphones like Xlite by implementing the SIP REGISTER method.
 	
-	* Improved recognition performance has been achieved by a number of methods, including adjusting the garbage collection strategy and better start and end of speech detection (endpointing).
+	* Adds handling of SIP BYE requests which are used to trigger the immediate release of speech resources at the completion of an active session.
+
+  * Recognition performance has been improved by a number of methods, including adjusting the garbage collection strategy and better start and end of speech detection (endpointing).
 	
-	* Improves RTP transmit with JMF workaround to ensure 20ms packet size. 
+	* RTP transmission has been improved with the use of a JMF workaround to ensure 20ms packet size. 
 	
 	* Adds support for playback of pre-recorded prompts on the speechsynth channel.
 	
 	* Adds natural language processing to obtain a semantic interpretion of the utterance based on the grammar.
 
 
-Limitations for Cairo v${project.version}
---------------------------
+Limitations for cairo-server v${project.version}
+---------------------------------
 
 General limitations of this release:
 

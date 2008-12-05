@@ -1,25 +1,31 @@
-Release Notes for Cairo v0.3:
-=============================
+Release Notes for cairo-server v0.3:
+====================================
 
-Project Cairo sets out to provide an enterprise grade, Media Resource
-Control Protocol Version 2 (MRCPv2) compliant speech server solution
-utilizing existing open source speech resources.
+Cairo-server is an open source speech resource server written entirely in the
+Java programming language.  Cairo-server builds upon pre-existing open source
+speech projects such as FreeTTS and Sphinx and adds additional functionality
+to meet the requirements necessary for use in enterprise scale deployments of
+speech/telephony applications.
+
 
 Version History
 ---------------
 
-Cairo v0.3 adds improved support for speech clients by adding support for 
-hotword recognition mode, pre-recorded prompt playback, active session termination (via SIP BYE commands), 
-SIP based DTMF detection using the SIP INFO method and basic register method for softphone integration.  There has also
-been further improvements made in speech recognition performance and endpointing.  This release also factors out some common code into  
-3 new subprojects: cairo-rtp, cairo-sip and cairo-client.
+Cairo-server v0.3 - adds improved support for speech clients by adding hotword
+recognition mode, playback of pre-recorded prompts, SIP softphone integration
+and termination of active requests and sessions from the client.  Natural
+language processing has also been added and there have been further
+improvements made in the areas of endpointing and speech recognition
+performance.  Additionaly, this release also factors out some common code into
+3 new sub-projects: cairo-rtp, cairo-sip and cairo-client. What was previously
+Cairo has now been renamed to cairo-server.
 
-Cairo v0.2 adds support for establishing sessions using Session Initiation
+Cairo v0.2 - adds support for establishing sessions using Session Initiation
 Protocol (SIP) signalling and improves speech recognition performance by
 matching the voice models used by Sphinx to the sampling rate of the
 received audio data.
 
-Cairo v0.1 implemented support for speech synthesis and speech recognition
+Cairo v0.1  - implements support for speech synthesis and speech recognition
 functionality using Media Resource Control Protocol Version 2 (MRCPv2) for
 the control channel between the speech client and the speech resource and
 Real-time Transport Protocol (RTP) for streaming audio to and from the
@@ -32,27 +38,35 @@ Change Log for Project Cairo:
 Cairo v0.3:
 -----------
 
-	* Re-usable SIP and RTP related functionaliy has been factored out into separate cairo-sip and cairo-rtp sub-projects that can be re-used by both speech servers and clients.
-	
-	* Adds the ability to handle SIP BYE requests which are used to trigger the release of speech resources at the end of an active session.
-	
-	* Adds support for detection of out-of-grammar responses.
-	
-	* Adds support for hotword barge-in mode.
-	
-	* Adds shell scripts for launching speech server processes on Unix/Linux.
-	
-	* Adds support for SIP based DTMF detection using the SIP INFO method.
-	
-	* Adds support for direct connection from SIP softphones like Xlite by implementing the SIP REGISTER method.
-	
-	* Improved recognition performance has been achieved by a number of methods, including adjusting the garbage collection strategy and better start and end of speech detection (endpointing).
-	
-	* Improves RTP transmit with JMF workaround to ensure 20ms packet size. 
-	
-	* Adds support for playback of pre-recorded prompts on the speechsynth channel.
-	
-	* Adds natural language processing to obtain a semantic interpretion of the utterance based on the grammar.
+* Cairo has been renamed to cairo-server and re-usable SIP and RTP related
+functionality has been factored out into separate cairo-sip and cairo-rtp
+projects for use by both speech servers and speech clients.
+
+* Adds support for detection of out-of-grammar responses.
+
+* Adds support for hotword barge-in mode.
+
+* Now runs on Linux out of the box with provided shell scripts for launching
+speech server processes.
+
+* Adds support for direct connection from SIP softphones like Xlite by
+implementing the SIP REGISTER method.
+
+* Adds handling of SIP BYE requests which are used to trigger the immediate
+release of speech resources at the completion of an active session.
+
+* Recognition performance has been improved by a number of methods, including
+adjusting the garbage collection strategy and better start and end of speech
+detection (endpointing).
+
+* RTP transmission has been improved with the use of a JMF workaround to ensure
+20ms packet size. 
+
+* Adds support for playback of pre-recorded prompts on the speechsynth channel.
+
+* Adds natural language processing to obtain a semantic interpretion of the
+utterance based on the grammar.
+
 
 Cairo v0.2:
 -----------
