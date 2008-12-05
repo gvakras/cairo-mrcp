@@ -1,4 +1,4 @@
-Release Notes for cairo-sip v0.1:
+Release Notes for cairo-sip v0.2:
 =================================
 The cairo-sip library provides a simple Java API for supporting SIP/SDP message
 communication between MRCPv2 clients and servers.
@@ -14,9 +14,14 @@ The Session Initiation Protocol (SIP) and the Session Description Protocol
    media sessions and associated parameters between the media source or sink
    and the media server."
 
-This is the first release for the cairo-sip project.  This release provides the
-necessary SIP and SDP capabilities required for implementing MRCPv2 clients and
-servers.
+
+Version History
+---------------
+
+Cairo-sip v0.2 adds support for NAT traversal and includes bug fixes.
+
+Cairo-sip v0.1 provides the necessary SIP and SDP capabilities required for 
+implementing MRCPv2  clients and servers.
 
 
 Change Log for Project cairo-sip:
