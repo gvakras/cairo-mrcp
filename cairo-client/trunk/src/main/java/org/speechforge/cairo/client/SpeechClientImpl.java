@@ -129,9 +129,11 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
         super();
 
         _ttsChannel = tts;
-        _ttsChannel.addEventListener(this);
+        if (tts != null)
+           _ttsChannel.addEventListener(this);
         _recogChannel = recog;
-        _recogChannel.addEventListener(this); 
+        if (recog != null)
+           _recogChannel.addEventListener(this); 
         listenerList = new java.util.ArrayList<SpeechEventListener>();
         
     }
@@ -362,9 +364,14 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws MrcpInvocationException the mrcp invocation exception
      * @throws InterruptedException the interrupted exception
+     * @throws NoMediaControlChannelException 
      */
-    public SpeechRequest play(boolean urlPrompt, String prompt) throws IOException, MrcpInvocationException, InterruptedException {
+    public SpeechRequest play(boolean urlPrompt, String prompt) throws IOException, MrcpInvocationException, InterruptedException, NoMediaControlChannelException {
 
+    	if (_ttsChannel == null) 
+    		throw new  NoMediaControlChannelException();
+    	
+ 
         // speak request
         MrcpRequest request = _ttsChannel.createRequest(MrcpMethodName.SPEAK);
         if (!urlPrompt) {
@@ -401,13 +408,15 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
      * @throws MrcpInvocationException the mrcp invocation exception
      * @throws InterruptedException the interrupted exception
      * @throws IllegalValueException the illegal value exception
+     * @throws NoMediaControlChannelException 
      */
-    public SpeechRequest recognize(String grammarUrl, boolean hotword, boolean attachGrammar, long noInputTimeout) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException {
-
-
+    public SpeechRequest recognize(String grammarUrl, boolean hotword, boolean attachGrammar, long noInputTimeout) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException {
+  	
+    	if (_recogChannel == null)
+    		throw new  NoMediaControlChannelException();
+  
         MrcpRequest request = constructRecogRequest(grammarUrl,hotword, attachGrammar,  noInputTimeout);
-
-        
+      
         _logger.debug("REQUEST: "+request.toString());
         MrcpResponse response = _recogChannel.sendRequest(request);
 
@@ -416,8 +425,7 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
         }
 
         if (response.getRequestState().equals(MrcpRequestState.COMPLETE)) {
-            throw new RuntimeException("Recognition failed to start!");
-            
+            throw new RuntimeException("Recognition failed to start!");           
         }
         //_activeRequestType = RequestType.recognize;
         SpeechRequest queuedRecognition = new SpeechRequest(response.getRequestID(),RequestType.recognize,false);   
@@ -440,9 +448,13 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
      * @throws MrcpInvocationException the mrcp invocation exception
      * @throws InterruptedException the interrupted exception
      * @throws IllegalValueException the illegal value exception
+     * @throws NoMediaControlChannelException 
      */
     public  SpeechRequest playAndRecognize(boolean urlPrompt, String prompt, String grammarUrl, boolean hotword)
-    throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException {
+    throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException {
+    	if ((_ttsChannel == null) ||  (_recogChannel == null))
+    		throw new  NoMediaControlChannelException();
+    
         long noInputTimeout=0;
         MrcpRequest request = constructRecogRequest(grammarUrl, hotword, true,noInputTimeout);
         SpeechRequest speechRequest = internalPlayAndRecogize(urlPrompt, prompt, request);
@@ -595,7 +607,10 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
     /* (non-Javadoc)
      * @see org.speechforge.cairo.client.SpeechClient#playBlocking(boolean, java.lang.String)
      */
-    public synchronized void playBlocking(boolean urlPrompt, String prompt) throws IOException, MrcpInvocationException, InterruptedException {
+    public synchronized void playBlocking(boolean urlPrompt, String prompt) throws IOException, MrcpInvocationException, InterruptedException, NoMediaControlChannelException {
+    	if (_ttsChannel == null) 
+    		throw new  NoMediaControlChannelException();
+    
         _activeBlockingTts = this.play(urlPrompt, prompt);
         //Block...
         //ActiveRequest request = activeRequests.get(String.valueOf(response.getRequestID()));
@@ -616,7 +631,7 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
     /* (non-Javadoc)
      * @see org.speechforge.cairo.client.SpeechClient#recognizeBlocking(java.lang.String, boolean, boolean)
      */
-    public synchronized RecognitionResult recognizeBlocking(String grammarUrl, boolean hotword, boolean attachGrammar, long noInputTimeout) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException {
+    public synchronized RecognitionResult recognizeBlocking(String grammarUrl, boolean hotword, boolean attachGrammar, long noInputTimeout) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException {
         _activeRecognition = this.recognize(grammarUrl, hotword, attachGrammar, noInputTimeout);
         //Block...
         //ActiveRequest request = activeRequests.get(String.valueOf(response.getRequestID()));
@@ -639,7 +654,10 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
     /* (non-Javadoc)
      * @see org.speechforge.cairo.client.SpeechClient#playAndRecognizeBlocking(boolean, java.lang.String, java.lang.String, boolean)
      */
-    public synchronized RecognitionResult playAndRecognizeBlocking(boolean urlPrompt, String prompt, String grammarUrl, boolean hotword) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException {
+    public synchronized RecognitionResult playAndRecognizeBlocking(boolean urlPrompt, String prompt, String grammarUrl, boolean hotword) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException {
+    	if ((_ttsChannel == null) ||  (_recogChannel == null))
+    		throw new  NoMediaControlChannelException();
+    
         long noInputTimeout=0;
         MrcpRequest mrcpRequest = constructRecogRequest(grammarUrl, hotword, true,noInputTimeout);
         _activeRecognition = internalPlayAndRecogize(urlPrompt, prompt, mrcpRequest);
@@ -695,7 +713,11 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
     /* (non-Javadoc)
      * @see org.speechforge.cairo.client.SpeechClient#playAndRecognizeBlocking(boolean, java.lang.String, java.io.Reader, boolean)
      */
-    public synchronized RecognitionResult playAndRecognizeBlocking(boolean urlPrompt, String prompt, Reader reader, boolean hotword) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException {
+    public synchronized RecognitionResult playAndRecognizeBlocking(boolean urlPrompt, String prompt, Reader reader, boolean hotword) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException {
+    	if ((_ttsChannel == null) ||  (_recogChannel == null))
+    		throw new  NoMediaControlChannelException();
+    
+    	
         long noInputTimeout=0;
         MrcpRequest mrcpRequest = constructRecogRequest(reader,hotword,noInputTimeout);
         SpeechRequest request = internalPlayAndRecogize(urlPrompt,prompt, mrcpRequest);
@@ -722,8 +744,12 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
     /* (non-Javadoc)
      * @see org.speechforge.cairo.client.SpeechClient#recognizeBlocking(java.io.Reader, boolean)
      */
-    public synchronized RecognitionResult recognizeBlocking(Reader reader, boolean hotword, long noInputTimeout) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException {
-        _logger.warn("The recognize blocking(reader,hotwordFlag) method is not implemented");
+    public synchronized RecognitionResult recognizeBlocking(Reader reader, boolean hotword, long noInputTimeout) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException {
+    	
+    	if (_recogChannel == null)
+    		throw new  NoMediaControlChannelException();
+  
+    	_logger.warn("The recognize blocking(reader,hotwordFlag) method is not implemented");
         return null;
     }
 
@@ -731,7 +757,10 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
     /* (non-Javadoc)
      * @see org.speechforge.cairo.client.SpeechClient#queuePrompt(boolean, java.lang.String)
      */
-    public SpeechRequest queuePrompt(boolean urlPrompt, String prompt) throws IOException, MrcpInvocationException, InterruptedException {
+    public SpeechRequest queuePrompt(boolean urlPrompt, String prompt) throws IOException, MrcpInvocationException, InterruptedException, NoMediaControlChannelException {
+    	if (_ttsChannel == null)
+    		throw new  NoMediaControlChannelException();
+    
         return play(urlPrompt, prompt);
     }
 
@@ -1025,8 +1054,11 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
     /* (non-Javadoc)
      * @see org.speechforge.cairo.client.SpeechClient#cancelRequest(org.speechforge.cairo.client.SpeechRequest)
      */
-    public void stopActiveRecognitionRequests() throws MrcpInvocationException, IOException, InterruptedException {
+    public void stopActiveRecognitionRequests() throws MrcpInvocationException, IOException, InterruptedException, NoMediaControlChannelException {
 
+    	if (_recogChannel == null) 
+    		throw new  NoMediaControlChannelException();
+    	
         MrcpRequest cancelRequest = _recogChannel.createRequest(MrcpMethodName.STOP);
         MrcpResponse response = _recogChannel.sendRequest(cancelRequest);
 
@@ -1053,7 +1085,11 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
         // TODO Determine if there are active requests before stopping them
         
         // Stop any active requests
-        this.stopActiveRecognitionRequests();
+        try {
+	        this.stopActiveRecognitionRequests();
+        } catch (NoMediaControlChannelException e) {
+	       _logger.debug("As part of shutting down the speech client, stopping active recognition requests.  No recog control channel so nothing to stop.");
+        }
         
         //shutdown the timers
         //cancel the no input timer
@@ -1073,7 +1109,12 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
     /* (non-Javadoc)
      * @see org.speechforge.cairo.client.SpeechClient#recognize(java.io.Reader, boolean, boolean)
      */
-    public SpeechRequest recognize(Reader reader, boolean hotword, boolean attachGrammar, long noInputTimeout) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException {
+    public SpeechRequest recognize(Reader reader, boolean hotword, boolean attachGrammar, long noInputTimeout) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException {
+    	
+    	if (_recogChannel == null)
+    		throw new  NoMediaControlChannelException();
+    
+    	
         MrcpRequest mrcpRequest = constructRecogRequest(reader,hotword,noInputTimeout);
         
         if (hotword) {

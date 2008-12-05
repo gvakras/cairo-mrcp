@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PACKAGE=org.speechforge.cairo.demo.bargein
+PACKAGE=org.speechforge.cairo.client.demo.bargein
 CLASS=BargeInClient
 
 LOCAL_RTP_PORT=42046

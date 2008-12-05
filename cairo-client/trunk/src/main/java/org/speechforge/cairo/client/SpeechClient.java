@@ -51,8 +51,9 @@ public interface SpeechClient {
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws MrcpInvocationException the mrcp invocation exception
      * @throws InterruptedException the interrupted exception
+     * @throws NoMediaControlChannelException 
      */
-    public void playBlocking(boolean urlPrompt, String prompt)  throws IOException, MrcpInvocationException, InterruptedException;
+    public void playBlocking(boolean urlPrompt, String prompt)  throws IOException, MrcpInvocationException, InterruptedException, NoMediaControlChannelException;
 
     
     /**
@@ -70,8 +71,9 @@ public interface SpeechClient {
      * @throws MrcpInvocationException the mrcp invocation exception
      * @throws InterruptedException the interrupted exception
      * @throws IllegalValueException the illegal value exception
+     * @throws NoMediaControlChannelException 
      */
-    public RecognitionResult recognizeBlocking(String grammarUrl, boolean hotword, boolean attachGrammar, long noInputTimeout)throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException;
+    public RecognitionResult recognizeBlocking(String grammarUrl, boolean hotword, boolean attachGrammar, long noInputTimeout)throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException;
 
 
     /**
@@ -88,8 +90,9 @@ public interface SpeechClient {
      * @throws MrcpInvocationException the mrcp invocation exception
      * @throws InterruptedException the interrupted exception
      * @throws IllegalValueException the illegal value exception
+     * @throws NoMediaControlChannelException 
      */
-    public RecognitionResult recognizeBlocking(Reader reader, boolean hotword, long noInputTimeout)throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException;
+    public RecognitionResult recognizeBlocking(Reader reader, boolean hotword, long noInputTimeout)throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException;
 
     
     /**
@@ -108,8 +111,9 @@ public interface SpeechClient {
      * @throws MrcpInvocationException the mrcp invocation exception
      * @throws InterruptedException the interrupted exception
      * @throws IllegalValueException the illegal value exception
+     * @throws NoMediaControlChannelException 
      */
-    public RecognitionResult playAndRecognizeBlocking(boolean urlPrompt, String prompt, String grammarUrl, boolean hotword) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException;
+    public RecognitionResult playAndRecognizeBlocking(boolean urlPrompt, String prompt, String grammarUrl, boolean hotword) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException;
     
     /**
      * Play and recognize blocking.  This version of play and recognize receievs a Reader to the grammar
@@ -127,8 +131,9 @@ public interface SpeechClient {
      * @throws MrcpInvocationException the mrcp invocation exception
      * @throws InterruptedException the interrupted exception
      * @throws IllegalValueException the illegal value exception
+     * @throws NoMediaControlChannelException 
      */
-    public RecognitionResult playAndRecognizeBlocking(boolean urlPrompt, String prompt, Reader reader, boolean hotword) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException;
+    public RecognitionResult playAndRecognizeBlocking(boolean urlPrompt, String prompt, Reader reader, boolean hotword) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException;
         
     
     /**
@@ -193,8 +198,9 @@ public interface SpeechClient {
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws MrcpInvocationException the mrcp invocation exception
      * @throws InterruptedException the interrupted exception
+     * @throws NoMediaControlChannelException 
      */
-    public SpeechRequest queuePrompt(boolean urlPormpt, String prompt)  throws IOException, MrcpInvocationException, InterruptedException;    
+    public SpeechRequest queuePrompt(boolean urlPormpt, String prompt)  throws IOException, MrcpInvocationException, InterruptedException, NoMediaControlChannelException;    
 
    
     /**
@@ -227,8 +233,9 @@ public interface SpeechClient {
      * @throws MrcpInvocationException the mrcp invocation exception
      * @throws InterruptedException the interrupted exception
      * @throws IllegalValueException the illegal value exception
+     * @throws NoMediaControlChannelException 
      */
-    public SpeechRequest recognize(String grammarUrl, boolean hotword, boolean attachGrammar, long noInputTimeout) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException ;
+    public SpeechRequest recognize(String grammarUrl, boolean hotword, boolean attachGrammar, long noInputTimeout) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException ;
 
     /**
      * Start speech recognition with the given grammar.  This method does not block.  The listener is called with the results.
@@ -244,8 +251,9 @@ public interface SpeechClient {
      * @throws MrcpInvocationException the mrcp invocation exception
      * @throws InterruptedException the interrupted exception
      * @throws IllegalValueException the illegal value exception
+     * @throws NoMediaControlChannelException 
      */
-    public SpeechRequest recognize(Reader reader, boolean hotword, boolean attachGrammar, long noInputTimeout) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException ;
+    public SpeechRequest recognize(Reader reader, boolean hotword, boolean attachGrammar, long noInputTimeout) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException ;
     
     /**
      * Cancel request.
@@ -254,8 +262,9 @@ public interface SpeechClient {
      * @throws InterruptedException 
      * @throws IOException 
      * @throws MrcpInvocationException 
+     * @throws NoMediaControlChannelException 
      */
-    public void stopActiveRecognitionRequests() throws MrcpInvocationException, IOException, InterruptedException;
+    public void stopActiveRecognitionRequests() throws MrcpInvocationException, IOException, InterruptedException, NoMediaControlChannelException;
     
     /**
      * Shutdown. close all channels and release all resources

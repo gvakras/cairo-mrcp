@@ -1,6 +1,6 @@
 @echo off
 
-set PACKAGE=org.speechforge.cairo.demo.bargein
+set PACKAGE=org.speechforge.cairo.client.demo.bargein
 set CLASS=BargeInClient
 
 set LOCAL_RTP_PORT=42046
