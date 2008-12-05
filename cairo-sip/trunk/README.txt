@@ -20,12 +20,25 @@ The Session Initiation Protocol (SIP) and the Session Description Protocol
    and the media server."
 
 
+New Features for cairo-sip v${project.version}
+----------------------------------
+
+	* Adds capability to do NAT traversal.  The public IP address can be specified so 
+	  that SDP message body and SIP headers can be setup accordingly.
+
+	* Fixes route header bug in SIP INVITE.
+	
+	* Adds rtp port and state attributes to sip Sesssion in support of the Session 
+	  Manager capabilities in the cairo-client project.
+
+	* Improves logging format of SIP/SDP activity.
+
+
 Limitations for Cairo v${project.version}
 --------------------------
 
-This is the first release for the cairo-sip project.  This release provides the
-necessary SIP and SDP capabilities required for implementing MRCPv2 clients and
-servers.
+This release provides the necessary SIP and SDP capabilities required for 
+implementing MRCPv2 clients and servers.
 
 See the General limitations section for a description of functionality not yet
 supported in this release.
