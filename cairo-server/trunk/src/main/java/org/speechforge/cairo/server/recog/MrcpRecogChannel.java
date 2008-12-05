@@ -285,20 +285,16 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
         
         _logger.debug("Stop recognition called, mrcp channel state: "+_state+" rtp channel state: "+_rtpChannel._state);
 
-        //chage the state right away, but save the current state 
-        short state;
-        synchronized (MrcpRecogChannel.this) {
-            state = _state;
-            _state = IDLE;
-        }
+
+
         
-        if (state == IDLE) {
+        if (_state == IDLE) {
             //Nothing to cancel
             _logger.warn("Stopping recognition, but nothing to cancel.  Mrcp channel state is IDLE");
-        } else if (state == RECOGNIZED) {
+        } else if (_state == RECOGNIZED) {
             //Nothing to cancel
             _logger.warn("Stopping recognition, but nothing to cancel.  Mrcp channel state is RECOGNIZED");            
-        } else if (state == RECOGNIZING) {
+        } else if (_state == RECOGNIZING) {
             _logger.info("Stopping recognition.  Mrcp channel state is RECOGNIZING and rtp channel state is is "+_rtpChannel._state);
             if (_rtpChannel._state == RTPRecogChannel.WAITING_FOR_SPEECH) {
                 if (_rtpChannel._noInputTimeoutTask != null) {
@@ -319,6 +315,9 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
         } else {
             _logger.warn("Stopping recognition, but invalid mrcp channel state: "+_state);
         }
+        
+        //change the state to IDLE
+        _state = IDLE;
         
         MrcpResponse response = null;
         response = session.createResponse(MrcpResponse.STATUS_SUCCESS, MrcpRequestState.COMPLETE);
