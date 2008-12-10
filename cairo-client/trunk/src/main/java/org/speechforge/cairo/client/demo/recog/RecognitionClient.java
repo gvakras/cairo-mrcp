@@ -1,5 +1,5 @@
 /*
- * Cairo - Open source framework for control of speech media resources.
+ * cairo-client - Open source client for control of speech media resources.
  *
  * Copyright (C) 2005-2006 SpeechForge - http://www.speechforge.org
  *
@@ -42,7 +42,6 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.log4j.Logger;
-import org.mrcp4j.MrcpEventName;
 import org.mrcp4j.client.MrcpInvocationException;
 import org.mrcp4j.message.MrcpEvent;
 import org.mrcp4j.message.MrcpResponse;

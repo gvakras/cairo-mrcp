@@ -1,5 +1,5 @@
 /**
- * cairo-client - Client side library for mrcpv2 apps
+ * cairo-client - Client side library for mrcpv2 applications.
  *
  * Copyright (C) 2005-2006 SpeechForge - http://www.speechforge.org
  *

@@ -1,5 +1,5 @@
 /*
- * Cairo - Open source framework for control of speech media resources.
+ * cairo-client - Open source client for control of speech media resources.
  *
  * Copyright (C) 2005-2006 SpeechForge - http://www.speechforge.org
  *
@@ -27,7 +27,6 @@ import org.speechforge.cairo.client.SpeechClient;
 import org.speechforge.cairo.client.SpeechClientImpl;
 import org.speechforge.cairo.rtp.NativeMediaClient;
 import org.speechforge.cairo.rtp.RTPConsumer;
-import org.speechforge.cairo.sip.SimpleSipAgent;
 import org.speechforge.cairo.sip.SipSession;
 import java.awt.Toolkit;
 import java.net.InetAddress;

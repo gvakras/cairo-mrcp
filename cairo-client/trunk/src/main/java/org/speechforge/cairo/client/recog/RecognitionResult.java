@@ -1,5 +1,5 @@
 /*
- * Cairo - Open source framework for control of speech media resources.
+ * cairo-client - Open source client for control of speech media resources.
  *
  * Copyright (C) 2005-2006 SpeechForge - http://www.speechforge.org
  *

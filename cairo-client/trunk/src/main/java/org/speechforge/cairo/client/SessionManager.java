@@ -1,5 +1,5 @@
 /*
- * Cairo - Open source framework for control of speech media resources.
+ * cairo-client - Open source client for control of speech media resources.
  *
  * Copyright (C) 2005-2006 SpeechForge - http://www.speechforge.org
  *
@@ -48,13 +48,13 @@ import org.speechforge.cairo.sip.SipAgent;
 import org.speechforge.cairo.sip.SipSession;
 
 /**
- * SessionManager encapsaltes the sip agent for the speech client.  It implements SessionListner, so it
+ * SessionManager encapsulates the sip agent for the speech client.  It implements SessionListner, so it
  * is notified with Significant SIP events.  It also provides methods to initiate and terminate sessions
  * (i.e. invite and bye).
  * 
  * Before using this agent, the following properties need to be set either
- * by calling setters and then the no arg constructor then startup()(perhaps with Spring)
- * OR use the 4 parameter constructor and the setDaultCairoServer method
+ * by calling setters and then startup()(perhaps with Spring)
+ * OR use the 4 parameter constructor and the setCairoServer method
  * mySipAddress     - the sip address of the agent
  * stackName        - a name for the agents sip stack
  * port             - the port used by this sip agent
@@ -91,7 +91,7 @@ public class SessionManager  {
         }
 
         /**
-         * Instantiates a new session manager.
+         * Instantiates a new session manager. You must also call setCairoServer before trying to set up a session.
          * 
          * @param mySipAddress the my sip address
          * @param stackName the stack name
@@ -116,7 +116,7 @@ public class SessionManager  {
         
         
         /**
-         * Startup.
+         * Startup.  Useful for IoC frameworks.  Use all the setter methods needed to configure the object then call this method to start.
          * 
          * @throws SipException the sip exception
          */
@@ -152,7 +152,7 @@ public class SessionManager  {
         }
 
         /**
-         * New recog channel.
+         * New recog channel.  Use this method to create a session with just a recognition mrcpv2 channel.
          * 
          * @param clientHost the client host
          * @param sessionName the session name
@@ -184,7 +184,7 @@ public class SessionManager  {
         }
     
         /**
-         * New synth channel.
+         * New synth channel.  Use this method to create a session with hust a sythesizer mrcpv2 channel.
          * 
          * @param clientRtpPort the client rtp port
          * @param clientHost the client host
@@ -212,7 +212,7 @@ public class SessionManager  {
         }
         
         /**
-         * New receiver transmitter channel.
+         * New receiver transmitter channel.  Use this method to create a session with both a receiver and transmitter mrcpv2 channel.
          * 
          * @param clientRtpPort the client rtp port
          * @param clientHost the client host
@@ -242,7 +242,7 @@ public class SessionManager  {
         
         
         /**
-         * Send invite without proxy.
+         * Send invite without proxy.  This is an internal method to send an invite sip request with a sdp payload.
          * 
          * @param to the to
          * @param message the message
@@ -496,25 +496,25 @@ public class SessionManager  {
 
                         } catch (UnknownHostException e) {
                             // TODO Auto-generated catch block
-                        	e.printStackTrace();
+                        	_logger.warn("Unknown host Excepton while sending sip invite", e);
                         } catch (SdpParseException e) {
                             // TODO Auto-generated catch block
-                        	e.printStackTrace();
+                        	_logger.warn("Sdp Parse Excepton while sending sip invite", e);
                         } catch (IllegalArgumentException e) {
                             // TODO Auto-generated catch block
-                        	e.printStackTrace();
+                        	_logger.warn("Illegal Argument Excepton while sending sip invite", e);
                         } catch (IllegalValueException e) {
                             // TODO Auto-generated catch block
-                        	e.printStackTrace();
+                        	_logger.warn("Illeagal Value Excepton while sending sip invite", e);
                         } catch (IOException e) {
                             // TODO Auto-generated catch block
-                        	e.printStackTrace();
+                        	_logger.warn("Io Excepton while sending sip invite", e);
                         } catch (SdpException e) {
                             // TODO Auto-generated catch block
-                        	e.printStackTrace();
+                        	_logger.warn("Sdp Excepton while sending sip invite", e);
                         } catch (Exception e) {
                             // TODO Auto-generated catch block
-                        	e.printStackTrace();
+                        	_logger.warn("Excepton while sending sip invite", e);
                         }
                  
                 } else {
