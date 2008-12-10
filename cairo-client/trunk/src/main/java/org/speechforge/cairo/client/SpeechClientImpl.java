@@ -25,7 +25,7 @@ package org.speechforge.cairo.client;
 import org.speechforge.cairo.client.SpeechClient;
 import org.speechforge.cairo.client.SpeechEventListener;
 import org.speechforge.cairo.client.SpeechRequest.RequestType;
-import org.speechforge.cairo.client.recog.InvalidRecognitionResultException;
+import org.speechforge.cairo.client.recog.InvalidRecogResultException;
 import org.speechforge.cairo.client.recog.RecognitionResult;
 import org.speechforge.cairo.rtp.NativeMediaClient;
 import org.speechforge.cairo.sip.SdpMessage;
@@ -283,7 +283,7 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
                         _logger.debug("Recognition event content: "+event.getContent());
                         r = RecognitionResult.constructResultFromString(event.getContent());
                         _logger.debug("recognition result text: "+r.getText());
-                    } catch (InvalidRecognitionResultException e) {
+                    } catch (InvalidRecogResultException e) {
                     	_logger.warn("Illegal recognition result", e);
                         r = null;
                     }
@@ -316,7 +316,7 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
                         _logger.debug("Recognition event content: "+event.getContent());
                         r = RecognitionResult.constructResultFromString(event.getContent());
                         _logger.debug("recognition result text: "+r.getText());
-                    } catch (InvalidRecognitionResultException e) {
+                    } catch (InvalidRecogResultException e) {
                     	_logger.warn("Illegal Recognition Result", e);
                         r = null;
                     }

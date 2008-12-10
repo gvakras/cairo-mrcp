@@ -22,6 +22,6 @@
  */
 package org.speechforge.cairo.client.recog;
 
-public class InvalidRecognitionResultException extends Exception {
+public class InvalidRecogResultException extends Exception {
 
 }

@@ -106,12 +106,12 @@ public class RecognitionResult {
      * 
      * @return the recognition result
      * 
-     * @throws InvalidRecognitionResultException the invalid recognition result exception
+     * @throws InvalidRecogResultException the invalid recognition result exception
      */
-    public static  RecognitionResult constructResultFromString(String inputString) throws InvalidRecognitionResultException {
+    public static  RecognitionResult constructResultFromString(String inputString) throws InvalidRecogResultException {
 
         if (inputString == null)
-            throw new InvalidRecognitionResultException();
+            throw new InvalidRecogResultException();
         
         RecognitionResult result = new RecognitionResult();
         if(inputString.trim().equals(OUTOFGRAMMAR)) {
@@ -124,7 +124,7 @@ public class RecognitionResult {
         if (firstBracketIndex >0) {
             result._text = inputString.substring(0, firstBracketIndex);      //raw result are at the begining before the first ruleMatch
             if (result == null)
-                throw new InvalidRecognitionResultException();
+                throw new InvalidRecogResultException();
             _logger.debug(result._text);
             String theTags = inputString.substring(inputString.indexOf("<"));
             theTags = theTags.trim();
@@ -142,7 +142,7 @@ public class RecognitionResult {
                       _logger.debug(" rule match # "+i+"  " + rule.length+ " "+ruleMatches[i]);
                    } else {
                        _logger.debug(" Invalid rule match # "+i+"  " + rule.length+ " "+ruleMatches[i]);
-                       throw new InvalidRecognitionResultException();
+                       throw new InvalidRecogResultException();
                    }
                 } else {
                     _logger.debug("Bad Tag Rule In Result: "+ruleMatches[i]);
