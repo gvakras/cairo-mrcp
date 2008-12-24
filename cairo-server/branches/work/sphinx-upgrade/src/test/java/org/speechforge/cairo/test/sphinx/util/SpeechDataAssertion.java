@@ -37,8 +37,7 @@ import edu.cmu.sphinx.frontend.DataProcessingException;
 import edu.cmu.sphinx.frontend.DoubleData;
 import edu.cmu.sphinx.util.props.PropertyException;
 import edu.cmu.sphinx.util.props.PropertySheet;
-import edu.cmu.sphinx.util.props.PropertyType;
-import edu.cmu.sphinx.util.props.Registry;
+import edu.cmu.sphinx.util.props.S4String;
 
 import org.apache.log4j.Logger;
 
@@ -55,8 +54,9 @@ public class SpeechDataAssertion extends BaseDataProcessor {
 	/**
 	 * Property specifying the name of the log file to log speech data to.
 	 */
+    @S4String(defaultValue = "speechDataFileName")
 	public static final String PROP_SPEECH_DATA_FILE = "speechDataFile";
-
+	
 
     private StreamTokenizer _tokenizer;
     private int _ttype;
@@ -69,25 +69,19 @@ public class SpeechDataAssertion extends BaseDataProcessor {
         // TODO Auto-generated constructor stub
     }
 
-    /* (non-Javadoc)
-     * @see edu.cmu.sphinx.util.props.Configurable#register(java.lang.String, edu.cmu.sphinx.util.props.Registry)
-     */
-    public void register(String name, Registry registry) throws PropertyException {
-	    super.register(name, registry);
-	    registry.register(PROP_SPEECH_DATA_FILE, PropertyType.STRING);
-    }
+
 
     public void newProperties(PropertySheet ps) throws PropertyException {
         super.newProperties(ps);
 
-        String speechDataFile = ps.getString(PROP_SPEECH_DATA_FILE, null);
+        String speechDataFile = ps.getString(PROP_SPEECH_DATA_FILE);
         if (speechDataFile == null || speechDataFile.length() < 1) {
-            throw new PropertyException(this, PROP_SPEECH_DATA_FILE, "Required property \"speechDataFile\" not specified!");
+            throw new PropertyException(ps.getInstanceName(),PROP_SPEECH_DATA_FILE, "Required property \"speechDataFile\" not specified!");
         }
 
         URL speechDataURL = this.getClass().getResource(speechDataFile);
         if (speechDataURL == null) {
-            throw new PropertyException(this, PROP_SPEECH_DATA_FILE, "Specified speech data file (" + speechDataFile + ") not found!");
+            throw new PropertyException(ps.getInstanceName(), PROP_SPEECH_DATA_FILE, "Specified speech data file (" + speechDataFile + ") not found!");
         }
 
         try {
@@ -97,7 +91,7 @@ public class SpeechDataAssertion extends BaseDataProcessor {
             _ttype = _tokenizer.nextToken();
             _logger.trace(_tokenizer);
 		} catch (IOException e) {
-			throw (PropertyException) new PropertyException(this, PROP_SPEECH_DATA_FILE, e.getMessage()).initCause(e);
+			throw (PropertyException) new PropertyException(e,ps.getInstanceName(), PROP_SPEECH_DATA_FILE, e.getMessage()).initCause(e);
 		}
     }
 

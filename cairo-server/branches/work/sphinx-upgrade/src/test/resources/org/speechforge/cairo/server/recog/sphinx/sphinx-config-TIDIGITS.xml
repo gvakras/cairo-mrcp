@@ -224,7 +224,7 @@
 
     <component name="nonSpeechDataFilter" 
                type="edu.cmu.sphinx.frontend.endpoint.NonSpeechDataFilter">
-        <property name="mergeSpeechSegments" value="${mergeSpeechSegments}"/>
+        <!--property name="mergeSpeechSegments" value="${mergeSpeechSegments}"/-->
     </component>
 
     <component name="premphasizer" 

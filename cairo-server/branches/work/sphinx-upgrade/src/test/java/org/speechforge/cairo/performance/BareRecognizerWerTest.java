@@ -51,9 +51,6 @@ public class BareRecognizerWerTest extends BaseRecognizerWerTest{
         } catch (PropertyException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        } catch (InstantiationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         }
     }
 
@@ -78,9 +75,6 @@ public class BareRecognizerWerTest extends BaseRecognizerWerTest{
             e.printStackTrace();
         } catch (UnsupportedAudioFileException e) {
             System.err.println("Audio file format not supported: " + e);
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         return result.getBestFinalResultNoFiller();

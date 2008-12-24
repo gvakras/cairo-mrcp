@@ -284,7 +284,7 @@
     <dependency>
       <groupId>sphinx</groupId>
       <artifactId>sphinx4</artifactId>
-      <version>1.0beta</version>
+      <version>SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
 
@@ -365,14 +365,14 @@
     <dependency>
       <groupId>sphinx</groupId>
       <artifactId>WSJ_8gau_13dCep_16k_40mel_130Hz_6800Hz</artifactId>
-      <version>1.0beta</version>
+      <version>SNAPSHOT</version>
       <scope>runtime</scope>
     </dependency>
     
     <dependency>
       <groupId>sphinx</groupId>
       <artifactId>WSJ_8gau_13dCep_8kHz_31mel_200Hz_3500Hz</artifactId>
-      <version>1.0beta</version>
+      <version>SNAPSHOT</version>
       <scope>runtime</scope>
     </dependency>
 
@@ -388,7 +388,7 @@
     <dependency>
       <groupId>sphinx</groupId>
       <artifactId>TIDIGITS_8gau_13dCep_16k_40mel_130Hz_6800Hz</artifactId>
-      <version>1.0beta</version>
+      <version>SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
     
