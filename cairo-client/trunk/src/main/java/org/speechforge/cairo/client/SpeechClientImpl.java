@@ -854,6 +854,7 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
         //if it matches
         if (m.find()) {
             _logger.debug("Got a dtmf match : "+_inBuf);
+            _dtmfState = DtmfState.complete;
             
             //cancel the recog timer
             if (_noRecogTimeoutTask != null) {
@@ -864,10 +865,7 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
             //return the recognition results
            _dtmfListener.characterEventReceived(_inBuf,SpeechEventListener.EventType.recognitionMatch);
            
-           // set state to not active (and ready for next request)
-           _pattern = null;
-           _dtmfListener = null;
-           _dtmfState = DtmfState.notActive;
+
         }  else {
             _logger.debug("No match : "+_inBuf); 
         }
@@ -886,6 +884,12 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
             _noInputTimeoutTask = null;
         }
         
+        //cancel the recog timer
+        if (_noRecogTimeoutTask != null) {
+            _noRecogTimeoutTask.cancel();
+            _noRecogTimeoutTask = null;
+        }
+        
     }
 
 
@@ -896,7 +900,7 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
         
         //check if there is already dtmf enabled (TODO if so throw exception)
         //if not go ahead and enable dtmf with this pattern
-        if (_dtmfState == DtmfState.notActive) {
+        if ((_dtmfState == DtmfState.notActive) || (_dtmfState == DtmfState.complete)) {
             _dtmfState = DtmfState.waitingForInput;
             
             //save the pattern
