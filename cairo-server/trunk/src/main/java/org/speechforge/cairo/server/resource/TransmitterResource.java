@@ -206,8 +206,8 @@ public class TransmitterResource extends ResourceImpl {
         Map<String, ChannelResources> sessionChannels = session.getChannels();
         for(ChannelResources channel: sessionChannels.values()) {
             _mrcpServer.closeChannel(channel.getChannelId());
-            _portPairPool.returnPort(channel.getPort());
             channel.getRtpssc().shutdown();
+            _portPairPool.returnPort(channel.getPort());
         }
         ResourceSession.removeSession(session);
     }
