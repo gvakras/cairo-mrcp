@@ -164,6 +164,14 @@
                  16k acoustic model which is no longer used. -->
             <exclude>**/TestRawAudioProcessor.java</exclude>
 
+			<!-- Word Error Rate tests, are configurable tests  meant to run standalone and not part of the automated 
+			     unit test suite. -->
+            <exclude>**/BareRecognizerWerTest.java</exclude>
+            <exclude>**/BaseRecognizerWerTest.java</exclude>
+            <exclude>**/JMFRecognizerWerTest.java</exclude>
+            <exclude>**/ReplicatorRecognizerWerTest.java</exclude>
+            <exclude>**/RTPRecognizerWerTest.java</exclude>
+
           </excludes>
         </configuration>
       </plugin>
