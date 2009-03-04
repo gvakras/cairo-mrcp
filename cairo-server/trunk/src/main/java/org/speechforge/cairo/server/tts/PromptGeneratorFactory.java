@@ -40,12 +40,22 @@ public class PromptGeneratorFactory extends AbstractPoolableObjectFactory {
 
     private static Logger _logger = Logger.getLogger(PromptGeneratorFactory.class);
 
+    private String _voiceName;
+
+    /**
+     * TODOC
+     * @param voiceName
+     */
+    public PromptGeneratorFactory(String voiceName) {
+        _voiceName = voiceName;
+    }
+
     /* (non-Javadoc)
      * @see org.apache.commons.pool.PoolableObjectFactory#makeObject()
      */
     @Override
     public PoolableObject makeObject() throws Exception {
-        return new PromptGenerator();
+        return new PromptGenerator(_voiceName);
     }
 
     /**
@@ -53,14 +63,14 @@ public class PromptGeneratorFactory extends AbstractPoolableObjectFactory {
      * @param instances
      * @return
      */
-    public static ObjectPool createObjectPool(int instances)
+    public static ObjectPool createObjectPool(String voiceName, int instances)
       throws InstantiationException {
 
         if (_logger.isDebugEnabled()) {
             _logger.debug("creating new prompt generator pool... instances: " + instances);
         }
 
-        PoolableObjectFactory factory = new PromptGeneratorFactory();
+        PoolableObjectFactory factory = new PromptGeneratorFactory(voiceName);
 
         // TODO: adapt config to prompt generator constraints
         GenericObjectPool.Config config = ObjectPoolUtil.getGenericObjectPoolConfig(instances);

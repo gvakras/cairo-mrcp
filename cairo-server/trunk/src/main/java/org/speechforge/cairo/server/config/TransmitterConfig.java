@@ -36,6 +36,7 @@ import org.apache.commons.configuration.XMLConfiguration;
 public class TransmitterConfig extends ResourceConfig {
 
     private File _basePromptDir;
+    private String _voiceName;
 
     /**
      * TODOC
@@ -45,21 +46,22 @@ public class TransmitterConfig extends ResourceConfig {
      */
     public TransmitterConfig(int index, XMLConfiguration config) throws ConfigurationException {
         super(index, config);
-        try {
-            _basePromptDir = new File(config.getString("resources.resource(" + index + ").basePromptDir"));
-            ensureDir(_basePromptDir);
-        } catch (RuntimeException e) {
-            throw new ConfigurationException(e.getMessage(), e);
-        }
+        _basePromptDir = getConfigDir(config, "resources.resource(" + index + ").basePromptDir");
+        _voiceName = config.getString("resources.resource(" + index + ").voiceName");
     }
 
-
     /**
-     * TODOC
-     * @return Returns the basePromptDir.
+     * @return the base directory for storing temporary generated prompt files.
      */
     public File getBasePromptDir() {
         return _basePromptDir;
+    }
+
+    /**
+     * @return the name of the freetts voice to use
+     */
+    public String getVoiceName() {
+        return _voiceName;
     }
 
 }

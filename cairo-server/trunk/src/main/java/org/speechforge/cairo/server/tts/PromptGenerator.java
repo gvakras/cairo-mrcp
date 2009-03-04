@@ -43,14 +43,13 @@ public class PromptGenerator extends AbstractPoolableObject {
 
     private Voice _voice;
 
-    public PromptGenerator() {
-        String voiceName = "kevin";
+    public PromptGenerator(String voiceName) {
 
         VoiceManager voiceManager = VoiceManager.getInstance();
         _voice = voiceManager.getVoice(voiceName);
 
         if (_voice == null) {
-            throw new RuntimeException("No tts voice found!");
+            throw new RuntimeException("TTS voice name <" + voiceName + "> not found!");
         }
 
         _voice.allocate();

@@ -87,20 +87,40 @@ public abstract class ResourceConfig {
         return _engines;
     }
 
+    /**
+     * TODOC
+     * @param config
+     * @param key
+     * @return
+     * @throws ConfigurationException
+     */
+    public static File getConfigDir(XMLConfiguration config, String key) throws ConfigurationException {
+        try {
+            File dir = new File(config.getString(key));
+            ensureDir(dir);
+            return dir;
+        } catch (RuntimeException e) {
+            throw new ConfigurationException(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * TODOC
+     * @param dir
+     * @throws ConfigurationException
+     */
     public static void ensureDir(File dir) throws ConfigurationException {
         
-        // create directory if it does not exist
-        if (!dir.exists()) {
-            if (!dir.mkdirs()) {
-                throw new ConfigurationException(
-                    "Could not create directory: " + dir.getAbsolutePath());
-            }
+        // try to create directory if it does not exist
+        if (!dir.exists() && !dir.mkdirs()) {
+            throw new ConfigurationException(
+                "Could not create directory: " + dir.getAbsolutePath());
         }
 
         // make sure dir is actually a directory
         if (!dir.isDirectory()) {
             throw new ConfigurationException(
-                "File specified was not a directory: " + dir.getAbsolutePath());
+                "The specified path is not a directory: " + dir.getAbsolutePath());
         }
     }
 

@@ -1,4 +1,4 @@
-# This file lists the voice directories avialable to FreeTTs.
+# This file lists the voice directories available to FreeTTs.
 # To get the name of a voice directory from a voice jar file,
 # type "java -jar voicefile.jar".
 #
