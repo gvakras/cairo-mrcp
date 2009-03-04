@@ -112,8 +112,6 @@ Getting Started
 
 Once Cairo is successfully installed you can follow the instructions below to launch the various Cairo server processes and run the demo MRCPv2 clients.
 
-Note: These instructions and the batch files provided in the Cairo distribution are geared towards a deployment of Cairo on Windows.  Since Cairo is written entirely in Java it should work on any operating system, however it has, as of yet, only been verified on Windows.  If you are interested in deploying Cairo on another operating system please post a message to the cairo-user forum (http://www.nabble.com/cairo-user-f15778.html) to get assistance in this process.
-
 
 Starting the Cairo Server
 -------------------------
