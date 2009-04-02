@@ -45,9 +45,6 @@ public class BareRecognizerWerTest extends BaseRecognizerWerTest{
             
             /* allocate the resource necessary for the recognizer */
             recognizer.allocate();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         } catch (PropertyException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
