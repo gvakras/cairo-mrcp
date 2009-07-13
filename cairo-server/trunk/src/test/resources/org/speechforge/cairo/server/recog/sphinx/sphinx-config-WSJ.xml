@@ -162,6 +162,7 @@
             <item>speechClassifier</item>
             <!--item>speechDataLogger</item-->
             <item>speechMarker</item>
+            <item>speechDataRecorder</item>
             <item>nonSpeechDataFilter</item>
             <item>preemphasizer</item>
             <item>windower</item>
@@ -183,6 +184,10 @@
         <property name="bigEndianData" value="false"/>
         <property name="signedData" value="true"/>
     </component-->
+    
+    <component name="speechDataRecorder"
+               type="org.speechforge.cairo.server.recog.sphinx.SpeechDataRecorder"/>
+    
 
     <!--component name="speechDataLogger"
                   type="org.speechforge.cairo.server.recog.sphinx.SpeechDataLogger">
@@ -195,7 +200,7 @@
     </component-->
 
     <component name="speechClassifier"
-               type="edu.cmu.sphinx.frontend.endpoint.SpeechClassifierPatch">
+               type="edu.cmu.sphinx.frontend.endpoint.SpeechClassifier">
         <property name="threshold" value="${speechClassifierThreshold}"/>
         <property name="debug" value="false"/>
     </component>
@@ -210,7 +215,7 @@
 
     <component name="nonSpeechDataFilter"
                type="edu.cmu.sphinx.frontend.endpoint.NonSpeechDataFilter">
-        <property name="mergeSpeechSegments" value="${mergeSpeechSegments}"/>
+        <!--property name="mergeSpeechSegments" value="${mergeSpeechSegments}"/-->
     </component>
 
     <component name="preemphasizer"

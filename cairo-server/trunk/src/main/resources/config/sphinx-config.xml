@@ -20,7 +20,7 @@
     <property name="languageWeight"              value="8"/>
     <property name="silenceInsertionProbability" value="1"/>
 
-    <property name="speechClassifierThreshold"   value="15"/>
+    <property name="speechClassifierThreshold"   value="13"/>
     <property name="mergeSpeechSegments"         value="false"/>
 
     <property name="grammarLocation"             value="resource:/org.speechforge.cairo.server.recog.sphinx.SphinxRecEngine!/grammar"/>
@@ -98,10 +98,10 @@
         <property name="silenceInsertionProbability" value="${silenceInsertionProbability}"/>
         <property name="languageWeight" value="${languageWeight}"/>
         <property name="unitManager" value="unitManager"/>
-        <property name="addOutOfGrammarBranch" value="true"/>
-        <property name="outOfGrammarProbability" value="1E-60"/>
-        <property name="phoneInsertionProbability" value="1E-10"/>
-        <property name="phoneLoopAcousticModel" value="acousticModel"/>
+        <!--property name="addOutOfGrammarBranch" value="true"/-->
+        <!--property name="outOfGrammarProbability" value="1E-60"/-->
+        <!--property name="phoneInsertionProbability" value="1E-10"/-->
+        <!--property name="phoneLoopAcousticModel" value="acousticModel"/-->
     </component>
 
 
@@ -168,9 +168,10 @@
             <item>speechClassifier</item>
             <item>speechMarker</item>
             <item>speechDataMonitor</item>
-            <!--item>speechDataRecorder</item-->
             <item>nonSpeechDataFilter</item>
+            <!--item>speechDataRecorder</item-->
             <item>preemphasizer</item>
+            <!--item>dither</item-->
             <item>windower</item>
             <item>fft</item>
             <item>melFilterBank</item>
@@ -184,7 +185,7 @@
                type="org.speechforge.cairo.server.recog.sphinx.RawAudioProcessor"/>
 
     <component name="speechClassifier"
-               type="edu.cmu.sphinx.frontend.endpoint.SnrSpeechClassifier">
+               type="edu.cmu.sphinx.frontend.endpoint.SpeechClassifier">
         <property name="useSnrThreshold" value="false"/>
         <property name="threshold" value="${speechClassifierThreshold}"/>
         <property name="debug" value="false"/>
@@ -206,7 +207,7 @@
 
     <component name="nonSpeechDataFilter"
                type="edu.cmu.sphinx.frontend.endpoint.NonSpeechDataFilter">
-        <property name="mergeSpeechSegments" value="${mergeSpeechSegments}"/>
+        <!--property name="mergeSpeechSegments" value="${mergeSpeechSegments}"/-->
     </component>
 
     <component name="preemphasizer"
@@ -233,6 +234,9 @@
 
     <component name="featureExtraction"
                type="edu.cmu.sphinx.frontend.feature.DeltasFeatureExtractor"/>
+                              
+    <component name="dither"
+               type="edu.cmu.sphinx.frontend.filter.Dither"/>
 
 
     <!-- ******************************************************* -->
@@ -240,7 +244,7 @@
     <!-- ******************************************************* -->
 
     <component name="accuracyTracker"
-               type="edu.cmu.sphinx.instrumentation.AccuracyTracker">
+               type="edu.cmu.sphinx.instrumentation.BestPathAccuracyTracker">
         <property name="recognizer" value="recognizer"/>
         <property name="showAlignedResults" value="false"/>
         <property name="showRawResults" value="false"/>

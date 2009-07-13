@@ -28,6 +28,9 @@ package edu.cmu.sphinx.frontend.endpoint;
 import java.util.LinkedList;
 import java.util.List;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import edu.cmu.sphinx.frontend.BaseDataProcessor;
 import edu.cmu.sphinx.frontend.Data;
 import edu.cmu.sphinx.frontend.DataProcessingException;
@@ -35,8 +38,8 @@ import edu.cmu.sphinx.frontend.DoubleData;
 import edu.cmu.sphinx.util.LogMath;
 import edu.cmu.sphinx.util.props.PropertyException;
 import edu.cmu.sphinx.util.props.PropertySheet;
-import edu.cmu.sphinx.util.props.PropertyType;
-import edu.cmu.sphinx.util.props.Registry;
+import edu.cmu.sphinx.util.props.S4Double;
+import edu.cmu.sphinx.util.props.S4Integer;
 
 
 /**
@@ -73,64 +76,30 @@ import edu.cmu.sphinx.util.props.Registry;
  */
 public class SpeechClassifierPatch extends BaseDataProcessor {
 
-    /**
-     * The SphinxProperty specifying the endpointing frame length
-     * in milliseconds.
-     */
+    /** The SphinxProperty specifying the endpointing frame length in milliseconds. */
+    @S4Integer(defaultValue = 10)
     public static final String PROP_FRAME_LENGTH_MS = "frameLengthInMs";
 
-    /**
-     * The default value of PROP_FRAME_LENGTH_MS.
-     */
-    public static final int PROP_FRAME_LENGTH_MS_DEFAULT = 10;
-
-    /**
-     * The SphinxProperty specifying the minimum signal level used
-     * to update the background signal level.
-     */
+    /** The SphinxProperty specifying the minimum signal level used to update the background signal level. */
+    @S4Double(defaultValue = 0)
     public static final String PROP_MIN_SIGNAL = "minSignal";
 
-    /**
-     * The default value of PROP_MIN_SIGNAL.
-     */
-    public static final double PROP_MIN_SIGNAL_DEFAULT = 0;
 
     /**
-     * The SphinxProperty specifying the threshold. If the current signal
-     * level is greater than the background level by this threshold,
-     * then the current signal is marked as speech. Therefore,
-     * a lower threshold will make the endpointer more sensitive,
-     * that is, mark more audio as speech. A higher threshold will
-     * make the endpointer less sensitive, that is, mark less audio as speech.
+     * The SphinxProperty specifying the threshold. If the current signal level is greater than the background level by
+     * this threshold, then the current signal is marked as speech. Therefore, a lower threshold will make the
+     * endpointer more sensitive, that is, mark more audio as speech. A higher threshold will make the endpointer less
+     * sensitive, that is, mark less audio as speech.
      */
+    @S4Double(defaultValue = 10)
     public static final String PROP_THRESHOLD = "threshold";
 
-    /**
-     * The default value of PROP_THRESHOLD.
-     */
-    public static final double PROP_THRESHOLD_DEFAULT = 10;
-
-    /**
-     * The SphinxProperty specifying the adjustment.
-     */
+    /** The SphinxProperty specifying the adjustment. */
+    @S4Double(defaultValue = 0.003)
     public static final String PROP_ADJUSTMENT = "adjustment";
-
-    /**
-     * The default value of PROP_ADJUSTMENT_DEFAULT.
-     */
-    public static final double PROP_ADJUSTMENT_DEFAULT = 0.003;
-
-    /**
-     * The SphinxProperty specifying whether to print debug messages.
-     */
-    public static final String PROP_DEBUG = "debug";
-
-    /**
-     * The default value of PROP_DEBUG.
-     */
-    public static final boolean PROP_DEBUG_DEFAULT = false;
-
     
+
+    protected Logger logger;
 
     private boolean debug;
     private double averageNumber = 1;
@@ -145,33 +114,23 @@ public class SpeechClassifierPatch extends BaseDataProcessor {
     /*
      * (non-Javadoc)
      * 
-     * @see edu.cmu.sphinx.util.props.Configurable#register(java.lang.String,
-     *      edu.cmu.sphinx.util.props.Registry)
-     */
-    public void register(String name, Registry registry)
-            throws PropertyException {
-        super.register(name, registry);
-        registry.register(PROP_FRAME_LENGTH_MS, PropertyType.INT);
-        registry.register(PROP_ADJUSTMENT, PropertyType.DOUBLE);
-        registry.register(PROP_THRESHOLD, PropertyType.DOUBLE);
-        registry.register(PROP_MIN_SIGNAL, PropertyType.DOUBLE);
-        registry.register(PROP_DEBUG, PropertyType.BOOLEAN);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see edu.cmu.sphinx.util.props.Configurable#newProperties(edu.cmu.sphinx.util.props.PropertySheet)
      */
     public void newProperties(PropertySheet ps) throws PropertyException {
+    	
+    	
         super.newProperties(ps);
-        int frameLengthMs = ps.getInt
-            (PROP_FRAME_LENGTH_MS, PROP_FRAME_LENGTH_MS_DEFAULT);
+        int frameLengthMs = ps.getInt(PROP_FRAME_LENGTH_MS);
         frameLengthSec = ((float) frameLengthMs) / 1000.f;
-        adjustment = ps.getDouble(PROP_ADJUSTMENT, PROP_ADJUSTMENT_DEFAULT);
-        threshold = ps.getDouble(PROP_THRESHOLD, PROP_THRESHOLD_DEFAULT);
-        minSignal = ps.getDouble(PROP_MIN_SIGNAL, PROP_MIN_SIGNAL_DEFAULT);
-        debug = ps.getBoolean(PROP_DEBUG, PROP_DEBUG_DEFAULT);
+
+        adjustment = ps.getDouble(PROP_ADJUSTMENT);
+        threshold = ps.getDouble(PROP_THRESHOLD);
+        minSignal = ps.getDouble(PROP_MIN_SIGNAL);
+        logger = ps.getLogger();
+
+        initialize();
+    	
+
     }
 
     /**
@@ -224,7 +183,7 @@ public class SpeechClassifierPatch extends BaseDataProcessor {
     private void classify(DoubleData audio) {
         double current = logRootMeanSquare(audio.getValues());
         // System.out.println("current: " + current);
-        if (false && debug) {
+        if (logger.isLoggable(Level.FINEST)) {
             System.out.println("Before -- Bkg: " + background + ", level: " + level +
                                ", current: " + current);
         }
@@ -243,7 +202,7 @@ public class SpeechClassifierPatch extends BaseDataProcessor {
         }
         SpeechClassifiedData labeledAudio
             = new SpeechClassifiedData(audio, isSpeech);
-        if (debug) {
+        if (logger.isLoggable(Level.FINEST)) {
             String speech = "";
             if (labeledAudio.isSpeech()) {
                 speech = "*";

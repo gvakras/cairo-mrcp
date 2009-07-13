@@ -36,8 +36,8 @@ import edu.cmu.sphinx.frontend.Signal;
 import edu.cmu.sphinx.frontend.endpoint.SpeechClassifiedDataAccessor;
 import edu.cmu.sphinx.util.props.PropertyException;
 import edu.cmu.sphinx.util.props.PropertySheet;
-import edu.cmu.sphinx.util.props.PropertyType;
-import edu.cmu.sphinx.util.props.Registry;
+import edu.cmu.sphinx.util.props.S4Double;
+import edu.cmu.sphinx.util.props.S4String;
 
 import org.apache.log4j.Logger;
 
@@ -54,22 +54,15 @@ public class SpeechDataLogger extends BaseDataProcessor {
     /**
      * Property specifying the location of the log file to log speech data to.
      */
+    @S4String(defaultValue = "/temp/speechdata")
     public static final String PROP_LOG_FILE_DIR = "speechDataLogFileDir";
 
-    /**
-     * The default value of PROP_LOG_FILE_DIR.
-     */
-    public static final String PROP_LOG_FILE_DIR_DEFAULT = "/temp/speechdata";
 
 	/**
 	 * Property specifying the name of the log file to log speech data to.
 	 */
+    @S4String(defaultValue = "speechdata")
 	public static final String PROP_LOG_FILE_NAME = "speechDataLogFileName";
-
-	/**
-	 * The default value of PROP_LOG_FILE_NAME.
-	 */
-	public static final String PROP_LOG_FILE_NAME_DEFAULT = "speechdata";
 
 
     private static final String NL = System.getProperty("line.separator");
@@ -83,33 +76,24 @@ public class SpeechDataLogger extends BaseDataProcessor {
         super();
     }
 
-    /* (non-Javadoc)
-     * @see edu.cmu.sphinx.util.props.Configurable#register(java.lang.String, edu.cmu.sphinx.util.props.Registry)
-     */
-    public void register(String name, Registry registry) throws PropertyException {
-	    super.register(name, registry);
-        registry.register(PROP_LOG_FILE_DIR, PropertyType.STRING);
-	    registry.register(PROP_LOG_FILE_NAME, PropertyType.STRING);
-    }
-
     public void newProperties(PropertySheet ps) throws PropertyException {
         super.newProperties(ps);
 
-        File logFileDir = new File(ps.getString(PROP_LOG_FILE_DIR, PROP_LOG_FILE_DIR_DEFAULT));
+        File logFileDir = new File(ps.getString(PROP_LOG_FILE_DIR));
         if (!logFileDir.exists()) {
             if (!logFileDir.mkdirs()) {
-                throw new PropertyException(this, PROP_LOG_FILE_DIR, "Invalid log file dir: " + logFileDir);
+                throw new PropertyException(ps.getInstanceName(), PROP_LOG_FILE_DIR, "Invalid log file dir: " + logFileDir);
             }
         } else if (!logFileDir.isDirectory()) {
-            throw new PropertyException(this, PROP_LOG_FILE_DIR, "Specified log file dir exists as file: " + logFileDir);
+            throw new PropertyException(ps.getInstanceName(), PROP_LOG_FILE_DIR, "Specified log file dir exists as file: " + logFileDir);
         }
 
-        String logFileName = ps.getString(PROP_LOG_FILE_NAME, PROP_LOG_FILE_NAME_DEFAULT);
+        String logFileName = ps.getString(PROP_LOG_FILE_NAME);
 
         try {
 			_fileWriter = new FileWriter(constructLogFile(logFileDir, logFileName), false);
 		} catch (IOException e) {
-			throw (PropertyException) new PropertyException(this, PROP_LOG_FILE_NAME, e.getMessage()).initCause(e);
+			throw (PropertyException) new PropertyException(e, ps.getInstanceName(),PROP_LOG_FILE_NAME,"Failed create file");
 		}
     }
 
@@ -193,7 +177,7 @@ public class SpeechDataLogger extends BaseDataProcessor {
 
     public static SpeechDataLogger getInstanceForTesting(String logFileName) throws IOException {
         SpeechDataLogger instance = new SpeechDataLogger();
-        instance._fileWriter = new FileWriter(constructLogFile(PROP_LOG_FILE_DIR_DEFAULT, logFileName), false);
+        instance._fileWriter = new FileWriter(constructLogFile("/temp/speechdata", logFileName), false);
         return instance;
     }
 

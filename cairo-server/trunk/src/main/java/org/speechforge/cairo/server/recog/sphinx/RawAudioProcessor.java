@@ -38,8 +38,7 @@ import edu.cmu.sphinx.frontend.DataProcessingException;
 import edu.cmu.sphinx.frontend.DataStartSignal;
 import edu.cmu.sphinx.util.props.PropertyException;
 import edu.cmu.sphinx.util.props.PropertySheet;
-import edu.cmu.sphinx.util.props.PropertyType;
-import edu.cmu.sphinx.util.props.Registry;
+import edu.cmu.sphinx.util.props.S4Integer;
 
 import org.apache.log4j.Logger;
 
@@ -53,18 +52,13 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
 
     private static Logger _logger = Logger.getLogger(RawAudioProcessor.class);
 
-    /**
-     * The Sphinx property that specifies the number of milliseconds of
-     * audio data to read each time from the underlying Java Sound audio 
-     * device.
-     */
-    public final static String PROP_MSEC_PER_READ = "msecPerRead";
+    
 
-    /**
-     * The default value of PROP_MSEC_PER_READ.
-     */
-    public final static int PROP_MSEC_PER_READ_DEFAULT = 10;
+    @S4Integer(defaultValue = 10)
+    public static final String PROP_MSEC_PER_READ = "msecPerRead";
 
+
+    //protected Logger logger;
     private BlockingFifoQueue<Data> _dataList;
     private BlockingFifoQueue<byte[]> _rawAudioList;
     private SourceAudioFormat _audioFormat;
@@ -84,32 +78,20 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
     private long _totalSamplesRead = 0;
     private long _startTime;
 
+   /*
+    * (non-Javadoc)
+    * 
+    * @see edu.cmu.sphinx.util.props.Configurable#newProperties(edu.cmu.sphinx.util.props.PropertySheet)
+    */
+   public void newProperties(PropertySheet ps) throws PropertyException {
+       super.newProperties(ps);
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see edu.cmu.sphinx.util.props.Configurable#register(java.lang.String,
-     *      edu.cmu.sphinx.util.props.Registry)
-     */
-    public void register(String name, Registry registry)
-        throws PropertyException {
-        super.register(name, registry);
-        registry.register(PROP_MSEC_PER_READ, PropertyType.INT);
-    }
+       _msecPerRead = ps.getInt(PROP_MSEC_PER_READ);
+       //logger = ps.getLogger();
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see edu.cmu.sphinx.util.props.Configurable#newProperties(edu.cmu.sphinx.util.props.PropertySheet)
-     */
-    public void newProperties(PropertySheet ps) throws PropertyException {
-        super.newProperties(ps);
-        //_logger = ps.getLogger();
+       initialize();
+   }
 
-        _msecPerRead = ps.getInt(PROP_MSEC_PER_READ, 
-                                PROP_MSEC_PER_READ_DEFAULT);
-
-    }
 
     /* (non-Javadoc)
      * @see edu.cmu.sphinx.frontend.DataProcessor#initialize()
@@ -202,7 +184,8 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
         _startTime = System.currentTimeMillis();
         _logger.debug("started processing");
         try {
-            Data data = new DataStartSignal();
+        	Data data = new DataStartSignal(_audioFormat.getSampleRate());
+            //Data data = new DataStartSignal();
             _logger.debug("adding DataStartSignal...");
             do {
                 _dataList.add(data);
@@ -367,7 +350,7 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
 
     public static RawAudioProcessor getInstanceForTesting(){
         RawAudioProcessor instance = new RawAudioProcessor();
-        instance._msecPerRead = PROP_MSEC_PER_READ_DEFAULT;
+        instance._msecPerRead = 10;
         instance.initialize();
         return instance;
     }

@@ -213,7 +213,7 @@
     </component-->
 
     <component name="speechClassifier" 
-               type="edu.cmu.sphinx.frontend.endpoint.SpeechClassifierPatch">
+               type="edu.cmu.sphinx.frontend.endpoint.SpeechClassifier">
         <property name="threshold" value="${speechClassifierThreshold}"/>
     </component>
 
@@ -224,7 +224,7 @@
 
     <component name="nonSpeechDataFilter" 
                type="edu.cmu.sphinx.frontend.endpoint.NonSpeechDataFilter">
-        <property name="mergeSpeechSegments" value="${mergeSpeechSegments}"/>
+        <!--property name="mergeSpeechSegments" value="${mergeSpeechSegments}"/-->
     </component>
 
     <component name="premphasizer" 
