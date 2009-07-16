@@ -62,7 +62,7 @@ public class JMFRecognizerWerTest extends BaseRecognizerWerTest{
 
             //recognizer = (Recognizer) cm.lookup("recognizer");
             jsgfGrammarManager = (JSGFGrammar) cm.lookup("grammar");
-            engine = new SphinxRecEngine(cm);
+            engine = new SphinxRecEngine(cm,1);
             
         } catch (IOException e) {
             // TODO Auto-generated catch block

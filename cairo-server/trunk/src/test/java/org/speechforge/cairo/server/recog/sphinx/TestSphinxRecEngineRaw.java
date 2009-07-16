@@ -233,7 +233,7 @@ public class TestSphinxRecEngineRaw extends AbstractTestCase {
 
         // configure sphinx
         ConfigurationManager cm = new ConfigurationManager(sphinxConfigURL);
-        SphinxRecEngine engine = new SphinxRecEngine(cm);
+        SphinxRecEngine engine = new SphinxRecEngine(cm,1);
 
         RecognitionResult result1 = doRecognize(engine, audioFileURL1);
         _logger.debug("result=" + result1);

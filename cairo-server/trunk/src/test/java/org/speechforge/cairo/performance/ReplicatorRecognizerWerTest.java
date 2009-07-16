@@ -74,7 +74,7 @@ public class ReplicatorRecognizerWerTest extends BaseRecognizerWerTest{
             System.out.println("Loading Recognizer...\n");
             cm = new ConfigurationManager(config);
             jsgfGrammarManager = (JSGFGrammar) cm.lookup("grammar");
-            engine = new SphinxRecEngine(cm);
+            engine = new SphinxRecEngine(cm,1);
             
         } catch (IOException e) {
             // TODO Auto-generated catch block

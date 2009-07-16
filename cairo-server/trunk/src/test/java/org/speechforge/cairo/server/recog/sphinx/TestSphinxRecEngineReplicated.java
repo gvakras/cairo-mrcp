@@ -86,7 +86,7 @@ public class TestSphinxRecEngineReplicated extends AbstractTestCase {
         _logger.debug("sphinxConfigURL: " + sphinxConfigURL);
 
         ConfigurationManager cm = new ConfigurationManager(sphinxConfigURL);
-        SphinxRecEngine engine = new SphinxRecEngine(cm);
+        SphinxRecEngine engine = new SphinxRecEngine(cm,1);
 
         Processor processor1 = JMFUtil.createRealizedProcessor(new MediaLocator(audioFileURL), SourceAudioFormat.PREFERRED_MEDIA_FORMAT);
         processor1.addControllerListener(new ProcessorStarter(true));

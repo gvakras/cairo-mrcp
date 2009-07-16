@@ -45,9 +45,12 @@ public class SphinxRecEngineFactory extends AbstractPoolableObjectFactory {
     private static Logger _logger = Logger.getLogger(SphinxRecEngineFactory.class);
 
     URL _sphinxConfigURL = null;
+    ConfigurationManager _cm;
+    private int id = 1;
 
     public SphinxRecEngineFactory(URL sphinxConfigURL) {
         _sphinxConfigURL = sphinxConfigURL;
+        _cm = new ConfigurationManager(_sphinxConfigURL);
     }
 
     /* (non-Javadoc)
@@ -55,8 +58,8 @@ public class SphinxRecEngineFactory extends AbstractPoolableObjectFactory {
      */
     @Override
     public PoolableObject makeObject() throws Exception {
-        ConfigurationManager cm = new ConfigurationManager(_sphinxConfigURL);
-        return new SphinxRecEngine(cm);
+
+        return new SphinxRecEngine(_cm, id++);
     }
 
     /**

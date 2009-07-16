@@ -36,7 +36,7 @@
     <!-- word recognizer configuration                            -->
     <!-- ******************************************************** -->
 
-    <component name="recognizer" type="edu.cmu.sphinx.recognizer.Recognizer">
+    <component name="recognizer1" type="edu.cmu.sphinx.recognizer.Recognizer">
         <property name="decoder" value="decoder"/>
         <propertylist name="monitors">
         </propertylist>
@@ -72,7 +72,7 @@
 
     <component name="scorer"
                type="edu.cmu.sphinx.decoder.scorer.ThreadedAcousticScorer">
-        <property name="frontend" value="frontend"/>
+        <property name="frontend" value="frontend1"/>
         <property name="isCpuRelative" value="true"/>
         <property name="numThreads" value="0"/>
         <property name="minScoreablesPerThread" value="10"/>
@@ -155,9 +155,9 @@
     <!-- The frontend configuration                               -->
     <!-- ******************************************************** -->
 
-    <component name="frontend" type="edu.cmu.sphinx.frontend.FrontEnd">
+    <component name="frontend1" type="edu.cmu.sphinx.frontend.FrontEnd">
         <propertylist name="pipeline">
-            <item>primaryInput</item>
+            <item>primaryInput1</item>
             <!--item>speechDataAssertion</item-->
             <item>speechClassifier</item>
             <!--item>speechDataLogger</item-->
@@ -174,7 +174,7 @@
         </propertylist>
     </component>
 
-    <component name="primaryInput"
+    <component name="primaryInput1"
                type="org.speechforge.cairo.server.recog.sphinx.RawAudioProcessor"/>
 
     <!--component name="streamDataSource"

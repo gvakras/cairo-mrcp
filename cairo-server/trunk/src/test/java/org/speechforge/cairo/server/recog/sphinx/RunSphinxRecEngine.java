@@ -130,7 +130,7 @@ public class RunSphinxRecEngine extends RecogListenerDecorator {
 
         _logger.debug("Loading...");
         ConfigurationManager cm = new ConfigurationManager(url);
-        SphinxRecEngine engine = new SphinxRecEngine(cm);
+        SphinxRecEngine engine = new SphinxRecEngine(cm,1);
 
         // commented out since SphinxRecEngine._jsgfGrammar not visible from this class
 //        if (_logger.isDebugEnabled()) {

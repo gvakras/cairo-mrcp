@@ -86,7 +86,7 @@ public class RTPRecognizerWerTest extends BaseRecognizerWerTest{
           //Get the recogntion engine
           try {
               cm = new ConfigurationManager(config);
-              engine = new SphinxRecEngine(cm);
+              engine = new SphinxRecEngine(cm,1);
               scorer = (ConfidenceScorer) cm.lookup("confidenceScorer");
           } catch (IOException e) {
               // TODO Auto-generated catch block

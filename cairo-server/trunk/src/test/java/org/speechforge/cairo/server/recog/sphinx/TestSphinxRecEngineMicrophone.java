@@ -141,7 +141,7 @@ public class TestSphinxRecEngineMicrophone extends AbstractTestCase {
 
         // configure sphinx
         ConfigurationManager cm = new ConfigurationManager(sphinxConfigURL);
-        SphinxRecEngine engine = new SphinxRecEngine(cm);
+        SphinxRecEngine engine = new SphinxRecEngine(cm,1);
 
         RecognitionResult result = doRecognize(engine, expected);
         _logger.debug("result=" + result);

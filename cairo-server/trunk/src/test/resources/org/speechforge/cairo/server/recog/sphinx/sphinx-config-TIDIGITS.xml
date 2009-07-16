@@ -23,9 +23,9 @@
     <property name="skip"                        value="0"/>
     <property name="logLevel"                    value="WARNING"/>
 
-    <property name="recognizer"                  value="recognizer"/>
+    <property name="recognizer"                  value="recognizer1"/>
     <property name="linguist"                    value="flatLinguist"/>
-    <property name="frontend"                    value="frontEnd"/>
+    <property name="frontend"                    value="frontEnd1"/>
 
     <property name="speechClassifierThreshold"   value="10"/>
     <property name="mergeSpeechSegments"         value="false"/>
@@ -37,7 +37,7 @@
     <!-- The connectedDigitsRecognizer configuration               -->
     <!-- ******************************************************** --> 
     
-    <component name="recognizer" 
+    <component name="recognizer1" 
                type="edu.cmu.sphinx.recognizer.Recognizer">
         <property name="decoder" value="decoder"/>
         <propertylist name="monitors">
@@ -157,9 +157,9 @@
     <!-- The frontend configuration                               -->
     <!-- ******************************************************** -->
 
-    <component name="frontEnd" type="edu.cmu.sphinx.frontend.FrontEnd">
+    <component name="frontEnd1" type="edu.cmu.sphinx.frontend.FrontEnd">
         <propertylist name="pipeline">
-            <item>primaryInput</item>
+            <item>primaryInput1</item>
             <!--item>speechDataAssertion</item-->
             <!--item>speechDataLogger</item-->
             <item>premphasizer</item>
@@ -174,7 +174,7 @@
 
     <component name="epFrontEnd" type="edu.cmu.sphinx.frontend.FrontEnd">
         <propertylist name="pipeline">
-            <item>primaryInput</item>
+            <item>primaryInput1</item>
             <!--item>speechDataAssertion</item-->
             <item>speechClassifier</item>
             <item>speechMarker</item>
@@ -190,7 +190,7 @@
         </propertylist>
     </component>
 
-    <component name="primaryInput"
+    <component name="primaryInput1"
            type="org.speechforge.cairo.server.recog.sphinx.RawAudioProcessor">
     </component>
 

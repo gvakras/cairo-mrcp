@@ -115,6 +115,7 @@ public class RTPRecogChannel {
             // TODO: wait for availability...?
         }
 
+        _logger.debug("Recognize command with a listener: "+listener);
         _recogListener = new Listener(listener);
         
         try {

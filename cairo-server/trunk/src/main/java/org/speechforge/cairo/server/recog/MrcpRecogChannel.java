@@ -341,9 +341,11 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
          * @see org.speechforge.cairo.server.recog.RecogListener#recognitionComplete()
          */
         public void recognitionComplete(RecognitionResult result) {
+        	_logger.debug("speech complete event...");
             synchronized (MrcpRecogChannel.this) {
                 _state = RECOGNIZED;
             }
+        	_logger.debug("...and past the synchronized block");
             try {
                 MrcpEvent event = _session.createEvent(
                         MrcpEventName.RECOGNITION_COMPLETE,
@@ -372,10 +374,12 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
          * @see org.speechforge.cairo.server.recog.RecogListener#speechStarted()
          */
         public void speechStarted() {
+        	_logger.debug("speech started event");
             short state;
             synchronized (MrcpRecogChannel.this) {
                 state = _state;
             }
+        	_logger.debug("and past the synchronized block");
             if (state == RECOGNIZING) try {
                 MrcpEvent event = _session.createEvent(
                         MrcpEventName.START_OF_INPUT,

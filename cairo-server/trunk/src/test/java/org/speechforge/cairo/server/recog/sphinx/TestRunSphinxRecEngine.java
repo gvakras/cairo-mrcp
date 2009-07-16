@@ -69,7 +69,7 @@ public class TestRunSphinxRecEngine extends AbstractTestCase {
         _logger.debug("sphinxConfigURL: " + sphinxConfigURL);
 
         ConfigurationManager cm = new ConfigurationManager(sphinxConfigURL);
-        SphinxRecEngine engine = new SphinxRecEngine(cm);
+        SphinxRecEngine engine = new SphinxRecEngine(cm,1);
         _runner = new RunSphinxRecEngine(engine);
 
     }

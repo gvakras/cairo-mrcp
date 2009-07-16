@@ -206,7 +206,7 @@ public class StandaloneRecogClient extends RecogListenerDecorator {
 
             _logger.info("Loading Sphinx recognition engine...");
             ConfigurationManager cm = new ConfigurationManager(sphinxConfigUrl);
-            SphinxRecEngine engine = new SphinxRecEngine(cm);
+            SphinxRecEngine engine = new SphinxRecEngine(cm,1);
 
             _logger.info("Loading grammar file...");
             engine.loadJSGF(grammarLocation);
