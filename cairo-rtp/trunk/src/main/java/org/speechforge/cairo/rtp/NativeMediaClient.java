@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
 
+import javax.media.Format;
 import javax.media.Manager;
 import javax.media.Player;
 import javax.media.protocol.PushBufferDataSource;
@@ -53,9 +54,9 @@ public class NativeMediaClient extends RTPConsumer {
     private Player _player;
     private RTPPlayer _rtpPlayer;
     
-    public NativeMediaClient(String localHost, int localPort, InetAddress remoteAddress, int remotePort)
+    public NativeMediaClient(String localHost, int localPort, InetAddress remoteAddress, int remotePort, Format[] formats)
     throws IOException {
-      super(localHost, localPort, remoteAddress, remotePort);
+      super(localHost, localPort, remoteAddress, remotePort, formats);
       _rtpPlayer = new RTPPlayer(_rtpManager);
   }
 
@@ -123,7 +124,7 @@ public class NativeMediaClient extends RTPConsumer {
      * @see org.speechforge.cairo.server.rtp.RTPConsumer#streamReceived(javax.media.rtp.ReceiveStream, javax.media.protocol.PushBufferDataSource)
      */
     @Override
-    public synchronized void streamReceived(ReceiveStream stream, PushBufferDataSource dataSource) {
+    public synchronized void streamReceived(ReceiveStream stream, PushBufferDataSource dataSource, Format[] preferredMediaFormats) {
         if (_player == null) {
             try {
                 _logger.debug("Creating player for new stream...");

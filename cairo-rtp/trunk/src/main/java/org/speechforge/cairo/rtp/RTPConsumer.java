@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Iterator;
 
+import javax.media.Format;
 import javax.media.protocol.DataSource;
 import javax.media.protocol.PushBufferDataSource;
 import javax.media.rtp.InvalidSessionAddressException;
@@ -62,6 +63,9 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
     protected RTPManager _rtpManager;
     private SessionAddress _localAddress;
     private SessionAddress _targetAddress;
+    
+    
+    private Format[] preferredMediaFormats;
 
     /**
      * Instantiates a new RTP consumer.  Just needs a remote port.  
@@ -92,7 +96,7 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public RTPConsumer(String localHost, int localPort, InetAddress remoteAddress, int remotePort) throws IOException {
+    public RTPConsumer(String localHost, int localPort, InetAddress remoteAddress, int remotePort, Format[] preferredMediaFormats) throws IOException {
         if (localPort < 0 || localPort > TCP_PORT_MAX) {
             throw new IllegalArgumentException("Invalid local port value: " + localPort);
         }
@@ -104,6 +108,7 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
         }
         _localAddress = new SessionAddress(InetAddress.getByName(localHost), localPort);
         _targetAddress = new SessionAddress(remoteAddress, remotePort);
+        this.preferredMediaFormats = preferredMediaFormats;
         init();
     }
     
@@ -211,7 +216,7 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
                             _logger.debug("  - Recevied new RTP stream: RTPControl is null!");
                         }
                     }
-                    this.streamReceived(stream, (PushBufferDataSource) dataSource);
+                    this.streamReceived(stream, (PushBufferDataSource) dataSource, preferredMediaFormats);
                 }
             }
         } else if (event instanceof StreamMappedEvent) {
@@ -236,7 +241,7 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
         }
     }
 
-    public abstract void streamReceived(ReceiveStream stream, PushBufferDataSource dataSource);
+    public abstract void streamReceived(ReceiveStream stream, PushBufferDataSource dataSource,Format[] preferredMediaFormats);
 
     public abstract void streamMapped(ReceiveStream stream, Participant participant);
 
