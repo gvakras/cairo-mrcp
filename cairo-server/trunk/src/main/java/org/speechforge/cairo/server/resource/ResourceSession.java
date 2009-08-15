@@ -26,7 +26,7 @@ import java.util.Hashtable;
 import java.util.Map;
 import org.apache.log4j.Logger;
 import org.speechforge.cairo.server.recog.RTPRecogChannel;
-import org.speechforge.cairo.server.rtp.RTPStreamReplicator;
+import org.speechforge.cairo.rtp.server.RTPStreamReplicator;
 import org.speechforge.cairo.server.tts.RTPSpeechSynthChannel;
 import org.speechforge.cairo.sip.SdpMessage;
 

@@ -22,8 +22,9 @@
  */
 package org.speechforge.cairo.server.recog.sphinx;
 
+import org.speechforge.cairo.rtp.server.sphinx.SourceAudioFormat;
 import org.speechforge.cairo.server.recog.RecognitionResult;
-import org.speechforge.cairo.server.rtp.PBDSReplicator;
+import org.speechforge.cairo.rtp.server.PBDSReplicator;
 import org.speechforge.cairo.test.sphinx.util.RecogNotifier;
 import org.speechforge.cairo.jmf.JMFUtil;
 import org.speechforge.cairo.jmf.ProcessorStarter;

@@ -285,7 +285,7 @@
     <dependency>
       <groupId>org.speechforge</groupId>
       <artifactId>cairo-rtp</artifactId>
-      <version>0.1</version>
+      <version>SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
 

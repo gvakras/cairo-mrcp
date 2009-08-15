@@ -25,8 +25,9 @@ package org.speechforge.cairo.server.recog;
 import static org.speechforge.cairo.jmf.JMFUtil.CONTENT_DESCRIPTOR_RAW;
 
 import org.speechforge.cairo.exception.ResourceUnavailableException;
+import org.speechforge.cairo.rtp.server.sphinx.SourceAudioFormat;
 import org.speechforge.cairo.server.recog.sphinx.SphinxRecEngine;
-import org.speechforge.cairo.server.rtp.RTPStreamReplicator;
+import org.speechforge.cairo.rtp.server.RTPStreamReplicator;
 import org.speechforge.cairo.jmf.ProcessorStarter;
 
 import java.io.IOException;
@@ -98,7 +99,7 @@ public class RTPRecogChannel {
             // TODO: cancel or queue request instead (depending upon value of 'cancel-if-queue' header)
         }
 
-        _processor = _replicator.createRealizedProcessor(CONTENT_DESCRIPTOR_RAW, 10000); // TODO: specify audio format
+        _processor = _replicator.createRealizedProcessor(CONTENT_DESCRIPTOR_RAW, 10000,SourceAudioFormat.PREFERRED_MEDIA_FORMATS); // TODO: specify audio format
 
         PushBufferDataSource dataSource = (PushBufferDataSource) _processor.getDataOutput();
         if (dataSource == null) {

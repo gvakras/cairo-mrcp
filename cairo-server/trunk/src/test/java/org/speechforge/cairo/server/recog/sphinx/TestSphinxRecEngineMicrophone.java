@@ -24,6 +24,7 @@ package org.speechforge.cairo.server.recog.sphinx;
 
 import static org.speechforge.cairo.jmf.JMFUtil.MICROPHONE;
 
+import org.speechforge.cairo.rtp.server.sphinx.SourceAudioFormat;
 import org.speechforge.cairo.server.recog.RecognitionResult;
 import org.speechforge.cairo.test.sphinx.util.RecogNotifier;
 import org.speechforge.cairo.jmf.JMFUtil;

@@ -32,11 +32,11 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
 import org.apache.log4j.Logger;
+import org.speechforge.cairo.rtp.server.sphinx.SourceAudioFormat;
 import org.speechforge.cairo.server.recog.GrammarLocation;
 import org.speechforge.cairo.server.recog.RecognitionResult;
-import org.speechforge.cairo.server.recog.sphinx.SourceAudioFormat;
 import org.speechforge.cairo.server.recog.sphinx.SphinxRecEngine;
-import org.speechforge.cairo.server.rtp.PBDSReplicator;
+import org.speechforge.cairo.rtp.server.PBDSReplicator;
 import org.speechforge.cairo.test.sphinx.util.RecogNotifier;
 import org.speechforge.cairo.jmf.JMFUtil;
 import org.speechforge.cairo.jmf.ProcessorStarter;

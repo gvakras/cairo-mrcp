@@ -22,7 +22,8 @@
  */
 package org.speechforge.cairo.server.recorder;
 
-import org.speechforge.cairo.server.rtp.RTPStreamReplicator;
+import org.speechforge.cairo.rtp.server.sphinx.SourceAudioFormat;
+import org.speechforge.cairo.rtp.server.RTPStreamReplicator;
 
 import java.io.File;
 import java.io.IOException;
@@ -91,7 +92,7 @@ public class RTPRecorderChannel implements DataSinkListener {
             throw new IllegalStateException("Recording already in progress!");
         }
         
-        _processor = _replicator.createRealizedProcessor(CONTENT_DESCRIPTOR_WAVE, 2000); // TODO: specify audio format
+        _processor = _replicator.createRealizedProcessor(CONTENT_DESCRIPTOR_WAVE, 2000,SourceAudioFormat.PREFERRED_MEDIA_FORMATS); // TODO: specify audio format
 
         DataSource dataSource = _processor.getDataOutput();
         if (dataSource == null) {

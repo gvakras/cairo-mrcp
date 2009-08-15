@@ -22,7 +22,7 @@
  */
 package org.speechforge.cairo.demo.standalone;
 
-import static org.speechforge.cairo.server.recog.sphinx.SourceAudioFormat.PREFERRED_MEDIA_FORMATS;
+import static org.speechforge.cairo.rtp.server.sphinx.SourceAudioFormat.PREFERRED_MEDIA_FORMATS;
 import static org.speechforge.cairo.server.resource.ResourceImpl.HELP_OPTION;
 import static org.speechforge.cairo.jmf.JMFUtil.MICROPHONE;
 
@@ -30,7 +30,7 @@ import org.speechforge.cairo.server.recog.GrammarLocation;
 import org.speechforge.cairo.server.recog.RecogListenerDecorator;
 import org.speechforge.cairo.server.recog.RecognitionResult;
 import org.speechforge.cairo.server.recog.sphinx.SphinxRecEngine;
-import org.speechforge.cairo.server.rtp.PBDSReplicator;
+import org.speechforge.cairo.rtp.server.PBDSReplicator;
 import org.speechforge.cairo.jmf.JMFUtil;
 import org.speechforge.cairo.jmf.ProcessorStarter;
 

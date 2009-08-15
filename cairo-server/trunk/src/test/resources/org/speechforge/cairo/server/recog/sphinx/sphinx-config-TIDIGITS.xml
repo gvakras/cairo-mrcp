@@ -191,7 +191,7 @@
     </component>
 
     <component name="primaryInput1"
-           type="org.speechforge.cairo.server.recog.sphinx.RawAudioProcessor">
+           type="org.speechforge.cairo.rtp.server.sphinx.RawAudioProcessor">
     </component>
 
     <!--component name="streamDataSource" 

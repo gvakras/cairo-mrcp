@@ -24,7 +24,7 @@ package org.speechforge.cairo.server.recorder;
 
 import org.speechforge.cairo.exception.UnsupportedHeaderException;
 import org.speechforge.cairo.server.MrcpGenericChannel;
-import org.speechforge.cairo.server.rtp.RTPStreamReplicator;
+import org.speechforge.cairo.rtp.server.RTPStreamReplicator;
 
 import java.io.BufferedReader;
 import java.io.File;

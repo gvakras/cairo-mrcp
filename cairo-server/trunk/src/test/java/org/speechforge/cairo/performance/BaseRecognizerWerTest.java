@@ -11,7 +11,7 @@ import java.net.URL;
 import org.apache.log4j.Logger;
 import org.speechforge.cairo.server.recog.GrammarLocation;
 import org.speechforge.cairo.server.recog.sphinx.SphinxRecEngine;
-import org.speechforge.cairo.server.rtp.RTPStreamReplicator;
+import org.speechforge.cairo.rtp.server.RTPStreamReplicator;
 
 /**
  * A simple Sphinx-4 application that decodes a .WAV file containing...

@@ -175,7 +175,7 @@
     </component>
 
     <component name="primaryInput1"
-               type="org.speechforge.cairo.server.recog.sphinx.RawAudioProcessor"/>
+               type="org.speechforge.cairo.rtp.server.sphinx.RawAudioProcessor"/>
 
     <!--component name="streamDataSource"
                   type="edu.cmu.sphinx.frontend.util.StreamDataSource">
@@ -186,11 +186,11 @@
     </component-->
     
     <component name="speechDataRecorder"
-               type="org.speechforge.cairo.server.recog.sphinx.SpeechDataRecorder"/>
+               type="org.speechforge.cairo.rtp.server.sphinx.SpeechDataRecorder"/>
     
 
     <!--component name="speechDataLogger"
-                  type="org.speechforge.cairo.server.recog.sphinx.SpeechDataLogger">
+                  type="org.speechforge.cairo.rtp.server.sphinx.SpeechDataLogger">
         <property name="speechDataLogFileName" value="${speechDataLogFileName}"/>
     </component-->
 

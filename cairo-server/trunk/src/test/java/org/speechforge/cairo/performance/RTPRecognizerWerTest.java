@@ -33,11 +33,12 @@ import org.speechforge.cairo.server.recog.RecogListener;
 import org.speechforge.cairo.server.recog.RecognitionResult;
 import org.speechforge.cairo.server.recog.sphinx.SphinxRecEngine;
 import org.speechforge.cairo.server.recog.sphinx.SphinxRecEngineFactory;
-import org.speechforge.cairo.server.rtp.RTPStreamReplicator;
-import org.speechforge.cairo.server.rtp.RTPStreamReplicatorFactory;
+import org.speechforge.cairo.rtp.server.RTPStreamReplicator;
+import org.speechforge.cairo.rtp.server.RTPStreamReplicatorFactory;
 import org.speechforge.cairo.rtp.RTPPlayer;
 import org.speechforge.cairo.jmf.ProcessorStarter;
 import org.speechforge.cairo.rtp.AudioFormats;
+import org.speechforge.cairo.rtp.server.sphinx.SourceAudioFormat;
 
 
 /**
@@ -157,7 +158,7 @@ public class RTPRecognizerWerTest extends BaseRecognizerWerTest{
                 }               
             }
             
-            processor= replicator.createRealizedProcessor(CONTENT_DESCRIPTOR_RAW, 10000); // TODO: specify audio format
+            processor= replicator.createRealizedProcessor(CONTENT_DESCRIPTOR_RAW, 10000,SourceAudioFormat.PREFERRED_MEDIA_FORMATS); // TODO: specify audio format
             PushBufferDataSource dataSource = (PushBufferDataSource) processor.getDataOutput();
 
             if (dataSource == null) {

@@ -25,7 +25,7 @@ package org.speechforge.cairo.server.resource;
 import org.speechforge.cairo.server.config.CairoConfig;
 import org.speechforge.cairo.server.config.TransmitterConfig;
 import org.speechforge.cairo.server.resource.ResourceSession.ChannelResources;
-import org.speechforge.cairo.server.rtp.PortPairPool;
+import org.speechforge.cairo.rtp.server.PortPairPool;
 import org.speechforge.cairo.server.tts.MrcpSpeechSynthChannel;
 import org.speechforge.cairo.server.tts.PromptGeneratorFactory;
 import org.speechforge.cairo.server.tts.RTPSpeechSynthChannel;
