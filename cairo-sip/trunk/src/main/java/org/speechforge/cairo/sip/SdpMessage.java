@@ -78,6 +78,8 @@ public class SdpMessage implements Serializable {
     public static final String SDP_SYNTH_RESOURCE = "speechsynth";
 
     public static final String SDP_RECOG_RESOURCE = "speechrecog";
+    
+    public static final String SDP_RECORDER_RESOURCE = "recorder";
 
     public static final String SDP_SETUP_ATTR_NAME = "setup";
 
@@ -115,6 +117,13 @@ public class SdpMessage implements Serializable {
         return getChannels(protocol);
     }
 
+    
+    public List<MediaDescription> getMrcpRecorderChannels() throws SdpException {
+        String protocol = SDP_MRCP_PROTOCOL;
+        String type = SDP_RECORDER_RESOURCE;
+        return getChannels(protocol, type);
+    }
+    
     public List<MediaDescription> getMrcpReceiverChannels() throws SdpException {
         String protocol = SDP_MRCP_PROTOCOL;
         String type = SDP_RECOG_RESOURCE;
@@ -380,8 +389,10 @@ public class SdpMessage implements Serializable {
             if (resourceType == MrcpResourceType.SPEECHRECOG) {
                 md.setAttribute(SDP_RESOURCE_ATTR_NAME, SDP_RECOG_RESOURCE);
             } else if (resourceType == MrcpResourceType.SPEECHSYNTH) {
-                md.setAttribute(SDP_RESOURCE_ATTR_NAME, SDP_SYNTH_RESOURCE);
-            }
+               md.setAttribute(SDP_RESOURCE_ATTR_NAME, SDP_SYNTH_RESOURCE);
+            } else if (resourceType == MrcpResourceType.RECORDER) {
+                md.setAttribute(SDP_RESOURCE_ATTR_NAME, SDP_RECORDER_RESOURCE);
+             }
         } catch (SdpException e) {
             _logger.debug(e, e);
             throw e;

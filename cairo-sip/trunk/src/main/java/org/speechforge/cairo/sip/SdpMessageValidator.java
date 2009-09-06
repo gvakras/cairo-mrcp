@@ -76,12 +76,11 @@ public class SdpMessageValidator {
                             // can either be new or existing
                         } else if (attribute.getName().equals("channel")) {
                             if (attribute.getValue().endsWith(MrcpResourceType.SPEECHRECOG.toString())) {
-                                //supportted
+                                //supported
                             } else if (attribute.getValue().endsWith(MrcpResourceType.SPEECHSYNTH.toString())) {
                                 //supported
                             } else if (attribute.getValue().endsWith(MrcpResourceType.RECORDER.toString())) {
-                                text = text+"Cairo does not support Recorder resource.\n";
-                                problemCount++;
+                               //supported
                             } else if (attribute.getValue().endsWith(MrcpResourceType.DTMFRECOG.toString())) {
                                 text = text+"Cairo does not support dtmfrecog resource.\n";
                                 problemCount++;
@@ -112,8 +111,7 @@ public class SdpMessageValidator {
                                 text = text+"Cairo does not support speakverify resource.\n";
                                 problemCount++;
                             } else if (attribute.getValue().equals(MrcpResourceType.RECORDER.toString())) {
-                                text = text+"Cairo does not support recorder resource.\n";
-                                problemCount++;
+                                //supportted
                             } else if (attribute.getValue().equals(MrcpResourceType.DTMFRECOG.toString())) {
                                 text = text+"Cairo does not support dtmfrecog resource.\n";
                                 problemCount++;
