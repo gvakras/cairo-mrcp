@@ -36,6 +36,7 @@ import org.mrcp4j.MrcpRequestState;
 import org.mrcp4j.message.MrcpResponse;
 import org.mrcp4j.message.header.IllegalValueException;
 import org.mrcp4j.message.header.MrcpHeader;
+import org.mrcp4j.message.header.MrcpHeaderName;
 import org.mrcp4j.message.request.RecordRequest;
 import org.mrcp4j.message.request.StartInputTimersRequest;
 import org.mrcp4j.message.request.StopRequest;
@@ -69,6 +70,14 @@ public class MrcpRecorderChannel extends MrcpGenericChannel implements RecorderR
             statusCode = MrcpResponse.STATUS_METHOD_NOT_VALID_IN_STATE;
         } else {
             try {
+            	//todo: What other headers do i need?  timeouts, sensitivities, ...
+            	MrcpHeader recordUri = request.getHeader(MrcpHeaderName.RECORD_URI);
+            	String uri = null;
+            	if (recordUri != null) {
+                	uri = recordUri.getValueString();
+            	}
+
+            	_logger.info("Starting recording with uri: "+ uri);
                 _recorderChannel.startRecording(true);
                 statusCode = MrcpResponse.STATUS_SUCCESS;
                 requestState = MrcpRequestState.IN_PROGRESS;

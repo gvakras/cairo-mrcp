@@ -28,6 +28,8 @@ import org.speechforge.cairo.server.config.ReceiverConfig;
 import org.speechforge.cairo.server.recog.MrcpRecogChannel;
 import org.speechforge.cairo.server.recog.RTPRecogChannel;
 import org.speechforge.cairo.server.recog.sphinx.SphinxRecEngineFactory;
+import org.speechforge.cairo.server.recorder.MrcpRecorderChannel;
+import org.speechforge.cairo.server.recorder.RTPRecorderChannel;
 import org.speechforge.cairo.server.resource.ResourceSession.ChannelResources;
 import org.speechforge.cairo.rtp.server.RTPStreamReplicator;
 import org.speechforge.cairo.rtp.server.RTPStreamReplicatorFactory;
@@ -107,6 +109,8 @@ public class ReceiverResource extends ResourceImpl {
         
         try {
             List<MediaDescription> channels = request.getMrcpReceiverChannels();
+            List<MediaDescription> c2 = request.getMrcpRecorderChannels();
+            channels.addAll(c2);
             Vector formatsInRequest = null;
             if (channels.size() > 0) {
 
@@ -114,23 +118,32 @@ public class ReceiverResource extends ResourceImpl {
                     String channelID = md.getAttribute(SdpMessage.SDP_CHANNEL_ATTR_NAME);
                     String rt =  md.getAttribute(SdpMessage.SDP_RESOURCE_ATTR_NAME);
                     MrcpResourceType resourceType = null;
+                    _logger.info("RT: " +rt);
                     if (rt.equalsIgnoreCase("speechrecog")) {
                         resourceType = MrcpResourceType.SPEECHRECOG;
                     } else if (rt.equalsIgnoreCase("speechsynth")) {
                         resourceType = MrcpResourceType.SPEECHSYNTH;
+                    } else if (rt.equalsIgnoreCase("recorder")) {
+                        resourceType = MrcpResourceType.RECORDER;
                     }
 
+                    ChannelResources cr = null;
+                    List<MediaDescription> rtpmd = null;
+                    RTPStreamReplicator replicator = null;
                     AudioFormats af = null;
                     switch (resourceType) {
                     case  SPEECHRECOG:
-                        List<MediaDescription> rtpmd = request.getAudioChansForThisControlChan(md);
+                        rtpmd = request.getAudioChansForThisControlChan(md);
                         //TODO: Check if audio format is supported.  If not resource not available exception should be shown.
                         //      maybe this could be part of the up-front validation
                         formatsInRequest = rtpmd.get(0).getMedia().getMediaFormats(true); 
                         af  = AudioFormats.constructWithSdpVector(formatsInRequest);
                         //formatsInRequest = AudioFormats.filterOutUnSupportedFormatsInOffer(formatsInRequest);
  
-                        RTPStreamReplicator replicator =  (RTPStreamReplicator) _replicatorPool.borrowObject();
+                        //if null, borrow a replicator.  else we will use the same one fo the other channel in this request
+                        //TODO: Is this correct in all cases?  Could there be seperate rtp channels for recording and recognizing? 
+                        if (replicator == null )
+                           replicator =  (RTPStreamReplicator) _replicatorPool.borrowObject();
                         if (rtpmd.size() > 0) {
                             //TODO: What if there is more than 1 media channels?
 
@@ -149,17 +162,53 @@ public class ReceiverResource extends ResourceImpl {
                         // transmitter, the resource is the RTP Replicator in the rtpReplicatorPool
                         // TODO:  The channels should cleanup after themselves (retrun resource to pools)
                         //        instead of having to keep track of the resoruces in the session.
-                        ChannelResources cr = session.new ChannelResources();
+                        cr = session.new ChannelResources();
                         cr.setReplicator(replicator);
                         cr.setChannelId(channelID);
                         cr.setRecog(recog);
                         sessionChannels.put(channelID, cr);
                         break;
 
-//                      case RECORDER:
-//                      RTPRecorderChannel recorder = new RTPRecorderChannel(channelID, _baseRecordingDir, replicator);
-//                      _mrcpServer.openChannel(channelID, new MrcpRecorderChannel(recorder));
-//                      break;
+                     case RECORDER:
+                    	 _logger.info("processing recorder...");
+                         rtpmd = request.getAudioChansForThisControlChan(md);
+                         //TODO: Check if audio format is supported.  If not resource not available exception should be shown.
+                         //      maybe this could be part of the up-front validation
+                         formatsInRequest = rtpmd.get(0).getMedia().getMediaFormats(true); 
+                         af  = AudioFormats.constructWithSdpVector(formatsInRequest);
+                         //formatsInRequest = AudioFormats.filterOutUnSupportedFormatsInOffer(formatsInRequest);
+  
+
+                         //if null, borrow a replicator.  else we will use the same one fo the other channel in this request
+                         //TODO: Is this correct in all cases?  Could there be seperate rtp channels for recording and recognizing? 
+                         if (replicator == null )
+                             replicator =  (RTPStreamReplicator) _replicatorPool.borrowObject();
+                         if (rtpmd.size() > 0) {
+                             //TODO: What if there is more than 1 media channels?
+
+                             rtpmd.get(0).getMedia().setMediaPort(replicator.getPort());
+                         } else {
+                             //TODO:  handle no media channel in the request corresponding to the mrcp channel (sip error)
+                         }                  	 
+                    	 
+                        RTPRecorderChannel recorder = new RTPRecorderChannel(channelID, _baseRecordingDir, replicator);
+                        _mrcpServer.openChannel(channelID, new MrcpRecorderChannel(recorder));
+                        md.getMedia().setMediaPort(_mrcpServer.getPort());
+                        rtpmd.get(0).getMedia().setMediaFormats(af.filterOutUnSupportedFormatsInOffer());   
+                        _logger.info(_mrcpServer.getPort());
+  
+                        // Create a channel resources object and put it in the channel map (which is in the session).  
+                        // These resources must be returned to the pool when the channel is closed.  In the case of a 
+                        // transmitter, the resource is the RTP Replicator in the rtpReplicatorPool
+                        // TODO:  The channels should cleanup after themselves (retrun resource to pools)
+                        //        instead of having to keep track of the resoruces in the session.
+                        cr = session.new ChannelResources();
+                        cr.setRecorderReplicator(replicator);
+                        cr.setChannelId(channelID);
+                        cr.setRecorder(recorder);
+                        sessionChannels.put(channelID, cr);
+                        
+                        break;
 
                     default:
                         throw new ResourceUnavailableException("Unsupported resource type: " + resourceType);

@@ -151,6 +151,13 @@ public class ResourceServerImpl implements SessionListener {
                 md.setAttribute("setup", "passive");
                 receiver = true;
             }
+            for (MediaDescription md : request.getMrcpRecorderChannels()) {
+                String channelID = getNextChannelID();
+                String chanid = channelID + '@' + MrcpResourceType.RECORDER.toString();
+                md.setAttribute("channel", chanid);
+                md.setAttribute("setup", "passive");
+                receiver = true;
+            }
             for (MediaDescription md : request.getMrcpTransmitterChannels()) {
                 String channelID = getNextChannelID();
                 String chanid = channelID + '@' + MrcpResourceType.SPEECHSYNTH.toString();
@@ -184,6 +191,7 @@ public class ResourceServerImpl implements SessionListener {
                 e.printStackTrace();
                 throw new org.speechforge.cairo.sip.ResourceUnavailableException("Could not get a receiver resource");
             }
+            _logger.info("Calling inviye on reseiver");
             request = resource.invite(request, session.getId());
             session.getResources().add(resource);
         } // TODO: catch exception and release transmitter resources

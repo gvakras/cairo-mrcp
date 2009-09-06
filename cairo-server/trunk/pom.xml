@@ -278,7 +278,7 @@
     <dependency>
       <groupId>org.speechforge</groupId>
       <artifactId>cairo-sip</artifactId>
-      <version>0.2</version>
+      <version>SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
     
