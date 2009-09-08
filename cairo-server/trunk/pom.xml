@@ -140,6 +140,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
+           <argLine>-Xms512m -Xmx512m</argLine>
           <!--debug>true</debug-->
           <!--forkMode>once</forkMode-->
           <!--childDelegation>false</childDelegation-->
