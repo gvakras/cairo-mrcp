@@ -22,18 +22,26 @@
  */
 package org.speechforge.cairo.server.recorder;
 
+import org.speechforge.cairo.exception.ResourceUnavailableException;
 import org.speechforge.cairo.exception.UnsupportedHeaderException;
 import org.speechforge.cairo.server.MrcpGenericChannel;
+import org.speechforge.cairo.server.recog.RecognitionResult;
 import org.speechforge.cairo.rtp.server.RTPStreamReplicator;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.EnumSet;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.log4j.Logger;
+import org.mrcp4j.MrcpEventName;
 import org.mrcp4j.MrcpRequestState;
+import org.mrcp4j.MrcpResourceType;
+import org.mrcp4j.message.MrcpEvent;
 import org.mrcp4j.message.MrcpResponse;
+import org.mrcp4j.message.header.CompletionCause;
 import org.mrcp4j.message.header.IllegalValueException;
 import org.mrcp4j.message.header.MrcpHeader;
 import org.mrcp4j.message.header.MrcpHeaderName;
@@ -45,16 +53,27 @@ import org.mrcp4j.server.MrcpSession;
 import org.mrcp4j.server.provider.RecorderRequestHandler;
 
 /**
- * Handles MRCPv2 recorder requests by delegating to a dedicated {@link org.speechforge.cairo.server.recorder.RTPRecorderChannel}.
+ * Handles MRCPv2 recorder requests by delegating to a dedicated {@link org.speechforge.cairo.server.recorder.RTPRecorderChannelImpl}.
  *
- * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
+ * @author Spencer Lord {@literal <}<a href="mailto:salord@users.sourceforge.net">salord@users.sourceforge.net</a>{@literal >}
  */
 public class MrcpRecorderChannel extends MrcpGenericChannel implements RecorderRequestHandler {
+
+	private static final Long LONG_MINUS_ONE = new Long(-1);
+
 
     private static Logger _logger = Logger.getLogger(MrcpRecorderChannel.class);
 
     private RTPRecorderChannel _recorderChannel;
-    private boolean _recording = false;
+
+    public static Long DEFAULT_NO_INPUT_TIMEOUT = new Long(10000);
+    public static Boolean DEFAULT_START_INPUT_TIMERS = Boolean.TRUE;
+
+    static short IDLE = 0;
+    static short RECORDING = 1;
+    static short RECORDED = 2;
+    
+    /*volatile*/ short _state = IDLE;
 
     public MrcpRecorderChannel(RTPRecorderChannel recorderChannel) {
         _recorderChannel = recorderChannel;
@@ -66,10 +85,15 @@ public class MrcpRecorderChannel extends MrcpGenericChannel implements RecorderR
     public synchronized MrcpResponse record(RecordRequest request, MrcpSession session) {
         MrcpRequestState requestState = MrcpRequestState.COMPLETE;
         short statusCode = -1;
-        if (_recording) {
+        if (_state == RECORDING) {
+            // TODO: cancel or queue request instead (depending upon value of 'cancel-if-queue' header)
             statusCode = MrcpResponse.STATUS_METHOD_NOT_VALID_IN_STATE;
         } else {
             try {
+                Boolean startInputTimers = (Boolean) getParam(MrcpHeaderName.START_INPUT_TIMERS, request, DEFAULT_START_INPUT_TIMERS);
+                Long noInputTimeout = (startInputTimers.booleanValue()) ?
+                        (Long) getParam(MrcpHeaderName.NO_INPUT_TIMEOUT, request, DEFAULT_NO_INPUT_TIMEOUT) : LONG_MINUS_ONE;
+            	
             	//todo: What other headers do i need?  timeouts, sensitivities, ...
             	MrcpHeader recordUri = request.getHeader(MrcpHeaderName.RECORD_URI);
             	String uri = null;
@@ -78,16 +102,22 @@ public class MrcpRecorderChannel extends MrcpGenericChannel implements RecorderR
             	}
 
             	_logger.info("Starting recording with uri: "+ uri);
-                _recorderChannel.startRecording(true);
+                _recorderChannel.startRecording(new Listener(session),  noInputTimeout.longValue(), uri);
                 statusCode = MrcpResponse.STATUS_SUCCESS;
                 requestState = MrcpRequestState.IN_PROGRESS;
-                _recording = true;
+                _state = RECORDING;
             } catch (IllegalStateException e){
                 _logger.debug(e, e);
                 statusCode = MrcpResponse.STATUS_METHOD_NOT_VALID_IN_STATE;
             } catch (IOException e){
                 _logger.debug(e, e);
                 statusCode = MrcpResponse.STATUS_SERVER_INTERNAL_ERROR;
+            } catch (IllegalValueException e) {
+	            // TODO Auto-generated catch block
+	            e.printStackTrace();
+            } catch (ResourceUnavailableException e) {
+	            // TODO Auto-generated catch block
+	            e.printStackTrace();
             }
         }
         // TODO: cache event acceptor if request is not complete
@@ -100,12 +130,12 @@ public class MrcpRecorderChannel extends MrcpGenericChannel implements RecorderR
     public synchronized MrcpResponse stop(StopRequest request, MrcpSession session) {
         MrcpRequestState requestState = MrcpRequestState.COMPLETE;
         short statusCode = -1;
-        if (_recording) {
+        if (_state == RECORDING) {
             try {
                 _recorderChannel.stopRecording();
                 statusCode = MrcpResponse.STATUS_SUCCESS;
                 //requestState = MrcpRequestState.IN_PROGRESS;
-                _recording = false;
+                _state = RECORDED;
             } catch (IllegalStateException e){
                 statusCode = MrcpResponse.STATUS_METHOD_NOT_VALID_IN_STATE;
             }
@@ -118,18 +148,144 @@ public class MrcpRecorderChannel extends MrcpGenericChannel implements RecorderR
     /* (non-Javadoc)
      * @see org.mrcp4j.server.provider.RecorderRequestHandler#startInputTimers(org.mrcp4j.message.request.StartInputTimersRequest, org.mrcp4j.server.MrcpSession)
      */
+
     public synchronized MrcpResponse startInputTimers(StartInputTimersRequest request, MrcpSession session) {
-        return session.createResponse(MrcpResponse.STATUS_SERVER_INTERNAL_ERROR, MrcpRequestState.COMPLETE);
+        MrcpResponse response = null;
+
+        try {
+            Long noInputTimeout = (Long) getParam(MrcpHeaderName.NO_INPUT_TIMEOUT, request, DEFAULT_NO_INPUT_TIMEOUT);
+            _recorderChannel.startInputTimers(noInputTimeout.longValue());
+            response = session.createResponse(MrcpResponse.STATUS_SUCCESS, MrcpRequestState.COMPLETE);
+        } catch (IllegalStateException e) {
+            _logger.debug(e, e);
+            response = session.createResponse(MrcpResponse.STATUS_METHOD_NOT_VALID_IN_STATE, MrcpRequestState.COMPLETE);
+        } catch (IllegalValueException e) {
+            _logger.debug(e, e);
+            response = session.createResponse(MrcpResponse.STATUS_ILLEGAL_VALUE_FOR_HEADER, MrcpRequestState.COMPLETE);
+            response.addHeader(request.getHeader(MrcpHeaderName.NO_INPUT_TIMEOUT));  // TODO: get header name from exception?
+        }
+
+        return response;
     }
+
+    // TODO: define which headers are supported fully
+    private static EnumSet FULLY_SUPPORTED_HEADERS  = EnumSet.of(MrcpHeaderName.START_INPUT_TIMERS);
 
     /* (non-Javadoc)
      * @see org.speechforge.cairo.server.MrcpGenericChannel#validateParam(org.mrcp4j.message.header.MrcpHeader)
      */
     @Override
     protected boolean validateParam(MrcpHeader header) throws UnsupportedHeaderException, IllegalValueException {
-        // TODO: check if param is valid
-        throw new UnsupportedHeaderException();
+        header.getValueObject();
+        MrcpHeaderName headerName = header.getHeaderName();
+        if (headerName == null) {
+            throw new UnsupportedHeaderException();
+        }
+        if (!headerName.isApplicableTo(MrcpResourceType.RECORDER)) {
+            throw new UnsupportedHeaderException();
+        }
+        if (MrcpHeaderName.ENROLLMENT_HEADER_NAMES.contains(headerName)) {
+            throw new UnsupportedHeaderException();
+        }
+        return FULLY_SUPPORTED_HEADERS.contains(header);
     }
+    
+    
+    private class Listener implements RecorderListener {
+
+        private MrcpSession _session;
+
+        /**
+         * TODOC
+         * @param session
+         */
+        public Listener(MrcpSession session) {
+            _session = session;
+        }
+
+
+        /* (non-Javadoc)
+         * @see org.speechforge.cairo.server.recog.RecogListener#speechStarted()
+         */
+        public void speechStarted() {
+        	_logger.info("speech started event");
+            short state;
+            synchronized (MrcpRecorderChannel.this) {
+                state = _state;
+            }
+        	_logger.debug("and past the synchronized block");
+            if (state == RECORDING) try {
+                MrcpEvent event = _session.createEvent(
+                        MrcpEventName.START_OF_INPUT,
+                        MrcpRequestState.IN_PROGRESS
+                );
+                _session.postEvent(event);
+            } catch (IllegalStateException e) {
+                // TODO Auto-generated catch block
+                _logger.debug(e, e);
+            } catch (TimeoutException e) {
+                // TODO Auto-generated catch block
+                _logger.debug(e, e);
+            }
+        }
+
+        /* (non-Javadoc)
+         * @see org.speechforge.cairo.server.recog.RecogListener#noInputTimeout()
+         */
+        public void noInputTimeout() {
+        	_logger.info("no input timeout event...");
+            short state;
+            synchronized (MrcpRecorderChannel.this) {
+                state = _state;
+                _state = IDLE;
+            }
+            if (state == RECORDING) try {
+                MrcpEvent event = _session.createEvent(
+                        MrcpEventName.RECOGNITION_COMPLETE,
+                        MrcpRequestState.COMPLETE
+                );
+                CompletionCause completionCause = new CompletionCause((short) 2, "no-input-timeout");
+                MrcpHeader completionCauseHeader = MrcpHeaderName.COMPLETION_CAUSE.constructHeader(completionCause);
+                event.addHeader(completionCauseHeader);
+                _session.postEvent(event);
+            } catch (IllegalStateException e) {
+                // TODO Auto-generated catch block
+                _logger.debug(e, e);
+            } catch (TimeoutException e) {
+                // TODO Auto-generated catch block
+                _logger.debug(e, e);
+            }
+            
+        }
+
+		public void recordingComplete(String uri) {
+	        // TODO Auto-generated method stub
+        	_logger.info("speech complete event...");
+            synchronized (MrcpRecorderChannel.this) {
+                _state = RECORDED;
+            }
+        	_logger.debug("...and past the synchronized block");
+            try {
+                MrcpEvent event = _session.createEvent(
+                        MrcpEventName.RECORD_COMPLETE,
+                        MrcpRequestState.COMPLETE
+                );
+
+                CompletionCause completionCause = new CompletionCause((short) 0, "success");
+                event.addHeader(MrcpHeaderName.COMPLETION_CAUSE.constructHeader(completionCause));
+       
+                _session.postEvent(event);
+            } catch (IllegalStateException e) {
+                // TODO Auto-generated catch block
+                _logger.debug(e, e);
+            } catch (TimeoutException e) {
+                // TODO Auto-generated catch block
+                _logger.debug(e, e);
+            }
+        }
+        
+    }
+    
 
     public static void main(String[] args) throws Exception {
         // We need three parameters to receive and record RTP transmissions
@@ -169,7 +325,7 @@ public class MrcpRecorderChannel extends MrcpGenericChannel implements RecorderR
 
         _logger.info("Starting up MrcpServerSocket...");
         MrcpServerSocket serverSocket = new MrcpServerSocket(mrcpPort);
-        RTPRecorderChannel recorder = new RTPRecorderChannel(channelID, dir, replicator);
+        RTPRecorderChannelImpl recorder = new RTPRecorderChannelImpl(channelID, dir, replicator);
         serverSocket.openChannel(channelID, new MrcpRecorderChannel(recorder));
 
         _logger.info("MRCP recorder resource listening on port " + mrcpPort);

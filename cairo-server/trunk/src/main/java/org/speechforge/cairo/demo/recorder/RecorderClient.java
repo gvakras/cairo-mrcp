@@ -169,7 +169,7 @@ public class RecorderClient implements MrcpEventListener {
             throw new RuntimeException("Recording failed to start!");
         }
 
-        /*
+        
         while (_mrcpEvent == null) {
             this.wait();
         }
@@ -178,8 +178,8 @@ public class RecorderClient implements MrcpEventListener {
         CompletionCause completionCause = (CompletionCause) completionCauseHeader.getValueObject();
 
         return (completionCause.getCauseCode() == 0) ? _mrcpEvent.getContent() : null ;
-        */
-        return response.getContent();
+        
+        //return response.getContent();
 
     }
 
@@ -370,9 +370,7 @@ public class RecorderClient implements MrcpEventListener {
 
             String uri = "file:///temp/test.wav";
             try {
-                String result = client.doRecording(uri);
-                Thread.sleep(20000);
-                result = client.stopRecording();    
+                String result = client.doRecording(uri);   
                 if (_logger.isInfoEnabled()) {
                     StringBuilder sb = new StringBuilder();
                     sb.append("\n**************************************************************");

@@ -191,7 +191,7 @@ public class ResourceServerImpl implements SessionListener {
                 e.printStackTrace();
                 throw new org.speechforge.cairo.sip.ResourceUnavailableException("Could not get a receiver resource");
             }
-            _logger.info("Calling inviye on reseiver");
+            _logger.info("Calling receiver.invite(sdpMessage)");
             request = resource.invite(request, session.getId());
             session.getResources().add(resource);
         } // TODO: catch exception and release transmitter resources

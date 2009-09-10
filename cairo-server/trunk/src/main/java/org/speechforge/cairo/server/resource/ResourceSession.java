@@ -27,6 +27,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.speechforge.cairo.server.recog.RTPRecogChannel;
 import org.speechforge.cairo.server.recorder.RTPRecorderChannel;
+import org.speechforge.cairo.server.resource.session.ChannelResources;
 import org.speechforge.cairo.rtp.server.RTPStreamReplicator;
 import org.speechforge.cairo.server.tts.RTPSpeechSynthChannel;
 import org.speechforge.cairo.sip.SdpMessage;
@@ -87,114 +88,7 @@ public class ResourceSession {
         this.channels = channels;
     }
 
-    public class ChannelResources {
-
-        //mrcp channel needs to becelaned up for all channel types 
-        private String channelId;
-
-        
-
-        //resource to be cleaned up for a recorder channels
-        private RTPStreamReplicator recorderReplicator;
-		private RTPRecorderChannel recorder;        
-        
-		//resource to be cleaned up for a recog channels
-        private RTPStreamReplicator replicator;
-        private RTPRecogChannel recog;
-        
-        //resoruces needed to be celaned up for synth channels
-        private int port;
-        private RTPSpeechSynthChannel rtpssc;
-        
-        
-        /**
-         * @return the recorder
-         */
-        public RTPRecorderChannel getRecorder() {
-        	return recorder;
-        }
-		/**
-         * @param recorder the recorder to set
-         */
-        public void setRecorder(RTPRecorderChannel recorder) {
-        	this.recorder = recorder;
-        }
-        
-        /**
-         * @return the recorderReplicator
-         */
-        public RTPStreamReplicator getRecorderReplicator() {
-        	return recorderReplicator;
-        }
-		/**
-         * @param recorderReplicator the recorderReplicator to set
-         */
-        public void setRecorderReplicator(RTPStreamReplicator recorderReplicator) {
-        	this.recorderReplicator = recorderReplicator;
-        }
-
-        
-        /**
-         * @return the channelId
-         */
-        public String getChannelId() {
-            return channelId;
-        }
-        /**
-         * @param channelId the channelId to set
-         */
-        public void setChannelId(String channelId) {
-            this.channelId = channelId;
-        }
-        /**
-         * @return the port
-         */
-        public int getPort() {
-            return port;
-        }
-        /**
-         * @param port the port to set
-         */
-        public void setPort(int port) {
-            this.port = port;
-        }
-        /**
-         * @return the rep
-         */
-        public RTPStreamReplicator getReplicator() {
-            return replicator;
-        }
-        /**
-         * @param rep the rep to set
-         */
-        public void setReplicator(RTPStreamReplicator rep) {
-            this.replicator = rep;
-        }
-        /**
-         * @return the rtpssc
-         */
-        public RTPSpeechSynthChannel getRtpssc() {
-            return rtpssc;
-        }
-        /**
-         * @param rtpssc the rtpssc to set
-         */
-        public void setRtpssc(RTPSpeechSynthChannel rtpssc) {
-            this.rtpssc = rtpssc;
-        }
-        /**
-         * @return the recog
-         */
-        public RTPRecogChannel getRecog() {
-            return recog;
-        }
-        /**
-         * @param recog the recog to set
-         */
-        public void setRecog(RTPRecogChannel recog) {
-            this.recog = recog;
-        }
-    }
+ 
     
     
     //------------------------------------------------------------------------

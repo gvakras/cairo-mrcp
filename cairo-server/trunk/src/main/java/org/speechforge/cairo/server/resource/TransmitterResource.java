@@ -24,7 +24,10 @@ package org.speechforge.cairo.server.resource;
 
 import org.speechforge.cairo.server.config.CairoConfig;
 import org.speechforge.cairo.server.config.TransmitterConfig;
-import org.speechforge.cairo.server.resource.ResourceSession.ChannelResources;
+import org.speechforge.cairo.server.resource.session.ChannelResources;
+import org.speechforge.cairo.server.resource.session.RecognizerResources;
+import org.speechforge.cairo.server.resource.session.RecorderResources;
+import org.speechforge.cairo.server.resource.session.TransmitterResources;
 import org.speechforge.cairo.rtp.server.PortPairPool;
 import org.speechforge.cairo.server.tts.MrcpSpeechSynthChannel;
 import org.speechforge.cairo.server.tts.PromptGeneratorFactory;
@@ -33,7 +36,6 @@ import org.speechforge.cairo.util.CairoUtil;
 import org.speechforge.cairo.rtp.AudioFormats;
 import org.speechforge.cairo.sip.ResourceUnavailableException;
 import org.speechforge.cairo.sip.SdpMessage;
-import org.speechforge.cairo.sip.SipSession;
 
 import java.io.File;
 import java.io.IOException;
@@ -173,10 +175,10 @@ public class TransmitterResource extends ResourceImpl {
                     // transmitter, the resource is the RTP port in the port pair pool
                     // TODO:  The channels should cleanup after themselves (retrun resource to pools)
                     //        instead of keeping track of the resoruces in the session.
-                    ChannelResources cr = session.new ChannelResources();
-                    cr.setPort(localPort);
+                    ChannelResources cr = new TransmitterResources();
                     cr.setChannelId(channelID);
-                    cr.setRtpssc(rtpscc);
+                    ((TransmitterResources)cr).setPort(localPort);
+                    ((TransmitterResources)cr).setRtpssc(rtpscc);
                     sessionChannels.put(channelID, cr);
                 }
             } else {
@@ -205,9 +207,23 @@ public class TransmitterResource extends ResourceImpl {
         ResourceSession session = ResourceSession.getSession(sessionId);
         Map<String, ChannelResources> sessionChannels = session.getChannels();
         for(ChannelResources channel: sessionChannels.values()) {
+            
+           	//always close the mrcp channel (common to resources)
             _mrcpServer.closeChannel(channel.getChannelId());
-            channel.getRtpssc().shutdown();
-            _portPairPool.returnPort(channel.getPort());
+            
+            //then do resource specific cleanup
+            //TODO: remove instanceof if statements (and casting) and add specific code to resources class (abstract method)
+            //issue is that each resource needs a reference to a different pool so a common cleanup method will be hard
+            //maybe just pass in an interface to "this" to the cleanup method that can get access to pools.
+            if (channel instanceof TransmitterResources) {
+            	TransmitterResources r = (TransmitterResources) channel;
+                r.getRtpssc().shutdown();
+                _portPairPool.returnPort(r.getPort());
+
+            } else {
+            	_logger.warn("Unsupported channle resource of type "+channel.toString());
+            }
+   
         }
         ResourceSession.removeSession(session);
     }

@@ -42,6 +42,10 @@ public class ReceiverConfig extends ResourceConfig {
     private URL _sphinxConfigURL;
     private File _baseRecordingDir;
 
+
+	private URL _sphinxRecorderConfigURL;
+    private int _recorderEngines;
+
     /**
      * TODOC
      * @param index
@@ -67,10 +71,30 @@ public class ReceiverConfig extends ResourceConfig {
                     _logger.debug("SphinxConfigURL: " + _sphinxConfigURL);
                 }
             }
+            
+            try {
+                String sphinxRecorderConfigURL = config.getString("resources.resource(" + index + ").sphinxRecorderConfigURL");
+                if (sphinxRecorderConfigURL != null && sphinxRecorderConfigURL.length() > 0) {
+                	_sphinxRecorderConfigURL = new URL(sphinxRecorderConfigURL);
+                }
+            } catch (NoSuchElementException e) {
+                // ignore
+            }
+            if (_sphinxRecorderConfigURL == null) {
+            	_sphinxRecorderConfigURL = this.getClass().getResource("/config/sphinx-recorder-config.xml");
+                if (_sphinxRecorderConfigURL == null) {
+                    throw new ConfigurationException("Sphinx recorder config URL not found in either cairo config file or cairo classpath!");
+                } else if (_logger.isDebugEnabled()) {
+                    _logger.debug("SphinxRecorderConfigURL: " + _sphinxRecorderConfigURL);
+                }
+            }
+            
             _baseGrammarDir = new File(config.getString("resources.resource(" + index + ").baseGrammarDir"));
             ensureDir(_baseGrammarDir);
             _baseRecordingDir = new File(config.getString("resources.resource(" + index + ").baseRecordingDir"));
             ensureDir(_baseRecordingDir);
+            _recorderEngines = config.getInt("resources.resource(" + index + ").recorderEngines");
+            
         } catch (RuntimeException e) {
             throw new ConfigurationException(e.getMessage(), e);
         } catch (MalformedURLException e) {
@@ -103,4 +127,19 @@ public class ReceiverConfig extends ResourceConfig {
         return _sphinxConfigURL;
     }
 
+    /**
+     * @return the _sphinxRecorderConfigURL
+     */
+    public URL getSphinxRecorderConfigURL() {
+    	return _sphinxRecorderConfigURL;
+    }
+
+
+	/**
+     * @return the _recorderEngines
+     */
+    public int getRecorderEngines() {
+    	return _recorderEngines;
+    }
+    
 }

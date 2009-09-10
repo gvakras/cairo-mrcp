@@ -98,10 +98,14 @@ public class RTPRecogChannel {
             throw new IllegalStateException("Recognition already in progress!");
             // TODO: cancel or queue request instead (depending upon value of 'cancel-if-queue' header)
         }
+        _logger.info("OK, processor was null");
 
         _processor = _replicator.createRealizedProcessor(CONTENT_DESCRIPTOR_RAW, 10000,SourceAudioFormat.PREFERRED_MEDIA_FORMATS); // TODO: specify audio format
-
+        _logger.info("OK, created new realized processor");
+        
         PushBufferDataSource dataSource = (PushBufferDataSource) _processor.getDataOutput();
+        _logger.info("OK, created new datasource "+dataSource);
+        
         if (dataSource == null) {
             throw new IOException("Processor.getDataOutput() returned null!");
         }
@@ -110,6 +114,7 @@ public class RTPRecogChannel {
             _logger.debug("Borrowing recognition engine from object pool...");
             _recEngine = (SphinxRecEngine) _recEnginePool.borrowObject();
         } catch (Exception e) {
+        	e.printStackTrace();
             _logger.debug(e, e);
             closeProcessor();
             throw new ResourceUnavailableException("All rec engines are in use!", e);
