@@ -217,7 +217,7 @@
     <dependency>
       <groupId>org.speechforge</groupId>
       <artifactId>cairo-rtp</artifactId>
-      <version>0.1</version>
+      <version>SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
     
@@ -225,6 +225,13 @@
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
       <version>1.2.13</version>
+      <scope>compile</scope>
+    </dependency>
+    
+    <dependency>
+      <groupId>com.spokentech</groupId>
+      <artifactId>speechcloud-client</artifactId>
+      <version>SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
 

@@ -239,93 +239,92 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
      * @param event the event
      */
     private void recogEventReceived(MrcpEvent event) {
-        MrcpEventName eventName = event.getEventName();
-        
-        //first determine if this is event for a blocking request
-        if ((_activeRecognition != null) && (event.getRequestID() == _activeRecognition.getRequestId() )) {
-        
+    	MrcpEventName eventName = event.getEventName();
 
-            if (MrcpEventName.START_OF_INPUT.equals(eventName)) {
-                //TODO: DO you need to check if there is something to barge in on (what if the play already completed?  Or if there is no play in teh first place?
-                //used to check if part of a playAndRecognize.  But now that one can queue a play non-blocking and then call recognize with bargein enabled
-                //that check is no longer valid. 
-                if ((_bargeIn) ) { //&&  (_activeRequestType == RequestType.playAndRecognize)){
-                    try {
-                        sendBargeinRequest();
-                    } catch (MrcpInvocationException e) {
-                        _logger.warn("MRCPv2 Status Code "+ e.getResponse().getStatusCode());
-                        _logger.warn(e, e);
-                    } catch (IOException e) {
-                        _logger.warn(e, e);
-                    } catch (InterruptedException e) {
-                        _logger.warn(e, e);
-                    }
-                }
-    
-            } else if (MrcpEventName.RECOGNITION_COMPLETE.equals(eventName)) {
-                
-                //get the result and place in the active recog request object where it is retrieved by the blocking method
-                MrcpHeader completionCauseHeader = event.getHeader(MrcpHeaderName.COMPLETION_CAUSE);
-                CompletionCause completionCause = null;
-                try {
-                    completionCause = (CompletionCause) completionCauseHeader.getValueObject();
-                } catch (IllegalValueException e) {
-                    // TODO Auto-generated catch block
-                	_logger.warn("Illegal Value getting the completion cause", e);
+    	//first determine if this is event for a blocking request
+    	if ((_activeRecognition != null) && (event.getRequestID() == _activeRecognition.getRequestId() )) {
 
-                }
-    
-                RecognitionResult r = null;
-                if (completionCause.getCauseCode() != 0) { 
-                    r = null; 
-                } else {
-                    try {
-                        _logger.debug("Recognition event content: "+event.getContent());
-                        r = RecognitionResult.constructResultFromString(event.getContent());
-                        _logger.debug("recognition result text: "+r.getText());
-                    } catch (InvalidRecogResultException e) {
-                    	_logger.warn("Illegal recognition result", e);
-                        r = null;
-                    }
-                }
-                _activeRecognition.setResult(r);
-                
-             
-                //signal for the blocking call to check for unblocking
-                synchronized (this) {
-                    _activeRecognition.setCompleted(true);
-                    this.notifyAll();
-                }
-            }
-        //try to always send anyway (if not null) good for status on client
-        //else it is a non blocking requests, just forward on the event (with the recognition results)
-        //} else {
-        }
-            RecognitionResult r = null;
-            if (MrcpEventName.RECOGNITION_COMPLETE.equals(eventName)) {
-                MrcpHeader completionCauseHeader = event.getHeader(MrcpHeaderName.COMPLETION_CAUSE);
-                CompletionCause completionCause = null;
-                try {
-                    completionCause = (CompletionCause) completionCauseHeader.getValueObject();
-                } catch (IllegalValueException e) {
-                    // TODO Auto-generated catch block
-                	_logger.warn("Illegal Value getting the completion cause", e);
-                }
-                if (completionCause.getCauseCode() == 0) { 
-                    try {
-                        _logger.debug("Recognition event content: "+event.getContent());
-                        r = RecognitionResult.constructResultFromString(event.getContent());
-                        _logger.debug("recognition result text: "+r.getText());
-                    } catch (InvalidRecogResultException e) {
-                    	_logger.warn("Illegal Recognition Result", e);
-                        r = null;
-                    }
-                }
-            }
-            
-            fireRecogEvent(event,r);
 
-        //}
+    		if (MrcpEventName.START_OF_INPUT.equals(eventName)) {
+    			//TODO: DO you need to check if there is something to barge in on (what if the play already completed?  Or if there is no play in teh first place?
+    			//used to check if part of a playAndRecognize.  But now that one can queue a play non-blocking and then call recognize with bargein enabled
+    			//that check is no longer valid. 
+    			if ((_bargeIn) ) { //&&  (_activeRequestType == RequestType.playAndRecognize)){
+    				try {
+    					sendBargeinRequest();
+    				} catch (MrcpInvocationException e) {
+    					_logger.warn("MRCPv2 Status Code "+ e.getResponse().getStatusCode());
+    					_logger.warn(e, e);
+    				} catch (IOException e) {
+    					_logger.warn(e, e);
+    				} catch (InterruptedException e) {
+    					_logger.warn(e, e);
+    				}
+    			}
+
+    		} else if (MrcpEventName.RECOGNITION_COMPLETE.equals(eventName)) {
+
+    			//get the result and place in the active recog request object where it is retrieved by the blocking method
+    			MrcpHeader completionCauseHeader = event.getHeader(MrcpHeaderName.COMPLETION_CAUSE);
+    			CompletionCause completionCause = null;
+    			try {
+    				completionCause = (CompletionCause) completionCauseHeader.getValueObject();
+    			} catch (IllegalValueException e) {
+    				// TODO Auto-generated catch block
+    				_logger.warn("Illegal Value getting the completion cause", e);
+
+    			}
+
+    			RecognitionResult r = null;
+    			if (completionCause.getCauseCode() != 0) { 
+    				r = null; 
+    			} else {
+    				try {
+    					_logger.debug("Recognition event content: "+event.getContent());
+    					r = RecognitionResult.constructResultFromString(event.getContent());
+    					_logger.debug("recognition result text: "+r.getText());
+    				} catch (InvalidRecogResultException e) {
+    					_logger.warn("Illegal recognition result", e);
+    					r = null;
+    				}
+    			}
+    			_activeRecognition.setResult(r);
+
+
+    			//signal for the blocking call to check for unblocking
+    			synchronized (this) {
+    				_activeRecognition.setCompleted(true);
+    				this.notifyAll();
+    			}
+    		}
+    	}
+    	
+		// else it is a non blocking requests, just forward on the event (with the recognition results)
+		//    Always try to always send event (blocking or non) -- could be useful for status on client
+    	RecognitionResult r = null;
+    	if (MrcpEventName.RECOGNITION_COMPLETE.equals(eventName)) {
+    		MrcpHeader completionCauseHeader = event.getHeader(MrcpHeaderName.COMPLETION_CAUSE);
+    		CompletionCause completionCause = null;
+    		try {
+    			completionCause = (CompletionCause) completionCauseHeader.getValueObject();
+    		} catch (IllegalValueException e) {
+    			// TODO Auto-generated catch block
+    			_logger.warn("Illegal Value getting the completion cause", e);
+    		}
+    		if (completionCause.getCauseCode() == 0) { 
+    			try {
+    				_logger.debug("Recognition event content: "+event.getContent());
+    				r = RecognitionResult.constructResultFromString(event.getContent());
+    				_logger.debug("recognition result text: "+r.getText());
+    			} catch (InvalidRecogResultException e) {
+    				_logger.warn("Illegal Recognition Result", e);
+    				r = null;
+    			}
+    		}
+    	}
+
+    	fireRecogEvent(event,r);
+
     }
 
     /* (non-Javadoc)
@@ -811,7 +810,22 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
             }
             
             //TODO: cancel speech recognition
+            
                 
+            // if barge in enabled, send bareg in request (to transmitter)
+			if ((_bargeIn) ) { //&&  (_activeRequestType == RequestType.playAndRecognize)){
+				try {
+					sendBargeinRequest();
+				} catch (MrcpInvocationException e) {
+					_logger.warn("MRCPv2 Status Code "+ e.getResponse().getStatusCode());
+					_logger.warn(e, e);
+				} catch (IOException e) {
+					_logger.warn(e, e);
+				} catch (InterruptedException e) {
+					_logger.warn(e, e);
+				}
+			}
+            
             
             //now we have the first char, we are waiting for a match
             _dtmfState = DtmfState.waitingForMatch;

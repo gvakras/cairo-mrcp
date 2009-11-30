@@ -24,6 +24,9 @@ package org.speechforge.cairo.client;
 
 import java.io.IOException;
 import java.io.Reader;
+
+import javax.media.rtp.InvalidSessionAddressException;
+
 import org.mrcp4j.MrcpRequestState;
 import org.mrcp4j.client.MrcpInvocationException;
 import org.mrcp4j.message.header.IllegalValueException;
@@ -52,8 +55,9 @@ public interface SpeechClient {
      * @throws MrcpInvocationException the mrcp invocation exception
      * @throws InterruptedException the interrupted exception
      * @throws NoMediaControlChannelException 
+     * @throws InvalidSessionAddressException 
      */
-    public void playBlocking(boolean urlPrompt, String prompt)  throws IOException, MrcpInvocationException, InterruptedException, NoMediaControlChannelException;
+    public void playBlocking(boolean urlPrompt, String prompt)  throws IOException, MrcpInvocationException, InterruptedException, NoMediaControlChannelException, InvalidSessionAddressException;
 
     
     /**
@@ -112,8 +116,9 @@ public interface SpeechClient {
      * @throws InterruptedException the interrupted exception
      * @throws IllegalValueException the illegal value exception
      * @throws NoMediaControlChannelException 
+     * @throws InvalidSessionAddressException 
      */
-    public RecognitionResult playAndRecognizeBlocking(boolean urlPrompt, String prompt, String grammarUrl, boolean hotword) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException;
+    public RecognitionResult playAndRecognizeBlocking(boolean urlPrompt, String prompt, String grammarUrl, boolean hotword) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException, InvalidSessionAddressException;
     
     /**
      * Play and recognize blocking.  This version of play and recognize receievs a Reader to the grammar
