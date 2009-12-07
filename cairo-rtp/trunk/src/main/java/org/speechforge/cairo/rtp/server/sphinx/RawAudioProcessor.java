@@ -79,7 +79,18 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
 
     private long _totalSamplesRead = 0;
     private long _startTime;
+    
 
+    public RawAudioProcessor(int msecsPerRead) {
+		this._msecPerRead = msecsPerRead;
+		initialize();
+    }
+    
+    public RawAudioProcessor() {
+
+		initialize();
+    }
+    
    /*
     * (non-Javadoc)
     * 
@@ -95,7 +106,9 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
    }
 
 
-    /* (non-Javadoc)
+
+
+	/* (non-Javadoc)
      * @see edu.cmu.sphinx.frontend.DataProcessor#initialize()
      */
     public void initialize() {
@@ -140,7 +153,6 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
         //_transformer = new AudioDataTransformer(_audioFormat, stereoToMono, selectedChannel);
         _transformer = new AudioDataTransformer(_audioFormat, "average", 0);
         _frame = new byte[_audioFormat.getFrameSizeInBytes()];
-
         Thread processingThread = new Thread(this);
         processingThread.start();
 
@@ -190,9 +202,10 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
             //Data data = new DataStartSignal();
             _logger.debug("adding DataStartSignal...");
             do {
-                _dataList.add(data);
+            	if (data!=null)
+                   _dataList.add(data);
                 data = transformNextRawAudio();
-            } while (data != null);
+            } while ((data != null) || (_processing));
         } catch (InterruptedException e) {
             _logger.warn(e, e);
         } 
@@ -227,10 +240,12 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
         }*/
 
         if (data.length < 1) {
+        	_logger.trace("data length < 1");
             return null;
         }
 
         _totalSamplesRead += (data.length / _audioFormat.getSampleSizeInBytes());
+        _logger.trace("read in " + data.length +" bytes "+_totalSamplesRead);
         
         if (data.length != _audioFormat.getFrameSizeInBytes()) {
             if (data.length % _audioFormat.getSampleSizeInBytes() != 0) {
@@ -286,7 +301,7 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
      * @param length number of bytes to be processed from buffer
      */
     public synchronized void addRawData(byte[] data, int offset, int length) {
-        try {
+    	try {
             addRawDataPrivate(data, offset, length);
         } catch (RuntimeException e) {
             _logger.debug("addRawData(): throwing exception", e);
@@ -300,7 +315,7 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
         }
 
         if (_logger.isTraceEnabled()) {
-            _logger.trace("addRawData(): offset=" + offset + ", length=" + length);
+            _logger.trace("addRawData(): datalength="+data.length+" offset=" + offset + ", length=" + length);
         }
 
         if (length < 1) {
@@ -336,7 +351,8 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
             if (_framePointer == _frame.length) {
                 // the frame was filled
                 _rawAudioList.add(_frame);
-                _frame = new byte[_audioFormat.getFrameSizeInBytes()];
+                _frame = new byte[_frame.length];
+                //_frame = new byte[_audioFormat.getFrameSizeInBytes()];
                 _framePointer = 0;
             } else {
                 // the data buffer was exhausted

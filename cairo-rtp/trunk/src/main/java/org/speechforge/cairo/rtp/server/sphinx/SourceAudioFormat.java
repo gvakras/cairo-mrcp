@@ -213,7 +213,7 @@ public class SourceAudioFormat {
             break;
 
         default:
-            throw new UnsupportedEncodingException("Unsupported/unspecified signed: " + mediaFormat.toString());
+            //throw new UnsupportedEncodingException("Unsupported/unspecified signed: " + mediaFormat.toString());
         
         }
 
@@ -227,7 +227,7 @@ public class SourceAudioFormat {
             break;
 
         default:
-            throw new UnsupportedEncodingException("Unsupported/unspecified endian: " + mediaFormat.toString());
+            //throw new UnsupportedEncodingException("Unsupported/unspecified endian: " + mediaFormat.toString());
         
         }
         

@@ -33,6 +33,7 @@ import javax.media.Time;
 import javax.media.format.AudioFormat;
 import javax.media.protocol.BufferTransferHandler;
 import javax.media.protocol.ContentDescriptor;
+import javax.media.protocol.DataSource;
 import javax.media.protocol.PushBufferDataSource;
 import javax.media.protocol.PushBufferStream;
 
@@ -106,6 +107,11 @@ public class PBDSReplicator implements BufferTransferHandler {
     public AudioFormat getAudioFormat() {
         return _format;
     }
+    
+    public void removeReplicator(PushBufferDataSource pbds) {
+    	_destinations.remove(pbds);
+    }
+    
 
     /**
      * Replicates the underlying data source.
@@ -116,6 +122,7 @@ public class PBDSReplicator implements BufferTransferHandler {
         synchronized (_destinations) {
             _destinations.add(pbds);
         }
+        _logger.debug("destination count now: "+_destinations.size());
         return pbds;
     }
 
@@ -136,6 +143,7 @@ public class PBDSReplicator implements BufferTransferHandler {
         }
         
         synchronized (_destinations) {
+        	_logger.trace("num destinations: "+_destinations.size());
             if (_destinations.size() > 0) {
                 for (PBDS pbds : _destinations) {
                     pbds.newData(buffer, ioe);
@@ -275,6 +283,7 @@ public class PBDSReplicator implements BufferTransferHandler {
                 if (_ioe != null) {
                     throw _ioe;
                 }
+                _logger.trace("readig buffer of length: "+_buffer.getLength());
                 buffer.copy(_buffer);
             }
         }

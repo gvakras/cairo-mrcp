@@ -31,10 +31,8 @@ import org.speechforge.cairo.jmf.ProcessorStarter;
 
 import java.io.IOException;
 
-import javax.media.CannotRealizeException;
 import javax.media.Format;
 import javax.media.Manager;
-import javax.media.NoPlayerException;
 import javax.media.Processor;
 import javax.media.ProcessorModel;
 import javax.media.protocol.ContentDescriptor;
@@ -59,6 +57,7 @@ public class RTPStreamReplicator extends RTPConsumer {
     private Processor _processor;
     private RecorderMediaClient recorder;
     private int _port;
+    
 
     public RTPStreamReplicator(int port) throws IOException {
         super(port);
@@ -72,13 +71,25 @@ public class RTPStreamReplicator extends RTPConsumer {
     public int getPort() {
         return _port;
     }
+    
+    public void removeReplicant(PushBufferDataSource pbds) {
+    	_replicator.removeReplicator(pbds);
+    	
+    }
 
     /* (non-Javadoc)
      * @see org.speechforge.cairo.server.rtp.RTPConsumer#shutdown()
      */
     @Override
     public void shutdown() {
-        super.shutdown();
+    	if (_processor != null) {
+    		_processor.close();
+    		_processor = null;
+    	}
+    	if (_replicator != null) 
+    	   _replicator = null;
+    	//_replicator.cleanup();
+        //super.shutdown();
     }
 
     /* (non-Javadoc)
@@ -102,7 +113,7 @@ public class RTPStreamReplicator extends RTPConsumer {
                     throw (IOException) new IOException(e.getMessage()).initCause(e);
                 }
 
-                _logger.debug("Processor realized.");
+                _logger.debug("Internal Processor realized.");
 
                 PushBufferDataSource pbds = (PushBufferDataSource) _processor.getDataOutput();
                 _replicator = new PBDSReplicator(pbds);
@@ -154,7 +165,7 @@ public class RTPStreamReplicator extends RTPConsumer {
      * @throws IOException if there are I/O problems creating the processor from the stream.
      * @throws IllegalStateException if the stream has not been received yet, and is not received within the maximum time to wait.
      */
-    public synchronized Processor createRealizedProcessor(ContentDescriptor outputContentDescriptor, long maxWait, Format[] preferredMediaFormats)
+    public synchronized ProcessorReplicatorPair createRealizedProcessor(ContentDescriptor outputContentDescriptor, long maxWait, Format[] preferredMediaFormats)
       throws IOException, IllegalStateException {
 
         if (_replicator == null) {
@@ -171,9 +182,9 @@ public class RTPStreamReplicator extends RTPConsumer {
             }
         }
 
-
+        PushBufferDataSource pbds = _replicator.replicate();
         ProcessorModel pm = new ProcessorModel(
-            _replicator.replicate(), preferredMediaFormats, outputContentDescriptor);
+        		pbds, preferredMediaFormats, outputContentDescriptor);
         Processor processor;
         try {
             _logger.debug("Creating realized processor...");
@@ -186,8 +197,7 @@ public class RTPStreamReplicator extends RTPConsumer {
             throw (IOException) new IOException(e.getMessage()).initCause(e);
         }
 
-        
-        if (_logger.isDebugEnabled()) {
+        /*if (_logger.isDebugEnabled()) {
             try {
                 recorder = new RecorderMediaClient(_replicator.replicate());
             } catch (NoPlayerException e) {
@@ -197,13 +207,46 @@ public class RTPStreamReplicator extends RTPConsumer {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-        }
+        }*/
 
         _logger.debug("Processor realized.");
 
-        return processor;
+        return new ProcessorReplicatorPair(processor,pbds);
 
     }
 
+    public class ProcessorReplicatorPair {
+    	public ProcessorReplicatorPair(Processor proc, PushBufferDataSource pbds) {
+	        super();
+	        this.proc = proc;
+	        this.pbds = pbds;
+        }
+		/**
+         * @return the proc
+         */
+        public Processor getProc() {
+        	return proc;
+        }
+		/**
+         * @param proc the proc to set
+         */
+        public void setProc(Processor proc) {
+        	this.proc = proc;
+        }
+		/**
+         * @return the pbds
+         */
+        public PushBufferDataSource getPbds() {
+        	return pbds;
+        }
+		/**
+         * @param pbds the pbds to set
+         */
+        public void setPbds(PushBufferDataSource pbds) {
+        	this.pbds = pbds;
+        }
+		private Processor proc;
+    	private PushBufferDataSource pbds;
+    }
 
 }
