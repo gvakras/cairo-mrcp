@@ -2,6 +2,7 @@ package org.speechforge.cairo.client.cloudimpl;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -18,21 +19,16 @@ import java.util.regex.Pattern;
 import javax.media.rtp.InvalidSessionAddressException;
 import javax.sound.sampled.AudioFormat;
 
-
 import org.apache.log4j.Logger;
-import org.mrcp4j.MrcpEventName;
 import org.mrcp4j.MrcpRequestState;
 import org.mrcp4j.client.MrcpInvocationException;
-import org.mrcp4j.message.MrcpEvent;
-import org.mrcp4j.message.header.CompletionCause;
 import org.mrcp4j.message.header.IllegalValueException;
-import org.mrcp4j.message.header.MrcpHeader;
-import org.mrcp4j.message.header.MrcpHeaderName;
 import org.speechforge.cairo.client.NoMediaControlChannelException;
 import org.speechforge.cairo.client.SpeechClient;
 import org.speechforge.cairo.client.SpeechClientProvider;
 import org.speechforge.cairo.client.SpeechEventListener;
 import org.speechforge.cairo.client.SpeechRequest;
+import org.speechforge.cairo.client.SpeechEventListener.SpeechEventType;
 import org.speechforge.cairo.client.SpeechRequest.RequestType;
 import org.speechforge.cairo.client.recog.InvalidRecogResultException;
 import org.speechforge.cairo.client.recog.RecognitionResult;
@@ -46,7 +42,7 @@ import com.spokentech.speechdown.client.rtp.RtpTransmitter;
 //TODO: Remove the dependency on MRCP4j (state and two exceptions)
 
 
-public class SpeechCloudClient implements SpeechClient, SpeechClientProvider, PromptPlayListener {
+public class SpeechCloudClient implements SpeechClient, SpeechClientProvider, PromptPlayListener, com.spokentech.speechdown.common.SpeechEventListener {
 
 
 	/** The _logger. */
@@ -56,8 +52,8 @@ public class SpeechCloudClient implements SpeechClient, SpeechClientProvider, Pr
     private static final String wav = "audio/x-wav";
     private static final String mpeg = "audio/mpeg";
     
-    private static final String recServiceUrl = "http://ec2-174-129-20-250.compute-1.amazonaws.com/speechcloud/SpeechUploadServlet";    
-    private static final String synthServiceUrl = "http://ec2-174-129-20-250.compute-1.amazonaws.com/speechcloud/SpeechDownloadServlet";    
+    private static final String recServiceUrl = "http://spokentech.net/speechcloud/SpeechUploadServlet";    
+    private static final String synthServiceUrl = "http://spokentech.net/speechcloud/SpeechDownloadServlet";    
 
     private static final  String s4audio = "audio/x-s4audio";
     
@@ -299,7 +295,7 @@ public class SpeechCloudClient implements SpeechClient, SpeechClientProvider, Pr
             }
            
             //return the recognition results
-           _dtmfListener.characterEventReceived(_inBuf,SpeechEventListener.EventType.recognitionMatch);
+           _dtmfListener.characterEventReceived(_inBuf,SpeechEventListener.DtmfEventType.recognitionMatch);
            
 
         }  else {
@@ -370,9 +366,10 @@ public class SpeechCloudClient implements SpeechClient, SpeechClientProvider, Pr
 	public RecognitionResult playAndRecognizeBlocking(boolean urlPrompt, String prompt, String grammarUrl,
             boolean hotword) throws IOException, MrcpInvocationException, InterruptedException,
             IllegalValueException, NoMediaControlChannelException, InvalidSessionAddressException {
-		playBlocking(urlPrompt, prompt);
+		queuePrompt(urlPrompt, prompt);
 		boolean attachGrammar = false;;
 		int noInputTimeout =0;
+		
 		return recognizeBlocking(grammarUrl,hotword,attachGrammar,noInputTimeout);
     }
 
@@ -427,35 +424,147 @@ public class SpeechCloudClient implements SpeechClient, SpeechClientProvider, Pr
 	    return file;
     }
 
+	
 
-	public SpeechRequest queuePrompt(boolean urlPormpt, String prompt) throws IOException,
+	
+
+	public SpeechRequest queuePrompt(boolean urlPrompt, String prompt) throws IOException,
             MrcpInvocationException, InterruptedException, NoMediaControlChannelException {
-	    // TODO Auto-generated method stub
-		_logger.warn("Not implemented.");
-		return null;
+
+    	if (rtpTransmitter == null)
+    		throw new  NoMediaControlChannelException();
+    	
+ 
+        // speak request
+
+		AudioFormat synthFormat = rtpTransmitter.getFormat();
+		String fileFormat = rtpTransmitter.getFileType();
+		
+		InputStream stream = synthesizer.synthesize(prompt, synthFormat, fileFormat, voiceName);
+		
+		//TODO: remove this step (converting stream to file) should just queue the stream
+        String fname = Long.toString(System.currentTimeMillis())+".wav";
+		if (fileFormat.equals("audio/x-au")) {
+             fname = Long.toString(System.currentTimeMillis())+".au";
+		} else if (fileFormat.equals("audio/x-wav")) {
+             fname = Long.toString(System.currentTimeMillis())+".wav";
+		} else {
+			_logger.warn("Unrecognzied file format:"+ fileFormat+" Trying wav");
+		}
+		File f = streamToFile(stream,fname);
+		
+		try {
+	        rtpTransmitter.queueAudio(f, this);
+        } catch (InvalidSessionAddressException e) {
+	        // TODO Auto-generated catch block
+	        e.printStackTrace();
+        }
+ 
+		//TODO: Need a unique id
+		int id = 1;
+        
+        //_activeRequestType = RequestType.play;
+        SpeechRequest queuedTts = new SpeechRequest(id,RequestType.play,false);   
+        queuedTts.setBlockingCall(false);
+
+        return queuedTts;
 
     }
 
 	public SpeechRequest recognize(String grammarUrl, boolean hotword, boolean attachGrammar,
             long noInputTimeout) throws IOException, MrcpInvocationException, InterruptedException,
             IllegalValueException, NoMediaControlChannelException {
-		_logger.warn("Not implemented.");
-		return null;
+		
+		
+		//todo: implement attachGrammar flag
+		//todo: implement hotword flag
+		//todo: implement timeout
+		
+		RtpS4EndPointingInputStream eStream = new RtpS4EndPointingInputStream();
+		eStream.setMimeType(s4audio);
+		eStream.setupStream(rtpReplicator);
+
+	       URL grammar = null;
+	    	try {
+	    		grammar = new URL(grammarUrl);
+			} catch (MalformedURLException e) {  
+		         e.printStackTrace();  
+			}
+
+    	boolean lmflg = false;
+    	boolean batchFlag = false;
+        try {	            
+            recognizer.recognizeAsynch(grammar,  eStream,  lmflg,  batchFlag, timeout,this) ;
+        } catch (InstantiationException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
+        //todo: unique request Id's
+        int id =1;
+        
+        SpeechRequest request = new SpeechRequest(id,RequestType.recognize,false);   
+        request.setBlockingCall(false);
+        return request;
+        
     }
 
 	public SpeechRequest recognize(Reader reader, boolean hotword, boolean attachGrammar, long noInputTimeout)
             throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException,
             NoMediaControlChannelException {
-		_logger.warn("Not implemented.");
-		return null;
+		
+		//todo: implement attachGrammar flag
+		//todo: implement hotword flag
+		//todo: implement timeout
+		
+        BufferedReader in  = new BufferedReader(reader);
+        StringBuilder sb = new StringBuilder();
+
+        String line = null;
+        while ((line = in.readLine()) != null) {
+            sb.append(line);
+            sb.append("\n");
+        }
+        
+       _logger.debug("The grammar text: " +sb.toString());
+       
+		RtpS4EndPointingInputStream eStream = new RtpS4EndPointingInputStream();
+		eStream.setMimeType(s4audio);
+		eStream.setupStream(rtpReplicator);
+
+
+  
+    	boolean lmflg = false;
+    	boolean batchFlag = false;
+        try {	            
+            recognizer.recognizeAsynch(sb.toString(),  eStream,  lmflg,  batchFlag, timeout,this) ;
+        } catch (InstantiationException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        //todo: unique request Id's
+        int id =1;
+        
+        SpeechRequest request = new SpeechRequest(id,RequestType.recognize,false);   
+        request.setBlockingCall(false);
+        return request;
+
     }
 
 	public RecognitionResult recognizeBlocking(String grammarUrl, boolean hotword, boolean attachGrammar,
             long noInputTimeout) throws IOException, MrcpInvocationException, InterruptedException,
             IllegalValueException, NoMediaControlChannelException {
-
 		
-
+		//todo: implement attachGrammar flag
+		//todo: implement hotword flag
+		//todo: implement timeeout
+		
 
         URL grammar = null;
     	try {
@@ -468,11 +577,11 @@ public class SpeechCloudClient implements SpeechClient, SpeechClientProvider, Pr
 		eStream.setMimeType(s4audio);
 		eStream.setupStream(rtpReplicator);
 		
-        //start up the microphone
+
     	com.spokentech.speechdown.common.RecognitionResult rr = null;
         try {
 
-			rr = recognizer.recognize(grammar, eStream, lmflg,  batchFlag, timeout);
+			rr = recognizer.recognize(grammar, eStream, lmflg,  batchFlag, timeout,this);
 
         } catch (InstantiationException e) {
 	        // TODO Auto-generated catch block
@@ -493,19 +602,52 @@ public class SpeechCloudClient implements SpeechClient, SpeechClientProvider, Pr
 	    return r;
     }
 
-	public RecognitionResult recognizeBlocking(Reader reader, boolean hotword, long noInputTimeout)
-            throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException,
-            NoMediaControlChannelException {
-    	_logger.warn("The recognize blocking(reader,hotwordFlag,timeout) method is not implemented");
-        return null;
-    }
+	public RecognitionResult recognizeBlocking(Reader reader, boolean hotword, long noInputTimeout) throws IOException, 
+		MrcpInvocationException, InterruptedException, IllegalValueException,NoMediaControlChannelException {
+
+		BufferedReader in  = new BufferedReader(reader);
+		StringBuilder sb = new StringBuilder();
+
+		String line = null;
+		while ((line = in.readLine()) != null) {
+			sb.append(line);
+			sb.append("\n");
+		} 
+		_logger.debug("The grammar text: " +sb.toString());
+		
+
+		RtpS4EndPointingInputStream eStream = new RtpS4EndPointingInputStream();
+		eStream.setMimeType(s4audio);
+		eStream.setupStream(rtpReplicator);
 
 
-	public MrcpRequestState sendBargeinRequest() throws IOException, MrcpInvocationException,
-            InterruptedException {
-	    // TODO Auto-generated method stub
-	    return null;
-    }
+		com.spokentech.speechdown.common.RecognitionResult rr = null;
+		try {
+			rr = recognizer.recognize(sb.toString(), eStream, lmflg,  batchFlag, timeout, this);
+
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}        
+
+
+		//TODO:  Remove this hack.  Have a single RecognitionResult object used in both Cairo client and the cloud client
+		//       Perhaps combine the two client libs.
+		RecognitionResult r = null;
+		try {
+			r = RecognitionResult.constructResultFromString(rr.toString());
+		} catch (InvalidRecogResultException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return r;
+
+
+	}
+
+
+
 
 	public MrcpRequestState sendStartInputTimersRequest() throws MrcpInvocationException, IOException,
             InterruptedException {
@@ -569,147 +711,6 @@ public class SpeechCloudClient implements SpeechClient, SpeechClientProvider, Pr
 
 
 
-	
-	
-	   /**
-     * Tts event received.
-     * 
-     * @param event the event
-     */
-    private void ttsEventReceived(MrcpEvent event) {
-        
-        //first determine if this is event for a blocking request
-        if ((_activeBlockingTts != null) && (event.getRequestID() == _activeBlockingTts.getRequestId() )) {
-        
-            if (MrcpEventName.SPEAK_COMPLETE.equals(event.getEventName())) {
-
-                // if there is an active recognition request and bargein is enabled, start the timer
-                if ((_bargeIn)&&(_activeRecognition != null)&&(!_activeRecognition.isCompleted())){
-                    try {
-                        sendStartInputTimersRequest();
-                    } catch (MrcpInvocationException e) {
-                        _logger.warn("MRCPv2 Status Code "+ e.getResponse().getStatusCode());
-                        _logger.warn(e, e);
-                    } catch (IOException e) {
-                        _logger.warn(e, e);
-                    } catch (InterruptedException e) {
-                        _logger.warn(e, e);
-                    }
-                }
-                
-                //signal for the blocking call to check for unblocking
-                synchronized (this) {
-                    _activeBlockingTts.setCompleted(true);
-                    //activeRequests.remove(key);
-                    this.notifyAll();
-                }
-            }
-            
-            //else an event from an asynch request, just send the event on
-        } else {
-            
-        	fireSynthEvent(event);
-
-        }
-        
-   
-
-    }
-
-    /**
-     * Recog event received.
-     * 
-     * @param event the event
-     */
-    private void recogEventReceived(MrcpEvent event) {
-    	MrcpEventName eventName = event.getEventName();
-
-    	//first determine if this is event for a blocking request
-    	if ((_activeRecognition != null) && (event.getRequestID() == _activeRecognition.getRequestId() )) {
-
-
-    		if (MrcpEventName.START_OF_INPUT.equals(eventName)) {
-    			//TODO: DO you need to check if there is something to barge in on (what if the play already completed?  Or if there is no play in teh first place?
-    			//used to check if part of a playAndRecognize.  But now that one can queue a play non-blocking and then call recognize with bargein enabled
-    			//that check is no longer valid. 
-    			if ((_bargeIn) ) { //&&  (_activeRequestType == RequestType.playAndRecognize)){
-    				try {
-    					sendBargeinRequest();
-    				} catch (MrcpInvocationException e) {
-    					_logger.warn("MRCPv2 Status Code "+ e.getResponse().getStatusCode());
-    					_logger.warn(e, e);
-    				} catch (IOException e) {
-    					_logger.warn(e, e);
-    				} catch (InterruptedException e) {
-    					_logger.warn(e, e);
-    				}
-    			}
-
-    		} else if (MrcpEventName.RECOGNITION_COMPLETE.equals(eventName)) {
-
-    			//get the result and place in the active recog request object where it is retrieved by the blocking method
-    			MrcpHeader completionCauseHeader = event.getHeader(MrcpHeaderName.COMPLETION_CAUSE);
-    			CompletionCause completionCause = null;
-    			try {
-    				completionCause = (CompletionCause) completionCauseHeader.getValueObject();
-    			} catch (IllegalValueException e) {
-    				// TODO Auto-generated catch block
-    				_logger.warn("Illegal Value getting the completion cause", e);
-
-    			}
-
-    			RecognitionResult r = null;
-    			if (completionCause.getCauseCode() != 0) { 
-    				r = null; 
-    			} else {
-    				try {
-    					_logger.debug("Recognition event content: "+event.getContent());
-    					r = RecognitionResult.constructResultFromString(event.getContent());
-    					_logger.debug("recognition result text: "+r.getText());
-    				} catch (InvalidRecogResultException e) {
-    					_logger.warn("Illegal recognition result", e);
-    					r = null;
-    				}
-    			}
-    			_activeRecognition.setResult(r);
-
-
-    			//signal for the blocking call to check for unblocking
-    			synchronized (this) {
-    				_activeRecognition.setCompleted(true);
-    				this.notifyAll();
-    			}
-    		}
-    	}
-    	
-		// else it is a non blocking requests, just forward on the event (with the recognition results)
-		//    Always try to always send event (blocking or non) -- could be useful for status on client
-    	RecognitionResult r = null;
-    	if (MrcpEventName.RECOGNITION_COMPLETE.equals(eventName)) {
-    		MrcpHeader completionCauseHeader = event.getHeader(MrcpHeaderName.COMPLETION_CAUSE);
-    		CompletionCause completionCause = null;
-    		try {
-    			completionCause = (CompletionCause) completionCauseHeader.getValueObject();
-    		} catch (IllegalValueException e) {
-    			// TODO Auto-generated catch block
-    			_logger.warn("Illegal Value getting the completion cause", e);
-    		}
-    		if (completionCause.getCauseCode() == 0) { 
-    			try {
-    				_logger.debug("Recognition event content: "+event.getContent());
-    				r = RecognitionResult.constructResultFromString(event.getContent());
-    				_logger.debug("recognition result text: "+r.getText());
-    			} catch (InvalidRecogResultException e) {
-    				_logger.warn("Illegal Recognition Result", e);
-    				r = null;
-    			}
-    		}
-    	}
-
-    	fireRecogEvent(event,r);
-
-    }
-
 	public void addListener(SpeechEventListener listener) {
         synchronized (listenerList) {
         	listenerList.add(listener);
@@ -725,7 +726,7 @@ public class SpeechCloudClient implements SpeechClient, SpeechClientProvider, Pr
     }
 
 
-    private void fireSynthEvent(final MrcpEvent event) {
+    private void fireSynthEvent(final SpeechEventType event) {
         synchronized (listenerList) {
             Collection<SpeechEventListener> copy =  new java.util.ArrayList<SpeechEventListener>();        
             copy.addAll(listenerList);
@@ -736,7 +737,7 @@ public class SpeechCloudClient implements SpeechClient, SpeechClientProvider, Pr
     }
     
 
-    private void fireRecogEvent(final MrcpEvent event,RecognitionResult result) {
+    private void fireRecogEvent(final SpeechEventType event,RecognitionResult result) {
         synchronized (listenerList) {
             Collection<SpeechEventListener> copy =  new java.util.ArrayList<SpeechEventListener>();        
             copy.addAll(listenerList);
@@ -745,8 +746,7 @@ public class SpeechCloudClient implements SpeechClient, SpeechClientProvider, Pr
             }
         }
     }
-    
-    
+
     
     /**
      * The Class NoInputTimeoutTask.
@@ -763,7 +763,7 @@ public class SpeechCloudClient implements SpeechClient, SpeechClientProvider, Pr
                 if (_dtmfState == DtmfState.waitingForInput) {
                     _dtmfState = DtmfState.complete;
                     if (_dtmfListener != null) {
-                        _dtmfListener.characterEventReceived(null,SpeechEventListener.EventType.noInputTimeout);
+                        _dtmfListener.characterEventReceived(null,SpeechEventListener.DtmfEventType.noInputTimeout);
                     }
                 }
             }
@@ -818,7 +818,7 @@ public class SpeechCloudClient implements SpeechClient, SpeechClientProvider, Pr
                 if (_dtmfState == DtmfState.waitingForInput) {
                     _dtmfState = DtmfState.complete;
                     if (_dtmfListener != null) {
-                        _dtmfListener.characterEventReceived(null,SpeechEventListener.EventType.noMatchTimeout);
+                        _dtmfListener.characterEventReceived(null,SpeechEventListener.DtmfEventType.noMatchTimeout);
                     }
                 }
             }
@@ -856,22 +856,79 @@ public class SpeechCloudClient implements SpeechClient, SpeechClientProvider, Pr
     }
 
     
+
+	public MrcpRequestState sendBargeinRequest() throws IOException, MrcpInvocationException,
+            InterruptedException {
+	    rtpTransmitter.stopPlayback();
+	    return null;
+    }
+    
+    
     //methods for prompt play listener
 
 	public void playCompleted() {
-	    // TODO Auto-generated method stub
-	    
-    }
+	    _logger.debug("Play complete event");
+		//first determine if this is event for a blocking request
+		if ((_activeBlockingTts != null) ) { //&& (event.getRequestID() == _activeBlockingTts.getRequestId() )) {
+			// if there is an active recognition request and bargein is enabled, start the timer
+			if ((_bargeIn)&&(_activeRecognition != null)&&(!_activeRecognition.isCompleted())){				
+				//sendStartInputTimersRequest();
+			}
+		//else an event from an asynch request, just send the event on
+		} else {
+			//fireSynthEvent(event);
+		}
+	}
 
 
-	public void playFailed(Exception arg0) {
-	    // TODO Auto-generated method stub
+	public void playFailed(Exception e) {
+		e.printStackTrace();
+	    _logger.warn(e.getMessage());
 	    
     }
 
 
 	public void playInterrupted() {
-	    // TODO Auto-generated method stub
+	    _logger.debug("play interupted");
+	       
+    }
+
+
+
+	public void noInputTimeout() {
+	    _logger.debug("no input timeout");
+	         
+    }
+
+
+	public void recognitionComplete(com.spokentech.speechdown.common.RecognitionResult result) {
+	    _logger.debug("Recognition complete event");
+	       //TODO:  Remove this hack.  Have a single RecognitionResult object used in both Cairo client and the cloud client
+        //       Perhaps combine the two client libs.
+    	RecognitionResult r = null;
+        try {
+	        r = RecognitionResult.constructResultFromString(result.toString());
+        } catch (InvalidRecogResultException e) {
+	        // TODO Auto-generated catch block
+	        e.printStackTrace();
+        }
+	   	fireRecogEvent(SpeechEventType.RECOGNITION_COMPLETE,r);
 	    
     }
+
+
+	public void speechEnded() {
+	    _logger.debug("Speech Ended event");
+	    	    
+    }
+
+
+	public void speechStarted() {
+	    _logger.debug("Speech Started event");
+		if ((rtpTransmitter!= null) && (_bargeIn)){
+			rtpTransmitter.stopPlayback();
+		}
+    }
+		
+		
 }

@@ -24,6 +24,7 @@ package org.speechforge.cairo.client;
 
 import org.speechforge.cairo.client.SpeechClient;
 import org.speechforge.cairo.client.SpeechEventListener;
+import org.speechforge.cairo.client.SpeechEventListener.SpeechEventType;
 import org.speechforge.cairo.client.SpeechRequest.RequestType;
 import org.speechforge.cairo.client.recog.InvalidRecogResultException;
 import org.speechforge.cairo.client.recog.RecognitionResult;
@@ -225,7 +226,7 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
             //else an event from an asynch request, just send the event on
         } else {
             
-        	fireSynthEvent(event);
+        	fireSynthEvent(convertEventType(event));
 
         }
         
@@ -233,7 +234,32 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
 
     }
 
-    /**
+    private SpeechEventListener.SpeechEventType convertEventType(MrcpEvent event) {
+        if (MrcpEventName.SPEAK_COMPLETE.equals(event.getEventName())) {
+        	return SpeechEventListener.SpeechEventType.SPEAK_COMPLETE;
+        } else if (MrcpEventName.INTERPRETATION_COMPLETE.equals(event.getEventName())) {
+        	return SpeechEventListener.SpeechEventType.INTERPRETATION_COMPLETE;
+            
+        } else if (MrcpEventName.RECOGNITION_COMPLETE.equals(event.getEventName())) {
+        	return SpeechEventListener.SpeechEventType.RECOGNITION_COMPLETE;
+        	  
+        } else if (MrcpEventName.SPEECH_MARKER.equals(event.getEventName())) {
+        	return SpeechEventListener.SpeechEventType.SPEECH_MARKER;
+        	  
+        } else if (MrcpEventName.START_OF_INPUT.equals(event.getEventName())) {
+        	return SpeechEventListener.SpeechEventType.START_OF_INPUT;
+        } else if (MrcpEventName.VERIFICATION_COMPLETE.equals(event.getEventName())) {
+        	return SpeechEventListener.SpeechEventType.VERIFICATION_COMPLETE;
+        } else if (MrcpEventName.RECORD_COMPLETE.equals(event.getEventName())) {
+        	return SpeechEventListener.SpeechEventType.RECORD_COMPLETE;
+        } else {
+        	return SpeechEventListener.SpeechEventType.UNKNOWN;
+
+        }
+    }
+
+
+	/**
      * Recog event received.
      * 
      * @param event the event
@@ -323,7 +349,7 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
     		}
     	}
 
-    	fireRecogEvent(event,r);
+    	fireRecogEvent(convertEventType(event),r);
 
     }
 
@@ -877,7 +903,7 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
             }
            
             //return the recognition results
-           _dtmfListener.characterEventReceived(_inBuf,SpeechEventListener.EventType.recognitionMatch);
+           _dtmfListener.characterEventReceived(_inBuf,SpeechEventListener.DtmfEventType.recognitionMatch);
            
 
         }  else {
@@ -989,7 +1015,7 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
                 if (_dtmfState == DtmfState.waitingForInput) {
                     _dtmfState = DtmfState.complete;
                     if (_dtmfListener != null) {
-                        _dtmfListener.characterEventReceived(null,SpeechEventListener.EventType.noInputTimeout);
+                        _dtmfListener.characterEventReceived(null,SpeechEventListener.DtmfEventType.noInputTimeout);
                     }
                 }
             }
@@ -1042,7 +1068,7 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
                 if (_dtmfState == DtmfState.waitingForInput) {
                     _dtmfState = DtmfState.complete;
                     if (_dtmfListener != null) {
-                        _dtmfListener.characterEventReceived(null,SpeechEventListener.EventType.noMatchTimeout);
+                        _dtmfListener.characterEventReceived(null,SpeechEventListener.DtmfEventType.noMatchTimeout);
                     }
                 }
             }
@@ -1195,7 +1221,7 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
     }
 
 
-    private void fireSynthEvent(final MrcpEvent event) {
+    private void fireSynthEvent(final SpeechEventType event) {
         synchronized (listenerList) {
             Collection<SpeechEventListener> copy =  new java.util.ArrayList<SpeechEventListener>();        
             copy.addAll(listenerList);
@@ -1206,7 +1232,7 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
     }
     
 
-    private void fireRecogEvent(final MrcpEvent event,RecognitionResult result) {
+    private void fireRecogEvent(final SpeechEventType event,RecognitionResult result) {
         synchronized (listenerList) {
             Collection<SpeechEventListener> copy =  new java.util.ArrayList<SpeechEventListener>();        
             copy.addAll(listenerList);

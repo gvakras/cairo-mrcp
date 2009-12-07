@@ -250,16 +250,16 @@ public class RecognitionClient  {
     
     private class Listener implements SpeechEventListener {
 
-		public void characterEventReceived(String c, EventType status) {
+		public void characterEventReceived(String c, DtmfEventType status) {
 			_logger.info("received a unexpected character receieved event. char: "+c+" Status: "+status);
         }
 
-		public void recognitionEventReceived(MrcpEvent event, RecognitionResult r) {
+		public void recognitionEventReceived(SpeechEventType event, RecognitionResult r) {
 			_logger.info("Received a recognition event: "+event);
        
         }
 
-		public void speechSynthEventReceived(MrcpEvent event) {
+		public void speechSynthEventReceived(SpeechEventType event) {
 			_logger.info("Received an unexpected synth event.  Event: "+event);
 	        
         }

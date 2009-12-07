@@ -34,31 +34,40 @@ import org.speechforge.cairo.client.recog.RecognitionResult;
  */
 public interface SpeechEventListener {
 
-    
+	
+    public enum SpeechEventType {SPEECH_MARKER,
+    						SPEAK_COMPLETE,
+	    					START_OF_INPUT,
+	    					RECOGNITION_COMPLETE,
+	    					INTERPRETATION_COMPLETE,
+	    					RECORD_COMPLETE,
+	    					VERIFICATION_COMPLETE,
+	    					UNKNOWN}
+   
     /**
      * Recognition event received.
      * 
      * @param event the mrcp event
      * @param r the recognition result
      */
-    public void recognitionEventReceived(MrcpEvent event, RecognitionResult r);
+    public void recognitionEventReceived(SpeechEventType event, RecognitionResult r);
     
     /**
      * Tts completed event received.
      * 
      * @param event the mrcp event
      */
-    public void speechSynthEventReceived(MrcpEvent event);
+    public void speechSynthEventReceived(SpeechEventType event);
 
     
 
-    public enum EventType {recognitionMatch, noInputTimeout, noMatchTimeout}
+    public enum DtmfEventType {recognitionMatch, noInputTimeout, noMatchTimeout}
     
     /**
      * Character event received.  Most typically used for DTMF (in which case valid characters include 0-9, * and #)
      * 
      * @param c the charcater received
      */
-    public void characterEventReceived(String c, EventType status);
+    public void characterEventReceived(String c, DtmfEventType status);
     
 }

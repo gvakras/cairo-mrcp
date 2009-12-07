@@ -36,7 +36,6 @@ public class SpeechRequest {
     
     private long requestId;
     private boolean completed;
-    private SpeechEventListener listener;
     private boolean blockingCall = false;
     private RecognitionResult result;
     private RequestType requestType;
