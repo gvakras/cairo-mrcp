@@ -38,6 +38,7 @@ import org.speechforge.cairo.rtp.server.RTPStreamReplicatorFactory;
 import org.speechforge.cairo.rtp.RTPPlayer;
 import org.speechforge.cairo.jmf.ProcessorStarter;
 import org.speechforge.cairo.rtp.AudioFormats;
+import org.speechforge.cairo.rtp.server.RTPStreamReplicator.ProcessorReplicatorPair;
 import org.speechforge.cairo.rtp.server.sphinx.SourceAudioFormat;
 
 
@@ -73,7 +74,11 @@ public class RTPRecognizerWerTest extends BaseRecognizerWerTest{
       GrammarLocation grammarLocation;
       RTPStreamReplicator replicator;
       ConfidenceScorer scorer;
-      PlayThread p; 
+      PlayThread p;
+
+	private ProcessorReplicatorPair pair;
+
+
       
       private static int RECEIVERPORT = 48050;
       private static int XMITTERPORT = 48000;
@@ -157,8 +162,8 @@ public class RTPRecognizerWerTest extends BaseRecognizerWerTest{
                     e1.printStackTrace();
                 }               
             }
-            
-            processor= replicator.createRealizedProcessor(CONTENT_DESCRIPTOR_RAW, 10000,SourceAudioFormat.PREFERRED_MEDIA_FORMATS); // TODO: specify audio format
+            pair  = replicator.createRealizedProcessor(CONTENT_DESCRIPTOR_RAW, 10000,SourceAudioFormat.PREFERRED_MEDIA_FORMATS); // TODO: specify audio format
+            processor = pair.getProc();
             PushBufferDataSource dataSource = (PushBufferDataSource) processor.getDataOutput();
 
             if (dataSource == null) {
@@ -457,6 +462,7 @@ public class RTPRecognizerWerTest extends BaseRecognizerWerTest{
          _logger.debug("Closing processor...");
            processor.close();
            processor = null;
+           replicator.removeReplicant( pair.getPbds());
        } else {
            _logger.debug("Tried to close processor.. but it was null."); 
        }

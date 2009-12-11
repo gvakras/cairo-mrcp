@@ -22,7 +22,10 @@
  */
 package org.speechforge.cairo.server.recorder;
 
+import static org.speechforge.cairo.jmf.JMFUtil.CONTENT_DESCRIPTOR_RAW;
+
 import org.speechforge.cairo.exception.ResourceUnavailableException;
+import org.speechforge.cairo.rtp.server.RTPStreamReplicator.ProcessorReplicatorPair;
 import org.speechforge.cairo.rtp.server.sphinx.SourceAudioFormat;
 import org.speechforge.cairo.rtp.server.RTPStreamReplicator;
 import java.io.File;
@@ -61,6 +64,8 @@ public class RTPRecorderChannelImpl implements DataSinkListener, RTPRecorderChan
     private Processor _processor;
     private File _destination;
 
+	private ProcessorReplicatorPair _pair;
+
     /**
      * TODOC
      * @param channelID unique id of the recorder channel
@@ -93,7 +98,8 @@ public class RTPRecorderChannelImpl implements DataSinkListener, RTPRecorderChan
             throw new IllegalStateException("Recording already in progress!");
         }
         
-        _processor = _replicator.createRealizedProcessor(CONTENT_DESCRIPTOR_WAVE, 2000,SourceAudioFormat.PREFERRED_MEDIA_FORMATS); // TODO: specify audio format
+        _pair  = _replicator.createRealizedProcessor(CONTENT_DESCRIPTOR_RAW, 10000,SourceAudioFormat.PREFERRED_MEDIA_FORMATS); // TODO: specify audio format
+        _processor = _pair.getProc();
 
         DataSource dataSource = _processor.getDataOutput();
         if (dataSource == null) {
@@ -138,7 +144,8 @@ public class RTPRecorderChannelImpl implements DataSinkListener, RTPRecorderChan
         _processor.close();
         _logger.debug("Processor closed.");
         _processor = null;
-
+        _replicator.removeReplicant( _pair.getPbds());
+        
         // TODO: wait for EndOfStreamEvent
 
         return _destination;

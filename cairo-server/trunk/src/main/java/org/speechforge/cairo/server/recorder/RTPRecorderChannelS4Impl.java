@@ -26,6 +26,7 @@ import static org.speechforge.cairo.jmf.JMFUtil.CONTENT_DESCRIPTOR_RAW;
 
 import org.speechforge.cairo.exception.ResourceUnavailableException;
 import org.speechforge.cairo.jmf.ProcessorStarter;
+import org.speechforge.cairo.rtp.server.RTPStreamReplicator.ProcessorReplicatorPair;
 import org.speechforge.cairo.rtp.server.sphinx.SourceAudioFormat;
 import org.speechforge.cairo.rtp.server.RTPStreamReplicator;
 import org.speechforge.cairo.server.recorder.sphinx.SphinxRecorder;
@@ -76,6 +77,8 @@ public class RTPRecorderChannelS4Impl implements RTPRecorderChannel  {
     
     RecorderListener _recorderListener;
 
+	private ProcessorReplicatorPair _pair;
+
     /**
      * TODOC
      * @param channelID unique id of the recorder channel
@@ -122,7 +125,8 @@ public class RTPRecorderChannelS4Impl implements RTPRecorderChannel  {
         _recorderListener = new Listener(listener);
 
         // TODO: specify audio format
-        _processor = _replicator.createRealizedProcessor(CONTENT_DESCRIPTOR_RAW, 10000,SourceAudioFormat.PREFERRED_MEDIA_FORMATS); 
+        _pair  = _replicator.createRealizedProcessor(CONTENT_DESCRIPTOR_RAW, 10000,SourceAudioFormat.PREFERRED_MEDIA_FORMATS); // TODO: specify audio format
+        _processor = _pair.getProc();
 
 
         PushBufferDataSource dataSource = (PushBufferDataSource) _processor.getDataOutput();
@@ -178,6 +182,7 @@ public class RTPRecorderChannelS4Impl implements RTPRecorderChannel  {
           _logger.debug("Closing processor...");
             _processor.close();
             _processor = null;
+            _replicator.removeReplicant( _pair.getPbds());
         }
         if (_recorderEngine != null) {
             _logger.debug("Returning recengine to pool...");

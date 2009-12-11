@@ -130,7 +130,7 @@ public class ReceiverResource extends ResourceImpl {
                     String channelID = md.getAttribute(SdpMessage.SDP_CHANNEL_ATTR_NAME);
                     String rt =  md.getAttribute(SdpMessage.SDP_RESOURCE_ATTR_NAME);
                     MrcpResourceType resourceType = null;
-                    _logger.info("RT: " +rt);
+                    _logger.debug("Resource Type: " +rt);
                     if (rt.equalsIgnoreCase("speechrecog")) {
                         resourceType = MrcpResourceType.SPEECHRECOG;
                     } else if (rt.equalsIgnoreCase("speechsynth")) {

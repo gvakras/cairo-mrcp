@@ -25,6 +25,7 @@ package org.speechforge.cairo.server.recog;
 import static org.speechforge.cairo.jmf.JMFUtil.CONTENT_DESCRIPTOR_RAW;
 
 import org.speechforge.cairo.exception.ResourceUnavailableException;
+import org.speechforge.cairo.rtp.server.RTPStreamReplicator.ProcessorReplicatorPair;
 import org.speechforge.cairo.rtp.server.sphinx.SourceAudioFormat;
 import org.speechforge.cairo.server.recog.sphinx.SphinxRecEngine;
 import org.speechforge.cairo.rtp.server.RTPStreamReplicator;
@@ -67,6 +68,7 @@ public class RTPRecogChannel {
     private Processor _processor;
 
     volatile short _state = COMPLETE;
+	private ProcessorReplicatorPair _pair;
 
     /**
      * TODOC
@@ -98,13 +100,15 @@ public class RTPRecogChannel {
             throw new IllegalStateException("Recognition already in progress!");
             // TODO: cancel or queue request instead (depending upon value of 'cancel-if-queue' header)
         }
-        _logger.info("OK, processor was null");
+        _logger.debug("OK, processor was null");
 
-        _processor = _replicator.createRealizedProcessor(CONTENT_DESCRIPTOR_RAW, 10000,SourceAudioFormat.PREFERRED_MEDIA_FORMATS); // TODO: specify audio format
-        _logger.info("OK, created new realized processor");
+
+        _pair  = _replicator.createRealizedProcessor(CONTENT_DESCRIPTOR_RAW, 10000,SourceAudioFormat.PREFERRED_MEDIA_FORMATS); // TODO: specify audio format
+        _processor = _pair.getProc();
+        _logger.debug("OK, created new realized processor");
         
         PushBufferDataSource dataSource = (PushBufferDataSource) _processor.getDataOutput();
-        _logger.info("OK, created new datasource "+dataSource);
+        _logger.debug("OK, created new datasource "+dataSource);
         
         if (dataSource == null) {
             throw new IOException("Processor.getDataOutput() returned null!");
@@ -181,6 +185,7 @@ public class RTPRecogChannel {
           _logger.debug("Closing processor...");
             _processor.close();
             _processor = null;
+            _replicator.removeReplicant( _pair.getPbds());
         }
         if (_recEngine != null) {
             _logger.debug("Returning recengine to pool...");

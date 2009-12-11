@@ -314,7 +314,7 @@ public class MrcpSpeechSynthChannel extends MrcpGenericChannel implements Speech
         return promptFile;
     }
     
-    private File generatePrompt(String text) {
+    private File generatePrompt(String text) throws IllegalArgumentException, IOException {
         PromptGenerator promptGenerator = null;
 
         // borrow prompt generator

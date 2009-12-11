@@ -221,7 +221,7 @@ public class TransmitterResource extends ResourceImpl {
                 _portPairPool.returnPort(r.getPort());
 
             } else {
-            	_logger.warn("Unsupported channle resource of type "+channel.toString());
+            	_logger.warn("Unsupported channel resource of type: "+channel.toString());
             }
    
         }
