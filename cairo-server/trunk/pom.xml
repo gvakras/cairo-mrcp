@@ -286,7 +286,7 @@
     <dependency>
       <groupId>org.speechforge</groupId>
       <artifactId>cairo-rtp</artifactId>
-      <version>SNAPSHOT</version>
+      <version>0.2</version>
       <scope>compile</scope>
     </dependency>
 
@@ -309,7 +309,7 @@
     <dependency>
       <groupId>freetts</groupId>
       <artifactId>freetts</artifactId>
-      <version>1.2.1</version>
+      <version>SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
 
