@@ -165,9 +165,10 @@ public class SpeechCloudClient implements SpeechClient, SpeechClientProvider, Pr
 
     
     
-    public SpeechCloudClient(RTPStreamReplicator rtpReplicator, RtpTransmitter rtpTransmitter) {
+    public SpeechCloudClient(RTPStreamReplicator rtpReplicator, RtpTransmitter rtpTransmitter, String url) {
         super();
      
+        this.serviceUrl = url;
         this.rtpReplicator = rtpReplicator;
         this.rtpTransmitter = rtpTransmitter;  
         
@@ -200,6 +201,13 @@ public class SpeechCloudClient implements SpeechClient, SpeechClientProvider, Pr
      */
     public void setServiceUrl(String serviceUrl) {
     	this.serviceUrl = serviceUrl;
+    	
+        if ((serviceUrl != null) && (synthesizer !=null))
+           synthesizer.setService(serviceUrl+"/SpeechDownloadServlet");
+        
+        if ((serviceUrl != null) && (recognizer != null))
+           recognizer.setService(serviceUrl+"/SpeechUploadServlet");
+
     }
 
 
@@ -417,7 +425,7 @@ public class SpeechCloudClient implements SpeechClient, SpeechClientProvider, Pr
 			if (bytesRead == -1) break; 
 			out.write(buffer, 0, bytesRead); 
 		} 
-		_logger.info("Closing streams");
+		_logger.debug("Closing streams");
 		in.close(); 
 		out.close(); 
 
