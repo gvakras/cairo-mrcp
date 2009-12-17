@@ -251,9 +251,22 @@
     </dependency>
 
 
+    <dependency>
+      <groupId>org.jlibrtp</groupId>
+      <artifactId>jlibrtp</artifactId>
+      <version>SNAPSHOT</version>
+      <scope>compile</scope>
+    </dependency>
+    
     <!-- runtime scope dependencies -->
 
-
+    <!-- used by jlibrtp -->
+    <dependency>
+        <groupId>jdom</groupId>
+        <artifactId>jdom</artifactId>
+        <version>1.1</version>
+    </dependency> 
+    
     <!-- test scope dependencies -->
 
     <dependency>

@@ -28,6 +28,7 @@ package org.speechforge.cairo.rtp.server.sphinx;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.media.format.AudioFormat;
 
@@ -61,8 +62,13 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
 
 
     //protected Logger logger;
-    private BlockingFifoQueue<Data> _dataList;
-    private BlockingFifoQueue<byte[]> _rawAudioList;
+    //private BlockingFifoQueue<Data> _dataList;
+    //private BlockingFifoQueue<byte[]> _rawAudioList;
+    private LinkedBlockingQueue<Data> _dataList;
+    private LinkedBlockingQueue<byte[]> _rawAudioList;
+    
+    
+    
     private SourceAudioFormat _audioFormat;
     private AudioDataTransformer _transformer = null;
     private volatile boolean _processing = false;
@@ -80,7 +86,8 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
     private long _totalSamplesRead = 0;
     private long _startTime;
     
-
+    long t1 =0;
+    
     public RawAudioProcessor(int msecsPerRead) {
 		this._msecPerRead = msecsPerRead;
 		initialize();
@@ -113,8 +120,8 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
      */
     public void initialize() {
         super.initialize();
-        _dataList = new BlockingFifoQueue<Data>();
-        _rawAudioList = new BlockingFifoQueue<byte[]>();
+        _dataList = new LinkedBlockingQueue<Data>();
+        _rawAudioList = new LinkedBlockingQueue<byte[]>();
     }
 
     /**
@@ -168,14 +175,14 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
         _logger.debug("stopProcessing() called: adding final frame data and end signal...");
         _processing = false;
 
-        if (_framePointer > 0) {
+        /*if (_framePointer > 0) {
             // write final frame
             byte[] finalFrame = new byte[_framePointer];
             for (int i = 0; i < _framePointer; i++) {
                 finalFrame[i] = _frame[i];
             }
             _rawAudioList.add(finalFrame);
-        }
+        }*/
         // add end signal
         _rawAudioList.add(new byte[0]);
 
@@ -196,7 +203,7 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
     public void run() {            
         _totalSamplesRead = 0;
         _startTime = System.currentTimeMillis();
-        _logger.debug("started processing");
+        _logger.debug("started processing "+_startTime);
         try {
         	Data data = new DataStartSignal(_audioFormat.getSampleRate());
             //Data data = new DataStartSignal();
@@ -205,13 +212,14 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
             	if (data!=null)
                    _dataList.add(data);
                 data = transformNextRawAudio();
-            } while ((data != null) || (_processing));
+            } while ((data != null) && (_processing));
         } catch (InterruptedException e) {
             _logger.warn(e, e);
         } 
-
+        //_rawAudioList.clear();
         _dataList.add(new DataEndSignal(_audioFormat.calculateDurationMsecs(_totalSamplesRead)));
-        _logger.debug("DataEndSignal added");
+        long t2 = System.currentTimeMillis();
+        _logger.debug("DataEndSignal added "+(t2-_startTime));
 
         /*synchronized (lock) {
             lock.notify();
@@ -222,8 +230,13 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
 
         _logger.trace("transformNextRawAudio(): retrieving data from raw audio list...");
 
-        byte[] data = _rawAudioList.remove();
-
+        long tt =  _rawAudioList.size();
+        long t1 = System.nanoTime();
+        byte[] data = _rawAudioList.take();
+        long t2 = System.nanoTime();
+        long t = System.currentTimeMillis();
+        _logger.trace(t+ " it took "+(t2-t1)+ " nanosecs to take an item from queue with "+tt+" elements");
+        
         if (_logger.isTraceEnabled()) {
             _logger.trace("transformNextRawAudio(): data from raw audio list, bytes=" + data.length);
         }
@@ -268,7 +281,7 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
         if (!_utteranceEndReached) {
             try {
                 _logger.trace("getData(): getting data from data list...");
-                output = _dataList.remove();
+                output = _dataList.take();
                 _logger.trace("getData(): got data from data list.");
             } catch (InterruptedException e){
                 _logger.warn(e, e);
@@ -310,6 +323,8 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
     }
 
     private synchronized void addRawDataPrivate(byte[] data, int offset, int length) {
+    	//long t2 = System.nanoTime();
+        //_logger.info((t2-t1)+ "  nano secs between calls");
         if (!_processing) {
             throw new IllegalStateException("Attempt to add raw data when RawAudioProcessor not in processing state!");
         }
@@ -359,6 +374,7 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
                 break;
             }
         }
+         //t1 = System.nanoTime();
 
         if (_logger.isTraceEnabled()) {
             _logger.trace("remainder = " + _framePointer);

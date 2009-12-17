@@ -26,8 +26,10 @@ import static org.speechforge.cairo.jmf.JMFUtil.CONTENT_DESCRIPTOR_RAW_RTP;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.util.Vector;
 
 import javax.media.CannotRealizeException;
 import javax.media.Codec;
@@ -39,10 +41,12 @@ import javax.media.EndOfMediaEvent;
 import javax.media.Format;
 import javax.media.Manager;
 import javax.media.MediaLocator;
+import javax.media.PackageManager;
 import javax.media.Processor;
 import javax.media.UnsupportedPlugInException;
 import javax.media.control.PacketSizeControl;
 import javax.media.control.TrackControl;
+//import javax.media.format.AudioFormat;
 import javax.media.format.UnsupportedFormatException;
 import javax.media.protocol.ContentDescriptor;
 import javax.media.protocol.DataSource;
@@ -50,9 +54,11 @@ import javax.media.rtp.InvalidSessionAddressException;
 import javax.media.rtp.RTPManager;
 import javax.media.rtp.SendStream;
 import javax.media.rtp.SessionAddress;
+import javax.sound.sampled.AudioFormat;
 
 import org.apache.log4j.Logger;
-//import org.speechforge.cairo.util.sip.AudioFormats;
+import org.speechforge.cairo.util.CustomDataSource;
+
 
 /**
  * Handles playing of audio prompt files over an RTP output stream.
@@ -68,6 +74,7 @@ public class RTPPlayer implements ControllerListener {
 
     private RTPManager _rtpManager;
     private SendStream _sendStream;
+    //private CustomDataSource _dataSource;
     private DataSource _dataSource;
     private SessionAddress _targetAddress;
     private AudioFormats _af;
@@ -81,11 +88,25 @@ public class RTPPlayer implements ControllerListener {
       _rtpManager.initialize(localAddress);
       _rtpManager.addTarget(_targetAddress);
       _af = af;
+      //registerDatasource();
     }
 
     public RTPPlayer(RTPManager rtpManager) {
         _rtpManager = rtpManager;
         _af = new AudioFormats();
+        //registerDatasource();
+    }
+    
+    private void registerDatasource() {
+    	 Vector  packagePrefix = PackageManager.getProtocolPrefixList();
+    	 String myPackagePrefix = new String("org.speechforge");
+    	 // Add new package prefix to end of the package prefix list. 
+    	 packagePrefix.addElement(myPackagePrefix);
+    	 PackageManager.setProtocolPrefixList(packagePrefix);
+    	 // Save the changes to the package prefix list.
+    	 PackageManager.commitProtocolPrefixList();
+
+    	
     }
 
     public void playPrompt(File promptFile) throws InterruptedException, IllegalStateException, IllegalArgumentException {
@@ -108,6 +129,7 @@ public class RTPPlayer implements ControllerListener {
                     throw new IllegalStateException("Attempt to call playPrompt() when prompt already playing!");
                 }
                 _dataSource = Manager.createDataSource(source);
+                System.out.println("DATA SOURCE CONTENT TYPE: "+_dataSource.getContentType());
                 _processor = Manager.createProcessor(_dataSource);
                 _processor.addControllerListener(this);
             }
@@ -155,7 +177,67 @@ public class RTPPlayer implements ControllerListener {
 
     }
     
-    private void checkInterrupted() throws InterruptedException {
+    public void playStream(InputStream stream, AudioFormat af) throws InterruptedException, IllegalStateException {
+    	
+    	javax.media.format.AudioFormat format= AudioFormats.convertToJmfFormat(af);
+    	
+        try {
+            synchronized(this) {
+                if (_processor != null) {
+                    throw new IllegalStateException("Attempt to call playPrompt() when prompt already playing!");
+                }
+                _dataSource = new CustomDataSource(stream,format);
+                _dataSource.connect();
+                _processor = Manager.createProcessor(_dataSource);
+                _processor.addControllerListener(this);
+            }
+
+            configure();
+            
+            program();
+          
+            TrackControl[] trackControls = _processor.getTrackControls();
+            Codec codec[] = new Codec[3];
+            codec[0] = new com.ibm.media.codec.audio.rc.RCModule();
+            codec[1] = new com.ibm.media.codec.audio.ulaw.JavaEncoder();
+            codec[2] = new com.sun.media.codec.audio.ulaw.Packetizer();
+            ((com.sun.media.codec.audio.ulaw.Packetizer) codec[2]).setPacketSize(160);
+            
+            try {
+                trackControls[0].setCodecChain(codec);
+            } catch (UnsupportedPlugInException e) {
+                e.printStackTrace();
+            }
+                        
+            realize();
+
+            play(); 
+
+        } catch (InterruptedException e) {
+            _logger.debug("playSource() interrupted, closing processor...");
+            try {
+                close();
+            } catch (InterruptedException ie) {
+                // TODO Auto-generated catch block
+                _logger.debug(ie, ie);
+            }
+            throw e;
+        } catch (Exception e) {
+            _logger.warn("playSource(): encountered unexpected exception: ", e);
+            try {
+                close();
+            } catch (InterruptedException ie) {
+                // TODO Auto-generated catch block
+                _logger.debug(ie, ie);
+            }
+            throw new RuntimeException("playSource() encountered unexpected exception", e);
+        }
+
+    }
+    
+ 
+
+	private void checkInterrupted() throws InterruptedException {
         if (Thread.interrupted()) {
             throw new InterruptedException();
         }
@@ -229,7 +311,7 @@ public class RTPPlayer implements ControllerListener {
     private void play() throws UnsupportedFormatException, IOException, InterruptedException {
         synchronized (_lock) {
     
-            DataSource dataOutput = _processor.getDataOutput();
+        	DataSource dataOutput = _processor.getDataOutput();
             SendStream _sendStream = _rtpManager.createSendStream(dataOutput, 0);
             _sendStream.start();
             //_logger.debug("init(): Waiting 5 seconds for send stream to start...");
