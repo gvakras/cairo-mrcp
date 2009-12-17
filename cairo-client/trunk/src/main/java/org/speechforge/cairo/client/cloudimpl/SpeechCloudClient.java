@@ -459,10 +459,11 @@ public class SpeechCloudClient implements SpeechClient, SpeechClientProvider, Pr
 		} else {
 			_logger.warn("Unrecognzied file format:"+ fileFormat+" Trying wav");
 		}
-		File f = streamToFile(stream,fname);
+		//File f = streamToFile(stream,fname);
 		
 		try {
-	        rtpTransmitter.queueAudio(f, this);
+			//rtpTransmitter.queueAudio(f,this);
+	        rtpTransmitter.queueAudio(stream, this,tempDir+fname);
         } catch (InvalidSessionAddressException e) {
 	        // TODO Auto-generated catch block
 	        e.printStackTrace();
