@@ -97,8 +97,7 @@ public class SpeechCloudClient implements SpeechClient, SpeechClientProvider, Pr
     char[] _charArray;
     int _length = 0;
     String sal;
-    
-    String tempDir = "c:/temp/";
+
     
     boolean lmflg = false; 
     boolean batchFlag = true;
@@ -130,20 +129,7 @@ public class SpeechCloudClient implements SpeechClient, SpeechClientProvider, Pr
     }
 
 
-	/**
-     * @return the tempDir
-     */
-    public String getTempDir() {
-    	return tempDir;
-    }
 
-
-	/**
-     * @param tempDir the tempDir to set
-     */
-    public void setTempDir(String tempDir) {
-    	this.tempDir = tempDir;
-    }
 
 	private  Collection<SpeechEventListener> listenerList = null;
 	
@@ -405,32 +391,13 @@ public class SpeechCloudClient implements SpeechClient, SpeechClientProvider, Pr
 		} else {
 			_logger.warn("Unrecognzied file format:"+ fileFormat+" Trying wav");
 		}
-		File f = streamToFile(stream,fname);
-		
-		rtpTransmitter.queueAudio(f, this);
+        rtpTransmitter.queueAudio(stream, this,fname);
+		//File f = streamToFile(stream,fname);
+		//rtpTransmitter.queueAudio(f, this);
 		
     }
 
-	private File streamToFile(InputStream inStream,String fname) throws IOException {
 
-        File file = new File(tempDir+fname);
-		BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file));
-		
-		BufferedInputStream in = new BufferedInputStream(inStream);
-
-		byte[] buffer = new byte[256]; 
-		while (true) { 
-			int bytesRead = in.read(buffer);
-			//_logger.trace("Read "+ bytesRead + "bytes.");
-			if (bytesRead == -1) break; 
-			out.write(buffer, 0, bytesRead); 
-		} 
-		_logger.debug("Closing streams");
-		in.close(); 
-		out.close(); 
-
-	    return file;
-    }
 
 	
 
@@ -450,7 +417,8 @@ public class SpeechCloudClient implements SpeechClient, SpeechClientProvider, Pr
 		
 		InputStream stream = synthesizer.synthesize(prompt, synthFormat, fileFormat, voiceName);
 		
-		//TODO: remove this step (converting stream to file) should just queue the stream
+
+		//filenames are needed just in case the audio needs to be queued
         String fname = Long.toString(System.currentTimeMillis())+".wav";
 		if (fileFormat.equals("audio/x-au")) {
              fname = Long.toString(System.currentTimeMillis())+".au";
@@ -463,7 +431,7 @@ public class SpeechCloudClient implements SpeechClient, SpeechClientProvider, Pr
 		
 		try {
 			//rtpTransmitter.queueAudio(f,this);
-	        rtpTransmitter.queueAudio(stream, this,tempDir+fname);
+	        rtpTransmitter.queueAudio(stream, this,fname);
         } catch (InvalidSessionAddressException e) {
 	        // TODO Auto-generated catch block
 	        e.printStackTrace();
