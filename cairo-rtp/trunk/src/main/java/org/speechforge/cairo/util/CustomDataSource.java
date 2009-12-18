@@ -45,11 +45,11 @@ public class CustomDataSource extends PushBufferDataSource {
 	    }
 
 	    public void disconnect() {
-		try {
+		    try {
 	            if (started)
 	                stop();
 	        } catch (IOException e) {}
-		connected = false;
+		    connected = false;
 	    }
 
 	    public void start() throws IOException {
@@ -58,19 +58,19 @@ public class CustomDataSource extends PushBufferDataSource {
 	            throw new java.lang.Error("DataSource must be connected before it can be started");
 	        if (started)
 	            return;
-		started = true;
-		stream.start(true);
+		    started = true;
+		    stream.start(true);
 	    }
 
 	    public void stop() throws IOException {
 		if ((!connected) || (!started))
 		    return;
-		started = false;
-		stream.start(false);
+		   started = false;
+		   stream.start(false);
 	    }
 
 	    public Object [] getControls() {
-		return controls;
+		    return controls;
 	    }
 
 	    public Object getControl(String controlType) {
@@ -89,7 +89,7 @@ public class CustomDataSource extends PushBufferDataSource {
 	    }
 
 	    public Time getDuration() {
-		return duration;
+		    return duration;
 	    }
 
 	    public PushBufferStream [] getStreams() {
