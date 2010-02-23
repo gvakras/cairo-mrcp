@@ -13,11 +13,11 @@
 
     <property name="logLevel"                    value="INFO"/>
     <property name="showCreations"               value="false"/>
-
-    <property name="absoluteBeamWidth"           value="-1"/>
-    <property name="relativeBeamWidth"           value="1E-80"/>
-    <property name="wordInsertionProbability"    value="1E-36"/>
-    <property name="languageWeight"              value="8"/>
+    
+    <property name="absoluteBeamWidth"  value="25000"/>
+    <property name="relativeBeamWidth"  value="1E-80"/>
+    <property name="wordInsertionProbability"    value="0.7"/>
+    <property name="languageWeight"              value="7"/>
     <property name="silenceInsertionProbability" value="1"/>
 
     <property name="speechClassifierThreshold"   value="13"/>
@@ -519,32 +519,57 @@
     <!-- The Dictionary configuration                            -->
     <!-- ******************************************************** -->
 
-    <component name="dictionary"
-               type="edu.cmu.sphinx.linguist.dictionary.FastDictionary">
+    <!--component name="dictionary"  type="edu.cmu.sphinx.linguist.dictionary.FastDictionary">
         <property name="dictionaryPath" value="resource:/edu.cmu.sphinx.model.acoustic.WSJ_8gau_13dCep_8kHz_31mel_200Hz_3500Hz.Model!/edu/cmu/sphinx/model/acoustic/WSJ_8gau_13dCep_8kHz_31mel_200Hz_3500Hz/dict/cmudict.0.6d"/>
         <property name="fillerPath" value="resource:/edu.cmu.sphinx.model.acoustic.WSJ_8gau_13dCep_8kHz_31mel_200Hz_3500Hz.Model!/edu/cmu/sphinx/model/acoustic/WSJ_8gau_13dCep_8kHz_31mel_200Hz_3500Hz/dict/fillerdict"/>
-		<!--property name="addenda" value="resource:/org.speechforge.cairo.server.recog.sphinx.SphinxRecEngine!/grammar/addendum.dict"/-->
         <property name="addSilEndingPronunciation" value="false"/>
         <property name="allowMissingWords" value="false"/>
         <property name="unitManager" value="unitManager"/>
+    </component-->
+
+
+    <component name="dictionary" type="edu.cmu.sphinx.linguist.dictionary.FastDictionary">
+        <property name="dictionaryPath"
+              value="file:///work/models/dict/cmudict.0.7a"/>
+        <property name="fillerPath"
+              value="file:///work/models/dict/mcmodel.filler"/>
+        <property name="addSilEndingPronunciation" value="false"/>
+        <property name="wordReplacement" value="&lt;sil&gt;"/>
+        <property name="unitManager" value="unitManager"/>
     </component>
+
 
 
     <!-- ******************************************************** -->
     <!-- The acoustic model configuration                         -->
     <!-- ******************************************************** -->
 
-    <component name="acousticModel"
-               type="edu.cmu.sphinx.model.acoustic.WSJ_8gau_13dCep_8kHz_31mel_200Hz_3500Hz.Model">
+    <component name="acousticModel"  type="edu.cmu.sphinx.model.acoustic.WSJ_8gau_13dCep_8kHz_31mel_200Hz_3500Hz.Model">
         <property name="loader" value="loader"/>
         <property name="unitManager" value="unitManager"/>
     </component>
 
-    <component name="loader"
-               type="edu.cmu.sphinx.model.acoustic.WSJ_8gau_13dCep_8kHz_31mel_200Hz_3500Hz.ModelLoader">
+    <component name="loader" type="edu.cmu.sphinx.model.acoustic.WSJ_8gau_13dCep_8kHz_31mel_200Hz_3500Hz.ModelLoader">
         <property name="logMath" value="logMath"/>
         <property name="unitManager" value="unitManager"/>
-    </component>
+   </component>
+
+
+    <!--component name="acousticModel"  type="edu.cmu.sphinx.linguist.acoustic.tiedstate.TiedStateAcousticModel">
+        <property name="loader" value="loader"/>
+        <property name="unitManager" value="unitManager"/>
+    </component-->
+
+    <!--component name="loader"
+           type="edu.cmu.sphinx.linguist.acoustic.tiedstate.Sphinx3Loader">
+        <property name="logMath" value="logMath"/>
+        <property name="unitManager" value="unitManager"/>
+        <property name="propertiesFile"
+              value="file:///C:/work/models/am/model2.props" />
+        <property name="dataLocation" value="file:///C:/work/models/am/mcmodel.cd_cont_4000"/>
+        <property name="modelDefinition" value="file:///C:/work/models/am/mcmodel.cd_cont_4000/mdef"/>
+    </component-->
+
 
 
     <!-- ******************************************************** -->
@@ -575,6 +600,7 @@
             <item>dct1</item>
             <item>cmn1</item>
             <item>featureExtraction1</item>
+            <!--item>LDA1</item-->
         </propertylist>
     </component>
 
@@ -635,6 +661,10 @@
     <component name="dither1"
                type="edu.cmu.sphinx.frontend.filter.Dither"/>
 
+    <component name="LDA1" 
+		   type="edu.cmu.sphinx.frontend.feature.LDA">	
+		<property name="loader" value="loader"/>
+	</component>
 
     <!-- ******************************************************** -->
     <!-- The frontend configuration  #2                             -->
@@ -656,6 +686,7 @@
             <item>dct2</item>
             <item>cmn2</item>
             <item>featureExtraction2</item>
+            <!--item>LDA2</item-->
         </propertylist>
     </component>
 
@@ -716,7 +747,11 @@
     <component name="dither2"
                type="edu.cmu.sphinx.frontend.filter.Dither"/>
 
-
+    <component name="LDA2" 
+		   type="edu.cmu.sphinx.frontend.feature.LDA">	
+		<property name="loader" value="loader"/>
+	</component>
+	
     <!-- ******************************************************** -->
     <!-- The frontend configuration  #3                             -->
     <!-- ******************************************************** -->
@@ -737,6 +772,7 @@
             <item>dct3</item>
             <item>cmn3</item>
             <item>featureExtraction3</item>
+            <!--item>LDA3</item-->
         </propertylist>
     </component>
 
@@ -797,7 +833,11 @@
     <component name="dither3"
                type="edu.cmu.sphinx.frontend.filter.Dither"/>
 
-
+    <component name="LDA3" 
+		   type="edu.cmu.sphinx.frontend.feature.LDA">	
+		<property name="loader" value="loader"/>
+	</component>
+	
     <!-- ******************************************************** -->
     <!-- The frontend configuration  #4                             -->
     <!-- ******************************************************** -->
@@ -818,6 +858,7 @@
             <item>dct4</item>
             <item>cmn4</item>
             <item>featureExtraction4</item>
+            <!--item>LDA4</item-->
         </propertylist>
     </component>
 
@@ -878,6 +919,10 @@
     <component name="dither4"
                type="edu.cmu.sphinx.frontend.filter.Dither"/>
 
+    <component name="LDA4" 
+		   type="edu.cmu.sphinx.frontend.feature.LDA">	
+		<property name="loader" value="loader"/>
+	</component>
 
     <!-- ******************************************************** -->
     <!-- The frontend configuration  #5                             -->
@@ -899,6 +944,7 @@
             <item>dct5</item>
             <item>cmn5</item>
             <item>featureExtraction5</item>
+            <!--item>LDA5</item-->
         </propertylist>
     </component>
 
@@ -959,7 +1005,11 @@
     <component name="dither5"
                type="edu.cmu.sphinx.frontend.filter.Dither"/>
 
-
+    <component name="LDA5" 
+		   type="edu.cmu.sphinx.frontend.feature.LDA">	
+		<property name="loader" value="loader"/>
+	</component>
+	
     <!-- ******************************************************** -->
     <!-- The frontend configuration  #6                             -->
     <!-- ******************************************************** -->
@@ -980,6 +1030,7 @@
             <item>dct6</item>
             <item>cmn6</item>
             <item>featureExtraction6</item>
+            <!--item>LDA6</item-->
         </propertylist>
     </component>
 
@@ -1040,7 +1091,11 @@
     <component name="dither6"
                type="edu.cmu.sphinx.frontend.filter.Dither"/>
 
-
+    <component name="LDA6" 
+		   type="edu.cmu.sphinx.frontend.feature.LDA">	
+		<property name="loader" value="loader"/>
+	</component>
+	
     <!-- ******************************************************** -->
     <!-- The frontend configuration  #7                             -->
     <!-- ******************************************************** -->
@@ -1061,6 +1116,7 @@
             <item>dct7</item>
             <item>cmn7</item>
             <item>featureExtraction7</item>
+            <!--item>LDA7</item-->
         </propertylist>
     </component>
 
@@ -1121,6 +1177,10 @@
     <component name="dither7"
                type="edu.cmu.sphinx.frontend.filter.Dither"/>
 
+    <component name="LDA7" 
+		   type="edu.cmu.sphinx.frontend.feature.LDA">	
+		<property name="loader" value="loader"/>
+	</component>
 
     <!-- ******************************************************** -->
     <!-- The frontend configuration  #8                             -->
@@ -1142,6 +1202,7 @@
             <item>dct8</item>
             <item>cmn8</item>
             <item>featureExtraction8</item>
+            <!--item>LDA8</item-->
         </propertylist>
     </component>
 
@@ -1202,7 +1263,11 @@
     <component name="dither8"
                type="edu.cmu.sphinx.frontend.filter.Dither"/>
 
-
+    <component name="LDA8" 
+		   type="edu.cmu.sphinx.frontend.feature.LDA">	
+		<property name="loader" value="loader"/>
+	</component>
+	
     <!-- ******************************************************** -->
     <!-- The frontend configuration  #9                             -->
     <!-- ******************************************************** -->
@@ -1223,6 +1288,7 @@
             <item>dct9</item>
             <item>cmn9</item>
             <item>featureExtraction9</item>
+             <!--item>LDA9</item-->
         </propertylist>
     </component>
 
@@ -1283,7 +1349,10 @@
     <component name="dither9"
                type="edu.cmu.sphinx.frontend.filter.Dither"/>
 
-
+    <component name="LDA9" 
+		   type="edu.cmu.sphinx.frontend.feature.LDA">	
+		<property name="loader" value="loader"/>
+	</component>
 
 
     <!-- ******************************************************** -->
@@ -1306,6 +1375,7 @@
             <item>dct10</item>
             <item>cmn10</item>
             <item>featureExtraction10</item>
+            <!--item>LDA10</item-->
         </propertylist>
     </component>
 
@@ -1366,7 +1436,11 @@
     <component name="dither10"
                type="edu.cmu.sphinx.frontend.filter.Dither"/>
 
-
+    <component name="LDA10" 
+		   type="edu.cmu.sphinx.frontend.feature.LDA">	
+		<property name="loader" value="loader"/>
+	</component>
+	
     <!-- ******************************************************* -->
     <!--  monitors                                               -->
     <!-- ******************************************************* -->
