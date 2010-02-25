@@ -251,12 +251,12 @@
     </dependency>
 
 
-    <dependency>
+    <!--dependency>
       <groupId>org.jlibrtp</groupId>
       <artifactId>jlibrtp</artifactId>
       <version>SNAPSHOT</version>
       <scope>compile</scope>
-    </dependency>
+    </dependency-->
     
     <!-- runtime scope dependencies -->
 

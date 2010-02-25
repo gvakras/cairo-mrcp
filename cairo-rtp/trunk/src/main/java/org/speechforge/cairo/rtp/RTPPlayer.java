@@ -82,12 +82,23 @@ public class RTPPlayer implements ControllerListener {
     public RTPPlayer(int localPort, InetAddress remoteAddress, int remotePort, AudioFormats af)
       throws InvalidSessionAddressException, IOException {
 
-      SessionAddress localAddress = new SessionAddress(InetAddress.getLocalHost(), localPort);
-       _targetAddress = new SessionAddress(remoteAddress, remotePort);
-      _rtpManager = RTPManager.newInstance();
-      _rtpManager.initialize(localAddress);
-      _rtpManager.addTarget(_targetAddress);
-      _af = af;
+    	try {
+	       SessionAddress localAddress = new SessionAddress(InetAddress.getLocalHost(), localPort);
+	       _targetAddress = new SessionAddress(remoteAddress, remotePort);
+	  	   _logger.debug("Constructing the RtpPlayer, localAddress: "+localAddress.toString() +" and remote address: "+ _targetAddress.toString());	  	   
+	      _rtpManager = RTPManager.newInstance();
+	      _rtpManager.initialize(localAddress);
+	      _rtpManager.addTarget(_targetAddress);
+	      _af = af;
+    	}catch (InvalidSessionAddressException e) {
+    		
+    		e.printStackTrace();
+    		throw e;
+    	}catch (IOException e) {
+    		
+    		e.printStackTrace();
+    		throw e;
+    	}
       //registerDatasource();
     }
 
@@ -129,7 +140,6 @@ public class RTPPlayer implements ControllerListener {
                     throw new IllegalStateException("Attempt to call playPrompt() when prompt already playing!");
                 }
                 _dataSource = Manager.createDataSource(source);
-                System.out.println("DATA SOURCE CONTENT TYPE: "+_dataSource.getContentType());
                 _processor = Manager.createProcessor(_dataSource);
                 _processor.addControllerListener(this);
             }
