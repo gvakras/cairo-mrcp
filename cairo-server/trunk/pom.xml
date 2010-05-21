@@ -296,6 +296,13 @@
       <version>SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
+    
+    <dependency>
+      <groupId>sphinx</groupId>
+      <artifactId>jsapi-1.0-base</artifactId>
+      <version>SNAPSHOT</version>
+      <scope>compile</scope>
+    </dependency>
 
     <!-- Need to install this artifact separately for license reasons! -->
     <!-- Download jsapi.exe to your java ext dir (jre/lib/ext) and execute to extract the jsapi jar file. -->
@@ -382,6 +389,13 @@
       <groupId>sphinx</groupId>
       <artifactId>WSJ_8gau_13dCep_8kHz_31mel_200Hz_3500Hz</artifactId>
       <version>SNAPSHOT</version>
+      <scope>runtime</scope>
+    </dependency>
+    
+    <dependency>
+      <groupId>freetts</groupId>
+      <artifactId>cmudict</artifactId>
+      <version>04</version>
       <scope>runtime</scope>
     </dependency>
 

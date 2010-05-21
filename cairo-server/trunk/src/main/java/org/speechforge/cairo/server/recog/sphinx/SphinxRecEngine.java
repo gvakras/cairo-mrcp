@@ -147,19 +147,19 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
      */
     public synchronized void loadJSGF(GrammarLocation grammarLocation) throws IOException, GrammarException {
         _jsgfGrammar.setBaseURL(grammarLocation.getBaseURL());
-        try {
+        //try {
             _jsgfGrammar.loadJSGF(grammarLocation.getGrammarName());
             _logger.debug("loadJSGF(): completed successfully.");
-        } catch (com.sun.speech.engine.recognition.TokenMgrError e) {
-            _logger.debug("loadJSGF(): encountered exception: " + e.getClass().getName(), e); // com.sun.speech.engine.recognition.TokenMgrError!!!
-            String message = e.getMessage();
+        //} catch (com.sun.speech.engine.recognition.TokenMgrError e) {
+         //   _logger.debug("loadJSGF(): encountered exception: " + e.getClass().getName(), e); // com.sun.speech.engine.recognition.TokenMgrError!!!
+         //   String message = e.getMessage();
             /*if (message.indexOf("speech") < 0) {
                 throw e;
             }*/
             // else assume caused by GrammarException
             // TODO: edu.cmu.sphinx.jsapi.JSGFGrammar.loadJSGF() should be updated not to swallow GrammarException
-            throw new GrammarException(message);
-        }
+         //   throw new GrammarException(message);
+        //}
     }
 
     /**

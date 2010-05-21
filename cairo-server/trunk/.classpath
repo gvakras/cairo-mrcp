@@ -58,4 +58,5 @@
   <classpathentry kind="var" path="M2_REPO/sphinx/TIDIGITS_8gau_13dCep_16k_40mel_130Hz_6800Hz/SNAPSHOT/TIDIGITS_8gau_13dCep_16k_40mel_130Hz_6800Hz-SNAPSHOT.jar"/>
   <classpathentry kind="var" path="M2_REPO/sphinx/WSJ_8gau_13dCep_16k_40mel_130Hz_6800Hz/SNAPSHOT/WSJ_8gau_13dCep_16k_40mel_130Hz_6800Hz-SNAPSHOT.jar"/>
   <classpathentry kind="var" path="M2_REPO/sphinx/WSJ_8gau_13dCep_8kHz_31mel_200Hz_3500Hz/SNAPSHOT/WSJ_8gau_13dCep_8kHz_31mel_200Hz_3500Hz-SNAPSHOT.jar"/>
+  <classpathentry kind="var" path="M2_REPO/sphinx/jsapi-1.0-base/SNAPSHOT/jsapi-1.0-base-SNAPSHOT.jar"/>
 </classpath>

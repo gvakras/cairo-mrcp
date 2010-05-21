@@ -23,9 +23,28 @@
     <property name="speechClassifierThreshold"   value="13"/>
     <property name="mergeSpeechSegments"         value="false"/>
 
-    <property name="grammarLocation"             value="resource:/org.speechforge.cairo.server.recog.sphinx.SphinxRecEngine!/grammar"/>
+    <!--property name="grammarLocation"           value="file:///C:/work/cairo-SNAPSHOT/demo/grammar"/-->
+    <property name="grammarLocation"             value="resource:/grammar"/>
     <property name="grammarName"                 value="example"/>
+    
+    
+    <!--property name="amPropertiesFile"   value="file:///C:/work/models/am/model2.props" /-->
+    <!--property name="amLocation" value="file:///C:/work/models/am/mcmodel.cd_cont_4000"/-->
+    <!--property name="amDataLocation" value="/"/-->
+    <!--property name="amModelDefinition" value="mdef"/-->
+    <!--property name="dictionaryPath"  value="file:///work/models/dict/cmudict.0.7a"/-->
+    <!--property name="fillerPath" value="file:///work/models/dict/mcmodel.filler"/-->
 
+
+    <property name="amLocation" value="resource:/WSJ_8gau_13dCep_8kHz_31mel_200Hz_3500Hz"/>
+    <property name="amDataLocation" value="cd_continuous_8gau/"/>
+    <property name="amModelDefinition" value="etc/WSJ_8gau_13dCep_8kHz_31mel_200Hz_3500Hz.4000.mdef"/>
+    <property name="dictionaryPath"  value="resource:/WSJ_8gau_13dCep_8kHz_31mel_200Hz_3500Hz/dict/cmudict.0.6d"/>
+    <property name="fillerPath" value="resource:/WSJ_8gau_13dCep_8kHz_31mel_200Hz_3500Hz/dict/fillerdict"/>
+
+
+    
+ 
     <!-- ******************************************************** -->
     <!-- word recognizer configuration  #1                        -->
     <!-- ******************************************************** -->
@@ -530,46 +549,34 @@
 
     <component name="dictionary" type="edu.cmu.sphinx.linguist.dictionary.FastDictionary">
         <property name="dictionaryPath"
-              value="file:///work/models/dict/cmudict.0.7a"/>
+              value="${dictionaryPath}"/>
         <property name="fillerPath"
-              value="file:///work/models/dict/mcmodel.filler"/>
+              value="${fillerPath}"/>
         <property name="addSilEndingPronunciation" value="false"/>
         <property name="wordReplacement" value="&lt;sil&gt;"/>
         <property name="unitManager" value="unitManager"/>
     </component>
 
-
-
-    <!-- ******************************************************** -->
+   
+     <!-- ******************************************************** -->
     <!-- The acoustic model configuration                         -->
     <!-- ******************************************************** -->
 
-    <component name="acousticModel"  type="edu.cmu.sphinx.model.acoustic.WSJ_8gau_13dCep_8kHz_31mel_200Hz_3500Hz.Model">
+    <component name="acousticModel"  type="edu.cmu.sphinx.linguist.acoustic.tiedstate.TiedStateAcousticModel">
         <property name="loader" value="loader"/>
         <property name="unitManager" value="unitManager"/>
     </component>
 
-    <component name="loader" type="edu.cmu.sphinx.model.acoustic.WSJ_8gau_13dCep_8kHz_31mel_200Hz_3500Hz.ModelLoader">
-        <property name="logMath" value="logMath"/>
-        <property name="unitManager" value="unitManager"/>
-   </component>
-
-
-    <!--component name="acousticModel"  type="edu.cmu.sphinx.linguist.acoustic.tiedstate.TiedStateAcousticModel">
-        <property name="loader" value="loader"/>
-        <property name="unitManager" value="unitManager"/>
-    </component-->
-
-    <!--component name="loader"
+    <component name="loader"
            type="edu.cmu.sphinx.linguist.acoustic.tiedstate.Sphinx3Loader">
         <property name="logMath" value="logMath"/>
         <property name="unitManager" value="unitManager"/>
-        <property name="propertiesFile"
-              value="file:///C:/work/models/am/model2.props" />
-        <property name="dataLocation" value="file:///C:/work/models/am/mcmodel.cd_cont_4000"/>
-        <property name="modelDefinition" value="file:///C:/work/models/am/mcmodel.cd_cont_4000/mdef"/>
-    </component-->
-
+        <!--property name="propertiesFile"
+              value="${amPropertiesFile}" /-->
+        <property name="location" value="${amLocation}"/>              
+        <property name="dataLocation" value="${amDataLocation}"/>
+        <property name="modelDefinition" value="${amModelDefinition}"/>
+    </component>
 
 
     <!-- ******************************************************** -->
