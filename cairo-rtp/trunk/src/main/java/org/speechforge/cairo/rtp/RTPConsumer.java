@@ -48,6 +48,7 @@ import javax.media.rtp.event.StreamMappedEvent;
 import javax.media.rtp.rtcp.SourceDescription;
 
 import org.apache.log4j.Logger;
+import org.speechforge.cairo.util.CairoUtil;
 
 /**
  * Manages connection with and consumption from an incoming RTP audio stream.
@@ -79,11 +80,20 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
         if (port < 0 || port >= TCP_PORT_MAX) {
             throw new IllegalArgumentException("Invalid port value: " + port);
         }
-        _localAddress = new SessionAddress(InetAddress.getLocalHost(), port);
+        _localAddress = new SessionAddress(CairoUtil.getLocalHost(), port);
         _targetAddress = _localAddress;
         init();
     }
 
+    
+    public RTPConsumer(InetAddress localAddress, int port) throws IOException {
+        if (port < 0 || port >= TCP_PORT_MAX) {
+            throw new IllegalArgumentException("Invalid port value: " + port);
+        }
+        _localAddress = new SessionAddress(localAddress, port);
+        _targetAddress = _localAddress;
+        init();
+    }
     
     /**
      * Instantiates a new RTP consumer.  It needs both the local and remote host names 
@@ -132,7 +142,23 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
         if (remotePort < 0 || remotePort > TCP_PORT_MAX) {
             throw new IllegalArgumentException("Invalid remote port value: " + remotePort);
         }
-        _localAddress = new SessionAddress(InetAddress.getLocalHost(), localPort);
+        _localAddress = new SessionAddress(CairoUtil.getLocalHost(), localPort);
+        _targetAddress = new SessionAddress(remoteAddress, remotePort);
+     
+        init();
+    }
+    
+    public RTPConsumer(InetAddress localAddress, int localPort, InetAddress remoteAddress, int remotePort) throws IOException {
+        if (localPort < 0 || localPort > TCP_PORT_MAX) {
+            throw new IllegalArgumentException("Invalid local port value: " + localPort);
+        }
+        if (remoteAddress == null) {
+            throw new IllegalArgumentException("Remote address supplied must not be null!");
+        }
+        if (remotePort < 0 || remotePort > TCP_PORT_MAX) {
+            throw new IllegalArgumentException("Invalid remote port value: " + remotePort);
+        }
+        _localAddress = new SessionAddress(localAddress, localPort);
         _targetAddress = new SessionAddress(remoteAddress, remotePort);
      
         init();

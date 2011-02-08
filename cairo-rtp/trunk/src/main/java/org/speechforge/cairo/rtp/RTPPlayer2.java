@@ -62,6 +62,7 @@ import javax.media.rtp.SendStream;
 import javax.media.rtp.SessionAddress;
 
 import org.apache.log4j.Logger;
+import org.speechforge.cairo.util.CairoUtil;
 
 
 /**
@@ -87,7 +88,7 @@ public class RTPPlayer2 implements ControllerListener {
     public RTPPlayer2(int localPort, InetAddress remoteAddress, int remotePort, AudioFormats af)
       throws InvalidSessionAddressException, IOException {
 
-      SessionAddress localAddress = new SessionAddress(InetAddress.getLocalHost(), localPort);
+      SessionAddress localAddress = new SessionAddress(CairoUtil.getLocalHost(), localPort);
        _targetAddress = new SessionAddress(remoteAddress, remotePort);
       _rtpManager = RTPManager.newInstance();
       _rtpManager.initialize(localAddress);

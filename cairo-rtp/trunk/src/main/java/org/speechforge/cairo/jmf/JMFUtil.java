@@ -70,7 +70,9 @@ public class JMFUtil {
     /**
      * MediaLocator specifying the attached microphone.
      */
-    public static final MediaLocator MICROPHONE = new MediaLocator("dsound://");
+    //public static final MediaLocator MICROPHONE = new MediaLocator("dsound://");
+    public static final MediaLocator MICROPHONE = new MediaLocator("javasound://8000");
+
 
     /**
      * @param mediaLocator

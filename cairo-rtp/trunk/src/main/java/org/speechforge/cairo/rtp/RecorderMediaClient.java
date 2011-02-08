@@ -58,6 +58,7 @@ import javax.media.rtp.event.StreamMappedEvent;
 import javax.media.rtp.rtcp.SourceDescription;
 
 import org.apache.log4j.Logger;
+import org.speechforge.cairo.util.CairoUtil;
 
 /**
  * Reusable media client that plays audio received from an RTP media stream through the system speakers
@@ -80,7 +81,7 @@ public class RecorderMediaClient implements SessionListener, ReceiveStreamListen
     public RecorderMediaClient(PushBufferDataSource pbds) throws IOException, NoPlayerException, CannotRealizeException {
         _localAddress=null;
         _targetAddress=null;
-        _localAddress = new SessionAddress(InetAddress.getLocalHost(),javax.media.rtp.SessionAddress.ANY_PORT);
+        _localAddress = new SessionAddress(CairoUtil.getLocalHost(),javax.media.rtp.SessionAddress.ANY_PORT);
         _targetAddress = _localAddress;
         
         _rtpManager = RTPManager.newInstance();

@@ -25,7 +25,7 @@ package org.speechforge.cairo.rtp.server;
 import org.speechforge.cairo.rtp.RTPConsumer;
 import org.speechforge.cairo.util.ObjectPoolUtil;
 
-
+import java.net.InetAddress;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -46,15 +46,18 @@ public class RTPStreamReplicatorFactory implements PoolableObjectFactory {
 
     private PortPairPool _portPairPool;
 
+	private InetAddress _localInetAdress;
+
     /**
      * TODOC
      * @param basePort 
      * @param portPairPool 
      */
-    private RTPStreamReplicatorFactory(int basePort, PortPairPool portPairPool) {
+    private RTPStreamReplicatorFactory(int basePort, PortPairPool portPairPool, InetAddress localAddress) {
         Validate.isTrue((basePort % 2 == 0), "Base port must be even, invalid port: ", basePort);
         Validate.isTrue(basePort >= 0, "Base port must not be less than zero, invalid port: ", basePort);
         Validate.isTrue(basePort <= RTPConsumer.TCP_PORT_MAX, "Base port exceeds max TCP port value, invalid port: ", basePort);
+        _localInetAdress = localAddress;
         _portPairPool = portPairPool;
     }
 
@@ -62,7 +65,7 @@ public class RTPStreamReplicatorFactory implements PoolableObjectFactory {
      * @see org.apache.commons.pool.PoolableObjectFactory#makeObject()
      */
     public Object makeObject() throws Exception {
-        return new RTPStreamReplicator(_portPairPool.borrowPort());
+        return new RTPStreamReplicator(_localInetAdress,_portPairPool.borrowPort());
     }
 
     /* (non-Javadoc)
@@ -102,9 +105,9 @@ public class RTPStreamReplicatorFactory implements PoolableObjectFactory {
      * @param maxConnects
      * @return
      */
-    public static ObjectPool createObjectPool(int rtpBasePort, int maxConnects) {
+    public static ObjectPool createObjectPool(int rtpBasePort, int maxConnects, InetAddress localAddress) {
         PortPairPool ppp = new PortPairPool(rtpBasePort, maxConnects);
-        PoolableObjectFactory factory = new RTPStreamReplicatorFactory(rtpBasePort, ppp);
+        PoolableObjectFactory factory = new RTPStreamReplicatorFactory(rtpBasePort, ppp, localAddress);
         GenericObjectPool.Config config = ObjectPoolUtil.getGenericObjectPoolConfig(maxConnects);
         ObjectPool objectPool = new GenericObjectPool(factory, config);
         return objectPool;

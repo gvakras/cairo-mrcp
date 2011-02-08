@@ -26,6 +26,7 @@ import static org.speechforge.cairo.jmf.JMFUtil.MICROPHONE;
 
 import org.speechforge.cairo.rtp.RTPConsumer;
 import org.speechforge.cairo.rtp.RTPPlayer;
+import org.speechforge.cairo.util.CairoUtil;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -85,6 +86,12 @@ public class NativeMediaClient extends RTPConsumer {
         super(localPort);
         _rtpPlayer = null;
     }
+    
+    public NativeMediaClient(InetAddress localAddress,int localPort)
+    throws IOException {
+      super(localAddress, localPort);
+      _rtpPlayer = null;
+  }
 
     public void startTransmit() {
         if (_rtpPlayer != null) {
@@ -168,7 +175,7 @@ public class NativeMediaClient extends RTPConsumer {
      */
     public static void main(String[] args) throws Exception {
         int localPort = 42048;
-        InetAddress remoteAddress = InetAddress.getLocalHost();
+        InetAddress remoteAddress = CairoUtil.getLocalHost();
         int remotePort = 42050;
 
         NativeMediaClient client = new NativeMediaClient(localPort, remoteAddress, remotePort);

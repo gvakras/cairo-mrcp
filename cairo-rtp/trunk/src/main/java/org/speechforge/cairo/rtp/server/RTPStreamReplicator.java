@@ -30,6 +30,7 @@ import org.speechforge.cairo.rtp.RecorderMediaClient;
 import org.speechforge.cairo.jmf.ProcessorStarter;
 
 import java.io.IOException;
+import java.net.InetAddress;
 
 import javax.media.Format;
 import javax.media.Manager;
@@ -61,6 +62,11 @@ public class RTPStreamReplicator extends RTPConsumer {
 
     public RTPStreamReplicator(int port) throws IOException {
         super(port);
+        _port = port;
+    }
+    
+    public RTPStreamReplicator(InetAddress localAddress, int port) throws IOException {
+        super(localAddress,port);
         _port = port;
     }
     
@@ -182,19 +188,24 @@ public class RTPStreamReplicator extends RTPConsumer {
             }
         }
 
+
         PushBufferDataSource pbds = _replicator.replicate();
         ProcessorModel pm = new ProcessorModel(
         		pbds, preferredMediaFormats, outputContentDescriptor);
-        Processor processor;
+        Processor processor =null;
         try {
             _logger.debug("Creating realized processor...");
             processor = Manager.createRealizedProcessor(pm);
+            _logger.debug("Done Creating realized processor...");
         } catch (IOException e){
-            throw e;
+        	e.printStackTrace();
+           // throw e;
         } catch (javax.media.CannotRealizeException e){
-            throw (IOException) new IOException(e.getMessage()).initCause(e);
+           	e.printStackTrace();
+            //throw (IOException) new IOException(e.getMessage()).initCause(e);
         } catch (javax.media.NoProcessorException e){
-            throw (IOException) new IOException(e.getMessage()).initCause(e);
+           	e.printStackTrace();
+           //throw (IOException) new IOException(e.getMessage()).initCause(e);
         }
 
         /*if (_logger.isDebugEnabled()) {

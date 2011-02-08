@@ -79,11 +79,12 @@ public class RTPPlayer implements ControllerListener {
     private SessionAddress _targetAddress;
     private AudioFormats _af;
 
-    public RTPPlayer(int localPort, InetAddress remoteAddress, int remotePort, AudioFormats af)
+    public RTPPlayer(InetAddress localIpAddress, int localPort, InetAddress remoteAddress, int remotePort, AudioFormats af)
       throws InvalidSessionAddressException, IOException {
 
     	try {
-	       SessionAddress localAddress = new SessionAddress(InetAddress.getLocalHost(), localPort);
+ 	       //SessionAddress localAddress = new SessionAddress(CairoUtil.getLocalHost(), localPort);
+	       SessionAddress localAddress = new SessionAddress(localIpAddress, localPort);
 	       _targetAddress = new SessionAddress(remoteAddress, remotePort);
 	  	   _logger.debug("Constructing the RtpPlayer, localAddress: "+localAddress.toString() +" and remote address: "+ _targetAddress.toString());	  	   
 	      _rtpManager = RTPManager.newInstance();
@@ -134,6 +135,7 @@ public class RTPPlayer implements ControllerListener {
     }
 
     public void playSource(MediaLocator source) throws InterruptedException, IllegalStateException {
+    	_logger.info("Source: " +source);
         try {
             synchronized(this) {
                 if (_processor != null) {
@@ -175,6 +177,7 @@ public class RTPPlayer implements ControllerListener {
             }
             throw e;
         } catch (Exception e) {
+        	e.printStackTrace();
             _logger.warn("playSource(): encountered unexpected exception: ", e);
             try {
                 close();

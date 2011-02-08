@@ -301,10 +301,11 @@ public class PBDSReplicator implements BufferTransferHandler {
             }
 
             if (bufferTransferHandler != null) { // TODO: this is a hack to avoid deadlock when processor is closing
-                synchronized (this) {
+                //synchronized (this) {
                     _bufferTransferHandler = bufferTransferHandler;
-                }
+                //}
             }
+            _logger.debug("DONE set settransferhandler()...");
         }
 
         /* (non-Javadoc)
