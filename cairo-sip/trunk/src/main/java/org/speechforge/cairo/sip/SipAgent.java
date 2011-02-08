@@ -22,12 +22,16 @@
  */
 package org.speechforge.cairo.sip;
 
+import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.Iterator;
 
 import java.util.Random;
@@ -190,7 +194,7 @@ public class SipAgent {
 
         if (host == null) {
             try {
-                InetAddress addr = InetAddress.getLocalHost();
+                InetAddress addr = SipAgent.getLocalHost();
                 host = addr.getHostAddress();
                 //host = addr.getCanonicalHostName();
             } catch (UnknownHostException e) {
@@ -198,7 +202,10 @@ public class SipAgent {
                 //host = "localhost";
                 _logger.debug(e, e);
                 e.printStackTrace();
-            }
+            } catch (SocketException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
         }
         
         guidPrefix = host + port + System.currentTimeMillis();
@@ -238,6 +245,7 @@ public class SipAgent {
         }
 
         try {
+        	_logger.info("Create Lisenting point: "+host+" "+port+" "+transport);
             listeningPoint = sipStack.createListeningPoint(host, port, transport);
             sipProvider = sipStack.createSipProvider(listeningPoint);
         } catch (TransportNotSupportedException e) {
@@ -620,5 +628,22 @@ public class SipAgent {
          } 
         dialog.sendRequest(ctx);
     }
+    
+	public static InetAddress getLocalHost() throws SocketException, UnknownHostException {
+		Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
+		while (networkInterfaces.hasMoreElements()) {
+			NetworkInterface networkInterface = networkInterfaces.nextElement();
+			for (Enumeration en2 = networkInterface.getInetAddresses(); en2.hasMoreElements();) {
+	            InetAddress addr = (InetAddress) en2.nextElement();
+	            if (!addr.isLoopbackAddress()) {
+	                if (addr instanceof Inet4Address) {
+	                    return addr;
+	                }
+	            }
+			}
+
+		}
+		return InetAddress.getLocalHost();
+	}
 
 }
