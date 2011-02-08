@@ -1,6 +1,6 @@
 <projectDescription>
   <name>cairo-client</name>
-  <comment>The module that provides client side mrcpv2 capabilities for speech recognition applications.</comment>
+  <comment>The module that provides client side mrcpv2 capabilities for speech recognition applications. NO_M2ECLIPSE_SUPPORT: Project files created with the maven-eclipse-plugin are not supported in M2Eclipse.</comment>
   <projects/>
   <buildSpec>
     <buildCommand>

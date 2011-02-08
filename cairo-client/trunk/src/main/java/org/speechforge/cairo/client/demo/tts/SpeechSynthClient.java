@@ -28,6 +28,8 @@ import org.speechforge.cairo.client.SpeechClientImpl;
 import org.speechforge.cairo.rtp.NativeMediaClient;
 import org.speechforge.cairo.rtp.RTPConsumer;
 import org.speechforge.cairo.sip.SipSession;
+import org.speechforge.cairo.util.CairoUtil;
+
 import java.awt.Toolkit;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -166,10 +168,10 @@ public class SpeechSynthClient {
 
         String text = args[1];
         InetAddress rserverHost = line.hasOption(RSERVERHOST_OPTION) ?
-            InetAddress.getByName(line.getOptionValue(RSERVERHOST_OPTION)) : InetAddress.getLocalHost();
+            InetAddress.getByName(line.getOptionValue(RSERVERHOST_OPTION)) : CairoUtil.getLocalHost();
 
         try {
-            _host = InetAddress.getLocalHost().getHostAddress();
+            _host = CairoUtil.getLocalHost().getHostAddress();
         } catch (UnknownHostException e) {
             _host = "localhost";
         }

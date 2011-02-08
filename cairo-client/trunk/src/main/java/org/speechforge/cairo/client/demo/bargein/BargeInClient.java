@@ -30,6 +30,7 @@ import org.speechforge.cairo.client.SpeechEventListener;
 import org.speechforge.cairo.client.recog.RecognitionResult;
 import org.speechforge.cairo.rtp.RTPConsumer;
 import org.speechforge.cairo.sip.SipSession;
+import org.speechforge.cairo.util.CairoUtil;
 
 import java.awt.Toolkit;
 import java.net.InetAddress;
@@ -167,10 +168,10 @@ public class BargeInClient  {
 
     	// lookup resource server
     	InetAddress rserverHost = line.hasOption(RSERVERHOST_OPTION) ?
-    			InetAddress.getByName(line.getOptionValue(RSERVERHOST_OPTION)) : InetAddress.getLocalHost(); 
+    			InetAddress.getByName(line.getOptionValue(RSERVERHOST_OPTION)) : CairoUtil.getLocalHost(); 
 
     			try {
-    				_host = InetAddress.getLocalHost().getHostAddress();
+    				_host = CairoUtil.getLocalHost().getHostAddress();
     			} catch (UnknownHostException e) {
     				_host = "localhost";
     			}

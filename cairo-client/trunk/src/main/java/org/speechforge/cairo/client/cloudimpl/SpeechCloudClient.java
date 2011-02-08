@@ -38,8 +38,13 @@ import com.spokentech.speechdown.client.HttpRecognizer;
 import com.spokentech.speechdown.client.HttpSynthesizer;
 import com.spokentech.speechdown.client.PromptPlayListener;
 import com.spokentech.speechdown.client.endpoint.RtpS4EndPointingInputStream;
+import com.spokentech.speechdown.client.endpoint.S4EndPointer;
+import com.spokentech.speechdown.client.exceptions.AsynchNotEnabledException;
+import com.spokentech.speechdown.client.exceptions.StreamInUseException;
 import com.spokentech.speechdown.client.rtp.RtpTransmitter;
 //TODO: Remove the dependency on MRCP4j (state and two exceptions)
+import com.spokentech.speechdown.common.Utterance;
+import com.spokentech.speechdown.common.Utterance.OutputFormat;
 
 
 public class SpeechCloudClient implements SpeechClient, SpeechClientProvider, PromptPlayListener, com.spokentech.speechdown.common.SpeechEventListener {
@@ -103,6 +108,9 @@ public class SpeechCloudClient implements SpeechClient, SpeechClientProvider, Pr
     boolean batchFlag = true;
     int timeout = 0;
     
+    private String devName="cairo-client";
+    private String devSecret ="secret";
+    private String userName =devName;
     
     private String voiceName = "default";
 	//voice = "hmm-jmk";
@@ -158,13 +166,14 @@ public class SpeechCloudClient implements SpeechClient, SpeechClientProvider, Pr
         this.rtpReplicator = rtpReplicator;
         this.rtpTransmitter = rtpTransmitter;  
         
-        synthesizer = new HttpSynthesizer();
+        synthesizer = new HttpSynthesizer(devName,devSecret);
         if (serviceUrl != null)
            synthesizer.setService(serviceUrl+"/SpeechDownloadServlet");
         else
             synthesizer.setService(synthServiceUrl);
         
-        recognizer = new HttpRecognizer();
+        recognizer = new HttpRecognizer(devName,devSecret);
+        recognizer.enableAsynchMode(10);
         if (serviceUrl != null)
            recognizer.setService(serviceUrl+"/SpeechUploadServlet");
         else
@@ -380,7 +389,7 @@ public class SpeechCloudClient implements SpeechClient, SpeechClientProvider, Pr
 		AudioFormat synthFormat = rtpTransmitter.getFormat();
 		String fileFormat = rtpTransmitter.getFileType();
 		
-		InputStream stream = synthesizer.synthesize(prompt, synthFormat, fileFormat, voiceName);
+		InputStream stream = synthesizer.synthesize(userName,prompt, synthFormat, fileFormat, voiceName);
 		
 		//TODO: remove this step (converting stream to file) should just queue the stream
         String fname = Long.toString(System.currentTimeMillis())+".wav";
@@ -415,7 +424,7 @@ public class SpeechCloudClient implements SpeechClient, SpeechClientProvider, Pr
 		AudioFormat synthFormat = rtpTransmitter.getFormat();
 		String fileFormat = rtpTransmitter.getFileType();
 		
-		InputStream stream = synthesizer.synthesize(prompt, synthFormat, fileFormat, voiceName);
+		InputStream stream = synthesizer.synthesize(userName,prompt, synthFormat, fileFormat, voiceName);
 		
 
 		//filenames are needed just in case the audio needs to be queued
@@ -448,36 +457,49 @@ public class SpeechCloudClient implements SpeechClient, SpeechClientProvider, Pr
 
     }
 
-	public SpeechRequest recognize(String grammarUrl, boolean hotword, boolean attachGrammar,
+	public SpeechRequest recognize(String grammar, boolean hotword, boolean attachGrammar,
             long noInputTimeout) throws IOException, MrcpInvocationException, InterruptedException,
             IllegalValueException, NoMediaControlChannelException {
 		
 		
-		//todo: implement attachGrammar flag
+
 		//todo: implement hotword flag
 		//todo: implement timeout
 		
-		RtpS4EndPointingInputStream eStream = new RtpS4EndPointingInputStream();
+    	S4EndPointer ep = new S4EndPointer();
+		RtpS4EndPointingInputStream eStream = new RtpS4EndPointingInputStream(ep);
 		eStream.setMimeType(s4audio);
 		eStream.setupStream(rtpReplicator);
-
-	       URL grammar = null;
+ 
+	    URL grammarUrl = null;
+		if (!attachGrammar) {
 	    	try {
-	    		grammar = new URL(grammarUrl);
+	    		grammarUrl = new URL(grammar);
 			} catch (MalformedURLException e) {  
 		         e.printStackTrace();  
 			}
+		}
 
     	boolean lmflg = false;
     	boolean batchFlag = false;
-        try {	            
-            recognizer.recognizeAsynch(grammar,  eStream,  lmflg,  batchFlag, timeout,this) ;
+        try {	
+        	if (attachGrammar) {
+               recognizer.recognizeAsynch(devName, devSecret, userName, grammar,  eStream,  lmflg,  batchFlag, OutputFormat.text, timeout,this);
+        	} else {
+                recognizer.recognizeAsynch(devName, devSecret, userName, grammarUrl,  eStream,  lmflg,  batchFlag, OutputFormat.text, timeout,this);
+        	}
         } catch (InstantiationException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+        } catch (StreamInUseException e) {
+	        // TODO Auto-generated catch block
+	        e.printStackTrace();
+        } catch (AsynchNotEnabledException e) {
+	        // TODO Auto-generated catch block
+	        e.printStackTrace();
         }
         
         //todo: unique request Id's
@@ -507,8 +529,8 @@ public class SpeechCloudClient implements SpeechClient, SpeechClientProvider, Pr
         }
         
        _logger.debug("The grammar text: " +sb.toString());
-       
-		RtpS4EndPointingInputStream eStream = new RtpS4EndPointingInputStream();
+   	    S4EndPointer ep = new S4EndPointer();
+		RtpS4EndPointingInputStream eStream = new RtpS4EndPointingInputStream(ep);
 		eStream.setMimeType(s4audio);
 		eStream.setupStream(rtpReplicator);
 
@@ -517,13 +539,19 @@ public class SpeechCloudClient implements SpeechClient, SpeechClientProvider, Pr
     	boolean lmflg = false;
     	boolean batchFlag = false;
         try {	            
-            recognizer.recognizeAsynch(sb.toString(),  eStream,  lmflg,  batchFlag, timeout,this) ;
+            recognizer.recognizeAsynch(devName, devSecret, userName, sb.toString(),  eStream,  lmflg,  batchFlag,OutputFormat.text, timeout,this) ;
         } catch (InstantiationException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+        } catch (StreamInUseException e) {
+	        // TODO Auto-generated catch block
+	        e.printStackTrace();
+        } catch (AsynchNotEnabledException e) {
+	        // TODO Auto-generated catch block
+	        e.printStackTrace();
         }
         //todo: unique request Id's
         int id =1;
@@ -534,31 +562,38 @@ public class SpeechCloudClient implements SpeechClient, SpeechClientProvider, Pr
 
     }
 
-	public RecognitionResult recognizeBlocking(String grammarUrl, boolean hotword, boolean attachGrammar,
+	public RecognitionResult recognizeBlocking(String grammar, boolean hotword, boolean attachGrammar,
             long noInputTimeout) throws IOException, MrcpInvocationException, InterruptedException,
             IllegalValueException, NoMediaControlChannelException {
 		
-		//todo: implement attachGrammar flag
+
 		//todo: implement hotword flag
 		//todo: implement timeeout
 		
+        URL grammarUrl = null;
+		if (!attachGrammar) {
+	    	try {
+	    		grammarUrl = new URL(grammar);
+			} catch (MalformedURLException e) {  
+		         e.printStackTrace();  
+			}
+		}
 
-        URL grammar = null;
-    	try {
-    		grammar = new URL(grammarUrl);
-		} catch (MalformedURLException e) {  
-	         e.printStackTrace();  
-		}		
-
-		RtpS4EndPointingInputStream eStream = new RtpS4EndPointingInputStream();
+    	S4EndPointer ep = new S4EndPointer();
+		RtpS4EndPointingInputStream eStream = new RtpS4EndPointingInputStream(ep);
 		eStream.setMimeType(s4audio);
 		eStream.setupStream(rtpReplicator);
 		
 
-    	com.spokentech.speechdown.common.RecognitionResult rr = null;
+    	String rr = null;
         try {
 
-			rr = recognizer.recognize(grammar, eStream, lmflg,  batchFlag, timeout,this);
+        	if (attachGrammar) {
+    			rr = recognizer.recognize(userName,grammar, eStream, lmflg,  batchFlag, OutputFormat.text, timeout,this);
+         	} else {
+    			rr = recognizer.recognize(userName,grammarUrl, eStream, lmflg,  batchFlag, OutputFormat.text, timeout,this);
+         	}
+        	
 
         } catch (InstantiationException e) {
 	        // TODO Auto-generated catch block
@@ -592,15 +627,15 @@ public class SpeechCloudClient implements SpeechClient, SpeechClientProvider, Pr
 		} 
 		_logger.debug("The grammar text: " +sb.toString());
 		
-
-		RtpS4EndPointingInputStream eStream = new RtpS4EndPointingInputStream();
+    	S4EndPointer ep = new S4EndPointer();
+		RtpS4EndPointingInputStream eStream = new RtpS4EndPointingInputStream(ep);
 		eStream.setMimeType(s4audio);
 		eStream.setupStream(rtpReplicator);
 
 
-		com.spokentech.speechdown.common.RecognitionResult rr = null;
+		String rr = null;
 		try {
-			rr = recognizer.recognize(sb.toString(), eStream, lmflg,  batchFlag, timeout, this);
+			rr = recognizer.recognize(userName, sb.toString(), eStream, lmflg,  batchFlag, OutputFormat.text ,timeout, this);
 
 		} catch (InstantiationException e) {
 			// TODO Auto-generated catch block
@@ -878,21 +913,6 @@ public class SpeechCloudClient implements SpeechClient, SpeechClientProvider, Pr
     }
 
 
-	public void recognitionComplete(com.spokentech.speechdown.common.RecognitionResult result) {
-	    _logger.debug("Recognition complete event");
-	       //TODO:  Remove this hack.  Have a single RecognitionResult object used in both Cairo client and the cloud client
-        //       Perhaps combine the two client libs.
-    	RecognitionResult r = null;
-        try {
-	        r = RecognitionResult.constructResultFromString(result.toString());
-        } catch (InvalidRecogResultException e) {
-	        // TODO Auto-generated catch block
-	        e.printStackTrace();
-        }
-	   	fireRecogEvent(SpeechEventType.RECOGNITION_COMPLETE,r);
-	    
-    }
-
 
 	public void speechEnded() {
 	    _logger.debug("Speech Ended event");
@@ -905,6 +925,21 @@ public class SpeechCloudClient implements SpeechClient, SpeechClientProvider, Pr
 		if ((rtpTransmitter!= null) && (_bargeIn)){
 			rtpTransmitter.stopPlayback();
 		}
+    }
+
+
+	public void recognitionComplete(Utterance result) {
+	    _logger.debug("Recognition complete event");
+		//TODO:  THIS IS NOT TESTED.  ONLY CHANGED TO COMPILE!!  CONVERTING FROM UTTERANCE.tostring() TO RecResult will probably not work!!!
+	    // This will be a conversion process issue (REAL SOLUTION IS TO USE UTTERANCE IN CAIRO TOO)
+	 	RecognitionResult r = null;
+	     try {
+		        r = RecognitionResult.constructResultFromString(result.toString());
+	     } catch (InvalidRecogResultException e) {
+		        // TODO Auto-generated catch block
+		        e.printStackTrace();
+	     }
+		 fireRecogEvent(SpeechEventType.RECOGNITION_COMPLETE,r);
     }
 		
 		

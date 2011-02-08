@@ -52,7 +52,7 @@ import org.mrcp4j.MrcpResourceType;
 import org.mrcp4j.client.MrcpChannel;
 import org.mrcp4j.client.MrcpInvocationException;
 import org.mrcp4j.message.MrcpResponse;
-
+import org.speechforge.cairo.util.CairoUtil;
 
 /**
  * Demo MRCPv2 client application that plays a TTS prompt while performing speech recognition on
@@ -181,10 +181,10 @@ public class AsynchBargeInClient  {
         
         // lookup resource server
         InetAddress rserverHost = line.hasOption(RSERVERHOST_OPTION) ?
-            InetAddress.getByName(line.getOptionValue(RSERVERHOST_OPTION)) : InetAddress.getLocalHost(); 
+            InetAddress.getByName(line.getOptionValue(RSERVERHOST_OPTION)) : CairoUtil.getLocalHost(); 
         
         try {
-            _host = InetAddress.getLocalHost().getHostAddress();
+            _host = CairoUtil.getLocalHost().getHostAddress();
         } catch (UnknownHostException e) {
             _host = "localhost";
         }

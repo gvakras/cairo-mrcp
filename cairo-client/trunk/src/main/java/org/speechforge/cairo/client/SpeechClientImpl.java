@@ -528,6 +528,7 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
      */
     private SpeechRequest internalPlayAndRecogize(boolean urlPrompt, String prompt, MrcpRequest request) throws IOException, MrcpInvocationException, InterruptedException {
         // TODO delay start of recognition if barge-in is disabled!
+    	_logger.debug("Sending the mrcp request");
     	MrcpResponse response = _recogChannel.sendRequest(request);
 
           if (_logger.isDebugEnabled()) {
@@ -706,6 +707,7 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
     
         long noInputTimeout=0;
         MrcpRequest mrcpRequest = constructRecogRequest(grammarUrl, hotword, true,noInputTimeout);
+        _logger.debug("The requestis: "+mrcpRequest.toString());
         _activeRecognition = internalPlayAndRecogize(urlPrompt, prompt, mrcpRequest);
         
         //Block...
