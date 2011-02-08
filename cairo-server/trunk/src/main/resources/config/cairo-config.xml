@@ -11,6 +11,8 @@
       <recorderEngines>5</recorderEngines>
       <baseRecordingDir>/temp/cairo/recordingDir</baseRecordingDir>
       <baseGrammarDir>/temp/cairo/baseGrammarDir</baseGrammarDir>
+      <!-- can specify ip address, if not specified it tries to get it progamatically -->
+      <!--ipAddress>192.168.10.105</ipAddress-->
       <!-- uncomment the following line to override sphinx config file in cairo.jar (generally you should not need to do this) -->
       <!-- sphinxConfigURL>file:///myconfigdir/sphinx-config.xml</sphinxConfigURL -->
       <!-- uncomment the following line to override sphinx recorder config file in cairo.jar (generally you should not need to do this) -->
@@ -25,6 +27,8 @@
       <engines>5</engines>
       <voiceName>kevin</voiceName>
       <basePromptDir>/temp/cairo/basePromptDir</basePromptDir>
+      <!-- can specify ip address, if not specified it tries to get it progamatically -->
+      <!--ipAddress>192.168.10.105</ipAddress-->
     </resource>
 
   </resources>

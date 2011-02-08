@@ -1,6 +1,6 @@
 <projectDescription>
   <name>cairo</name>
-  <comment>Cairo sets out to provide an enterprise grade, MRCPv2 compliant speech solution utilizing existing open source speech resources.</comment>
+  <comment>Cairo sets out to provide an enterprise grade, MRCPv2 compliant speech solution utilizing existing open source speech resources. NO_M2ECLIPSE_SUPPORT: Project files created with the maven-eclipse-plugin are not supported in M2Eclipse.</comment>
   <projects/>
   <buildSpec>
     <buildCommand>

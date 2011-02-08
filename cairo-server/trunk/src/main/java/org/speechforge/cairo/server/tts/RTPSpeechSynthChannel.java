@@ -33,6 +33,7 @@ import javax.media.rtp.InvalidSessionAddressException;
 import org.apache.log4j.Logger;
 import org.speechforge.cairo.rtp.AudioFormats;
 import org.speechforge.cairo.rtp.RTPPlayer;
+import org.speechforge.cairo.util.CairoUtil;
 
 /**
  * Handle requests for speech synthesis (TTS) to be streamed through an outbound RTP channel.
@@ -59,6 +60,8 @@ public class RTPSpeechSynthChannel {
     private InetAddress _remoteAddress;
     private int _remotePort;
     private AudioFormats _af;
+
+	private InetAddress _localAddress;
     
     /**
      * TODOC
@@ -66,17 +69,21 @@ public class RTPSpeechSynthChannel {
      * @param remoteAddress 
      * @param remotePort 
      */
-    public RTPSpeechSynthChannel(int localPort, InetAddress remoteAddress, int remotePort, AudioFormats af) {
+    public RTPSpeechSynthChannel(int localPort, InetAddress localAddress, InetAddress remoteAddress, int remotePort, AudioFormats af) {
         _localPort = localPort;
         _remoteAddress = remoteAddress;
         _remotePort = remotePort;
         _af = af;
+        _localAddress = localAddress;
     }
 
     private boolean init() throws InvalidSessionAddressException, IOException {
+    	_logger.debug("calling init");
         if (_promptPlayer == null) {
-            _promptPlayer = new RTPPlayer(_localPort, _remoteAddress, _remotePort, _af);
+            _promptPlayer = new RTPPlayer(_localAddress, _localPort, _remoteAddress, _remotePort, _af);
             (_sendThread = new SendThread()).start();
+        	_logger.debug("created a player and started it");
+
             return true;
         }
         return false;
@@ -102,6 +109,8 @@ public class RTPSpeechSynthChannel {
                     _logger.debug("Feeder prompt not found: " + FEEDER_PROMPT_FILE.getAbsolutePath());
                 }
             }
+        	_logger.debug("queued a prompt");
+
             _promptQueue.put(new PromptPlay(promptFile, listener));
             _state = SPEAKING;
         } catch (InterruptedException e) {
@@ -228,10 +237,10 @@ public class RTPSpeechSynthChannel {
         File promptDir = new File("C:\\work\\cvs\\onomatopia\\cairo\\prompts\\test");
 
         int localPort = 42050;
-        InetAddress remoteAddress = InetAddress.getLocalHost();
+        InetAddress remoteAddress = CairoUtil.getLocalHost();
         int remotePort = 42048;
-
-        RTPSpeechSynthChannel player = new RTPSpeechSynthChannel(localPort, remoteAddress, remotePort, new AudioFormats());
+        InetAddress localAddress =  CairoUtil.getLocalHost();
+        RTPSpeechSynthChannel player = new RTPSpeechSynthChannel(localPort, localAddress, remoteAddress, remotePort, new AudioFormats());
         
         File prompt = new File(promptDir, "good_morning_rita.wav");
         player.queuePrompt(prompt, null);

@@ -121,7 +121,7 @@ public class RTPRecognizerWerTest extends BaseRecognizerWerTest{
           v.add(SdpConstants.PCMU);
           af.setRequestedFormatsSDP(v);
           try {
-              audioFilePlayer = new RTPPlayer(XMITTERPORT, address, RECEIVERPORT,af);
+              audioFilePlayer = new RTPPlayer(null,XMITTERPORT, address, RECEIVERPORT,af);
           } catch (InvalidSessionAddressException e) {
               // TODO Auto-generated catch block
               e.printStackTrace();

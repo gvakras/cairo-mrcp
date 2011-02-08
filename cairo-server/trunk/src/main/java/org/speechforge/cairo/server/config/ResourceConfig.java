@@ -43,6 +43,8 @@ public abstract class ResourceConfig {
     private int _maxConnects;
     private int _engines;
 
+	private String _ipAddress = null;
+
     /**
      * TODOC
      * @param index 
@@ -53,8 +55,18 @@ public abstract class ResourceConfig {
         _rtpBasePort = config.getInt("resources.resource(" + index + ").rtpBasePort");
         _maxConnects = config.getInt("resources.resource(" + index + ").maxConnects");
         _engines = config.getInt("resources.resource(" + index + ").engines");
+        _ipAddress = config.getString("resources.resource(" + index + ").ipAddress");
     }
 
+	public String getIpAddress() {
+		return _ipAddress;
+	}
+
+	public void setIpAddress(String ipAddress) {
+		this._ipAddress = ipAddress;
+	}
+
+    
     /**
      * TODOC
      * @return Returns the maxConnects.

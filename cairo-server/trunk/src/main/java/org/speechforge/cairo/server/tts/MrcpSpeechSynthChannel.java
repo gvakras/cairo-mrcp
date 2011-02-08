@@ -105,6 +105,7 @@ public class MrcpSpeechSynthChannel extends MrcpGenericChannel implements Speech
         MrcpRequestState requestState = MrcpRequestState.COMPLETE;
         short statusCode = -1;
 
+        _logger.debug(request.getContent());
         if (request.hasContent()) {
             String contentType = request.getContentType();
             if (contentType.equalsIgnoreCase("text/plain")) {

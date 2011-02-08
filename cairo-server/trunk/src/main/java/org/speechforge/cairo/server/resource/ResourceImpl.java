@@ -42,6 +42,7 @@ public abstract class ResourceImpl extends UnicastRemoteObject implements Resour
 
     public static final String HELP_OPTION = "help";
     public static final String RSERVERHOST_OPTION = "rserverhost";
+    public static final String LOCALHOST_OPTION = "localhost";
 
     private Type _type;
     
@@ -74,6 +75,10 @@ public abstract class ResourceImpl extends UnicastRemoteObject implements Resour
 
         option = new Option(RSERVERHOST_OPTION, true, "location of resource server (defaults to localhost)");
         option.setArgName("host");
+        options.addOption(option);
+        
+        option = new Option(LOCALHOST_OPTION, true, "location of local server (defaults to localhost)");
+        option.setArgName("lhost");
         options.addOption(option);
 
         return options;

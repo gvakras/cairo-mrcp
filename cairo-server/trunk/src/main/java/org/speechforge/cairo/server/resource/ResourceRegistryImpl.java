@@ -24,6 +24,7 @@ package org.speechforge.cairo.server.resource;
 
 
 import org.speechforge.cairo.exception.ResourceUnavailableException;
+import org.speechforge.cairo.util.CairoUtil;
 
 import java.util.List;
 import java.net.InetAddress;
@@ -164,7 +165,7 @@ public class ResourceRegistryImpl extends UnicastRemoteObject implements Resourc
     public static void main(String[] args) throws Exception {
         ResourceRegistryImpl impl = new ResourceRegistryImpl();
 
-        /*InetAddress host = InetAddress.getLocalHost();
+        /*InetAddress host = CairoUtil.getLocalHost();
         String url = "rmi://" + host.getHostName() + '/' + NAME;
         _logger.info("(re)binding to: " + url);
         Naming.rebind(url, impl);*/
@@ -184,7 +185,7 @@ public class ResourceRegistryImpl extends UnicastRemoteObject implements Resourc
     public static class TestClient {
 
         public static void main(String[] args) throws Exception {
-            InetAddress host = InetAddress.getLocalHost();
+            InetAddress host = CairoUtil.getLocalHost();
             String url = "rmi://" + host.getHostName() + '/' + NAME;
             _logger.info("looking up: " + url);
             ResourceRegistry rr = (ResourceRegistry) Naming.lookup(url);

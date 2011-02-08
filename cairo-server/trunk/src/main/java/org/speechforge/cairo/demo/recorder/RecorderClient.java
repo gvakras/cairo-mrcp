@@ -29,6 +29,7 @@ import org.speechforge.cairo.sip.SimpleSipAgent;
 import org.speechforge.cairo.sip.SipAgent;
 import org.speechforge.cairo.sip.SdpMessage;
 import org.speechforge.cairo.sip.SipSession;
+import org.speechforge.cairo.util.CairoUtil;
 
 import java.awt.Toolkit;
 import java.io.IOException;
@@ -312,11 +313,11 @@ public class RecorderClient implements MrcpEventListener {
 
         // lookup resource server
         InetAddress rserverHost = line.hasOption(ResourceImpl.RSERVERHOST_OPTION) ?
-            InetAddress.getByName(line.getOptionValue(ResourceImpl.RSERVERHOST_OPTION)) : InetAddress.getLocalHost();
+            InetAddress.getByName(line.getOptionValue(ResourceImpl.RSERVERHOST_OPTION)) : CairoUtil.getLocalHost();
       
 
         try {
-            _host = InetAddress.getLocalHost().getHostAddress();
+            _host = CairoUtil.getLocalHost().getHostAddress();
         } catch (UnknownHostException e) {
             _host = "localhost";
         }

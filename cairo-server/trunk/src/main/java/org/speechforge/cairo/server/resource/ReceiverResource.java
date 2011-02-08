@@ -96,8 +96,14 @@ public class ReceiverResource extends ResourceImpl {
         _baseRecordingDir = config.getBaseRecordingDir();
         _baseGrammarDir = config.getBaseGrammarDir();
         _mrcpServer = new MrcpServerSocket(config.getMrcpPort());
+        
+        InetAddress localIpAddress = CairoUtil.getLocalHost();
+        //InetAddress localIpAddress = InetAddress.getByName(config.getIpAddress());
+        //if (localIpAddress == null) {
+        //	localIpAddress = CairoUtil.getLocalHost();
+        //}
         _replicatorPool = RTPStreamReplicatorFactory.createObjectPool(
-                config.getRtpBasePort(), config.getMaxConnects());
+                config.getRtpBasePort(), config.getMaxConnects(), localIpAddress);
         _recEnginePool = SphinxRecEngineFactory.createObjectPool(
                 config.getSphinxConfigURL(), config.getEngines());
         _recorderEnginePool = SphinxRecorderFactory.createObjectPool(
@@ -308,7 +314,7 @@ public class ReceiverResource extends ResourceImpl {
         if (line.hasOption(RSERVERHOST_OPTION)) {
             rmiUrl.append(line.getOptionValue(RSERVERHOST_OPTION));
         } else {
-            rmiUrl.append(InetAddress.getLocalHost().getHostName());
+            rmiUrl.append(CairoUtil.getLocalHost().getHostName());
         }
         rmiUrl.append('/').append(ResourceRegistry.NAME);
 

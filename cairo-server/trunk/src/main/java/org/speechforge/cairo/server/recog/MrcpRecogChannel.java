@@ -107,6 +107,7 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
         MrcpHeader completionReasonHeader = null;
         short statusCode = -1;
 
+        _logger.debug(request.toString());
         if (_state == RECOGNIZING) {
             // TODO: cancel or queue request instead (depending upon value of 'cancel-if-queue' header)
             statusCode = MrcpResponse.STATUS_METHOD_NOT_VALID_IN_STATE;
@@ -115,6 +116,7 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
             if (request.hasContent()) {
                 String contentType = request.getContentType();
                 if (contentType.equalsIgnoreCase("application/jsgf")) {
+                	_logger.debug("processing jsgf");
                     // save grammar to file
                     MrcpHeader contentIdHeader = request.getHeader(MrcpHeaderName.CONTENT_ID);
                     String grammarID = (contentIdHeader == null) ? null : contentIdHeader.getValueString();
@@ -186,6 +188,7 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
                     statusCode = MrcpResponse.STATUS_UNSUPPORTED_HEADER_VALUE;
                 }
             }
+        	_logger.debug("Before doing the work, status code is "+statusCode);
             if (statusCode < 0) { // status not yet set
                 try {
                     Boolean startInputTimers = (Boolean) getParam(MrcpHeaderName.START_INPUT_TIMERS, request, DEFAULT_START_INPUT_TIMERS);

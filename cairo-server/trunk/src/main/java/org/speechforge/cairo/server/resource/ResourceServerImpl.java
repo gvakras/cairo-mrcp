@@ -29,9 +29,12 @@ import org.speechforge.cairo.sip.SdpMessage;
 import org.speechforge.cairo.sip.SessionListener;
 import org.speechforge.cairo.sip.SipResource;
 import org.speechforge.cairo.sip.SipSession;
+import org.speechforge.cairo.util.CairoUtil;
 
 import java.awt.Toolkit;
 import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.URL;
 import java.net.UnknownHostException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -66,8 +69,8 @@ public class ResourceServerImpl implements SessionListener {
 
     private static final String SIPPORT_OPTION = "sipPort";
     private static final String SIPTRANSPORT_OPTION = "sipTransport";
-    private static final String SIPPUBLICADDESS_OPTION = "publicAddress";
-
+    private static final String SIPPUBLICADDRESS_OPTION = "publicAddress";
+    private static final String LOCALADDRESS_OPTION = "publicAddress";
 
   
     private long _channelID = System.currentTimeMillis();
@@ -85,17 +88,21 @@ public class ResourceServerImpl implements SessionListener {
      * @throws RemoteException
      * @throws SipException
      */
-    public ResourceServerImpl(ResourceRegistry registryImpl, int sipPort, String sipTransport, String publicAddress) throws RemoteException, SipException {
+    public ResourceServerImpl(ResourceRegistry registryImpl, int sipPort, String sipTransport, String hostIpAddress, String publicAddress) throws RemoteException, SipException {
         super();
-        String hostIpAddress = null;
-        try {
-            InetAddress addr = InetAddress.getLocalHost();
-            hostIpAddress = addr.getHostAddress();
-            //host = addr.getCanonicalHostName();
-        } catch (UnknownHostException e) {
-            hostIpAddress = "127.0.0.1";
-            _logger.debug(e, e);
-            e.printStackTrace();
+        if( hostIpAddress == null ) {
+	        try {
+	            InetAddress addr = CairoUtil.getLocalHost();
+	            hostIpAddress = addr.getHostAddress();
+	            //host = addr.getCanonicalHostName();
+	        } catch (UnknownHostException e) {
+	            hostIpAddress = "127.0.0.1";
+	            _logger.debug(e, e);
+	            e.printStackTrace();
+	        } catch (SocketException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
         }
         if (sipPort == 0) sipPort = 5050;
         if (sipTransport == null) sipTransport = "tcp";
@@ -234,7 +241,10 @@ public class ResourceServerImpl implements SessionListener {
         option = new Option(SIPTRANSPORT_OPTION, true, "The transport used by the sip agent udp or tcp.");
         options.addOption(option);
 
-        option = new Option(SIPPUBLICADDESS_OPTION, true, "The public address of the server (use this if the server is using NAT).");
+        option = new Option(SIPPUBLICADDRESS_OPTION, true, "The public address of the server (use this if the server is using NAT).");
+        options.addOption(option);
+        
+        option = new Option(LOCALADDRESS_OPTION, true, "The local address of the server (sometimes there is a problem getting the local address -- ie.e VMWare virtual ip).");
         options.addOption(option);
 
         return options;
@@ -271,14 +281,20 @@ public class ResourceServerImpl implements SessionListener {
            sipTransport = line.getOptionValue(SIPTRANSPORT_OPTION);
         }
         
-        if (line.hasOption(SIPPUBLICADDESS_OPTION)) {
-            publicAddress = line.getOptionValue(SIPPUBLICADDESS_OPTION);
-         }
+        if (line.hasOption(SIPPUBLICADDRESS_OPTION)) {
+            publicAddress = line.getOptionValue(SIPPUBLICADDRESS_OPTION);
+        }
+        
+        String hostName = null;
+        if (line.hasOption(LOCALADDRESS_OPTION)) {
+        	hostName = line.getOptionValue(LOCALADDRESS_OPTION);
+        }
+
         
         _logger.debug("Command line specified sip port: "+sipPort+ " and sip transport: "+ sipTransport);
        
         ResourceRegistryImpl rr = new ResourceRegistryImpl();
-        ResourceServerImpl rs = new ResourceServerImpl(rr,sipPort,sipTransport,publicAddress);
+        ResourceServerImpl rs = new ResourceServerImpl(rr,sipPort,sipTransport,hostName, publicAddress);
 
         Registry registry = LocateRegistry.createRegistry(Registry.REGISTRY_PORT);
         registry.rebind(ResourceRegistry.NAME, rr);

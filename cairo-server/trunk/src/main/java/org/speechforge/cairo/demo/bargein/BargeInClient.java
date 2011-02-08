@@ -30,6 +30,7 @@ import org.speechforge.cairo.sip.SimpleSipAgent;
 import org.speechforge.cairo.sip.SipAgent;
 import org.speechforge.cairo.sip.SdpMessage;
 import org.speechforge.cairo.sip.SipSession;
+import org.speechforge.cairo.util.CairoUtil;
 
 import java.awt.Toolkit;
 import java.io.IOException;
@@ -407,17 +408,16 @@ public class BargeInClient implements MrcpEventListener {
         
         // lookup resource server
         InetAddress rserverHost = line.hasOption(ResourceImpl.RSERVERHOST_OPTION) ?
-            InetAddress.getByName(line.getOptionValue(ResourceImpl.RSERVERHOST_OPTION)) : InetAddress.getLocalHost(); 
-        
-        try {
-            _host = InetAddress.getLocalHost().getHostAddress();
-        } catch (UnknownHostException e) {
-            _host = "localhost";
-        }
-        String peerAddress = rserverHost.getHostAddress();
+            InetAddress.getByName(line.getOptionValue(ResourceImpl.RSERVERHOST_OPTION)) : CairoUtil.getLocalHost(); 
+        String peerAddress = rserverHost.getHostAddress();    
+            
+        InetAddress localHost = line.hasOption(ResourceImpl.LOCALHOST_OPTION) ?
+                        InetAddress.getByName(line.getOptionValue(ResourceImpl.LOCALHOST_OPTION)) :CairoUtil.getLocalHost();
+        _host = localHost.getHostAddress();
+
 
         // Construct a SIP agent to be used to send a SIP Invitation to the cairo server
-        sipAgent = new SimpleSipAgent(_mySipAddress, "Synth Client Sip Stack", _myPort, "UDP");
+        sipAgent = new SimpleSipAgent(_mySipAddress, "Synth Client Sip Stack",_host, null, _myPort, "UDP");
 
         // Construct the SDP message that will be sent in the SIP invitation
         Vector format = new Vector();

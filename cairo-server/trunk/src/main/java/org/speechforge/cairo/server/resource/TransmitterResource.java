@@ -80,6 +80,8 @@ public class TransmitterResource extends ResourceImpl {
 
     private PortPairPool _portPairPool;
 
+	private InetAddress _myIpAddress;
+
     public TransmitterResource(TransmitterConfig config) 
       throws IOException, RemoteException, InstantiationException {
         super(RESOURCE_TYPE);
@@ -87,6 +89,14 @@ public class TransmitterResource extends ResourceImpl {
         _mrcpServer = new MrcpServerSocket(config.getMrcpPort());
         _promptGeneratorPool = PromptGeneratorFactory.createObjectPool(config.getVoiceName(), config.getEngines());
         _portPairPool = new PortPairPool(config.getRtpBasePort(), config.getMaxConnects());
+        
+        //if in config file, use as specified else get the local host programatically
+        //_myIpAddress = InetAddress.getByName(config.getIpAddress());
+        //_logger.info(_myIpAddress);
+        //if (_myIpAddress == null) {
+        	_myIpAddress = CairoUtil.getLocalHost();
+        //}
+        _logger.info(_myIpAddress);
     }
 
     /* (non-Javadoc)
@@ -158,7 +168,7 @@ public class TransmitterResource extends ResourceImpl {
                     case BASICSYNTH:
                     case SPEECHSYNTH:
 
-                        rtpscc = new RTPSpeechSynthChannel(localPort, mediaHost, remotePort,af);
+                        rtpscc = new RTPSpeechSynthChannel(localPort, _myIpAddress, mediaHost, remotePort,af);
                         MrcpSpeechSynthChannel mrcpChannel = new MrcpSpeechSynthChannel(channelID, rtpscc, _basePromptDir, _promptGeneratorPool);
                         _mrcpServer.openChannel(channelID, mrcpChannel);
                         md.getMedia().setMediaPort(_mrcpServer.getPort());
@@ -251,7 +261,7 @@ public class TransmitterResource extends ResourceImpl {
         if (line.hasOption(RSERVERHOST_OPTION)) {
             rmiUrl.append(line.getOptionValue(RSERVERHOST_OPTION));
         } else {
-            rmiUrl.append(InetAddress.getLocalHost().getHostName());
+            rmiUrl.append(CairoUtil.getLocalHost().getHostName());
         }
         rmiUrl.append('/').append(ResourceRegistry.NAME);
 

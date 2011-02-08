@@ -29,6 +29,7 @@ import org.speechforge.cairo.sip.SimpleSipAgent;
 import org.speechforge.cairo.sip.SipAgent;
 import org.speechforge.cairo.sip.SdpMessage;
 import org.speechforge.cairo.sip.SipSession;
+import org.speechforge.cairo.util.CairoUtil;
 
 import java.awt.Toolkit;
 import java.io.IOException;
@@ -299,17 +300,16 @@ public class SpeechSynthClient implements MrcpEventListener {
 
         String text = args[1];
         InetAddress rserverHost = line.hasOption(ResourceImpl.RSERVERHOST_OPTION) ?
-            InetAddress.getByName(line.getOptionValue(ResourceImpl.RSERVERHOST_OPTION)) : InetAddress.getLocalHost();
+            InetAddress.getByName(line.getOptionValue(ResourceImpl.RSERVERHOST_OPTION)) : CairoUtil.getLocalHost();
+            
+        InetAddress localHost = line.hasOption(ResourceImpl.LOCALHOST_OPTION) ?
+                    InetAddress.getByName(line.getOptionValue(ResourceImpl.LOCALHOST_OPTION)) : CairoUtil.getLocalHost();
 
-        try {
-            _host = InetAddress.getLocalHost().getHostAddress();
-        } catch (UnknownHostException e) {
-            _host = "localhost";
-        }
+        _host = localHost.getHostAddress();
         String peerAddress = rserverHost.getHostAddress();
 
         // Construct a SIP agent to be used to send a SIP Invitation to the cairo server
-        sipAgent = new SimpleSipAgent(_mySipAddress, "Synth Client Sip Stack", _myPort, "UDP");
+        sipAgent = new SimpleSipAgent(_mySipAddress, "Synth Client Sip Stack",_host, null, _myPort, "UDP");
 
         // Construct the SDP message that will be sent in the SIP invitation
         Vector format = new Vector();
@@ -337,7 +337,7 @@ public class SpeechSynthClient implements MrcpEventListener {
 
             //Setup a media client to receive and play the sythesized voice data streamed over the RTP channel
             _logger.debug("Starting NativeMediaClient for receive only...");
-            _mediaClient = new NativeMediaClient(localRtpPort); 
+            _mediaClient = new NativeMediaClient(localHost, localRtpPort); 
 
             SpeechSynthClient client = new SpeechSynthClient(ttsChannel);
 
