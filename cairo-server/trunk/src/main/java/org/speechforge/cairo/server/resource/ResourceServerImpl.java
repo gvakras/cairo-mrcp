@@ -81,6 +81,8 @@ public class ResourceServerImpl implements SessionListener {
 
     private String cairoSipAddress = "sip:cairo@speechforge.org";
 
+	private String hostIpAddress;
+
     /**
      * TODOC
      * 
@@ -90,13 +92,14 @@ public class ResourceServerImpl implements SessionListener {
      */
     public ResourceServerImpl(ResourceRegistry registryImpl, int sipPort, String sipTransport, String hostIpAddress, String publicAddress) throws RemoteException, SipException {
         super();
+        this.hostIpAddress = hostIpAddress;
         if( hostIpAddress == null ) {
 	        try {
 	            InetAddress addr = CairoUtil.getLocalHost();
-	            hostIpAddress = addr.getHostAddress();
+	            this.hostIpAddress = addr.getHostAddress();
 	            //host = addr.getCanonicalHostName();
 	        } catch (UnknownHostException e) {
-	            hostIpAddress = "127.0.0.1";
+	            this.hostIpAddress = "127.0.0.1";
 	            _logger.debug(e, e);
 	            e.printStackTrace();
 	        } catch (SocketException e) {
@@ -106,8 +109,8 @@ public class ResourceServerImpl implements SessionListener {
         }
         if (sipPort == 0) sipPort = 5050;
         if (sipTransport == null) sipTransport = "tcp";
-        cairoSipAddress = "sip:cairo@"+hostIpAddress;
-        _ua = new SipAgent(this, cairoSipAddress, "Cairo SIP Stack", hostIpAddress, publicAddress, sipPort, sipTransport);
+        cairoSipAddress = "sip:cairo@"+this.hostIpAddress;
+        _ua = new SipAgent(this, cairoSipAddress, "Cairo SIP Stack", this.hostIpAddress, publicAddress, sipPort, sipTransport);
 
         _registryImpl = registryImpl;
     }
@@ -211,6 +214,7 @@ public class ResourceServerImpl implements SessionListener {
         }
         // message.getSessionDescription().getConnection().setAddress(host);
 
+        request.getSessionDescription().getConnection().setAddress(hostIpAddress);
         return request;
     }
 
