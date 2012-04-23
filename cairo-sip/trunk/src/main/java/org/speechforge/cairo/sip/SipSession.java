@@ -75,6 +75,8 @@ public class SipSession {
     private ClientTransaction ctx;
     private MrcpChannel ttsChannel;
     private MrcpChannel recogChannel;
+    
+    private SdpMessage lastRequest;
 
     //private  SdpMessage lastRequest;
     //private  SdpMessage lastResponse;
@@ -168,8 +170,18 @@ public class SipSession {
         agent.sendBye(this);
     }
 
-    public void reInvite() {
+    public synchronized void reInvite(String rtpHost, int rtpPort) throws SipException {
         // TODO: implement modifying the session via re-invite
+    	agent.sendreInvite(this, rtpHost, rtpPort);  
+    	
+    	while (getState() == SipSession.SessionState.waitingForInviteResponse) {
+            try {
+                this.wait(5);
+            } catch (InterruptedException e) {
+                _logger.debug("Interupt Exception while blocked in sip reInvite method.");
+            }
+        }
+    	System.out.println("out out out");
     }
 
     public static SipSession createSipSession(SipAgent agent, ClientTransaction ctx, Dialog d, RequestEvent request, 
@@ -358,6 +370,20 @@ public class SipSession {
      */
     public void setRemoteRtpPort(int remoteRtpPort) {
     	this.remoteRtpPort = remoteRtpPort;
+    }
+    
+    /**
+     * @return the SdpMessage
+     */
+    public SdpMessage getSdpMessage() {
+    	return lastRequest;
+    }
+    
+    /**
+     * @return the SdpMessage
+     */
+    public void setSdpMessage(SdpMessage s) {
+    	lastRequest = s;
     }
 
 }

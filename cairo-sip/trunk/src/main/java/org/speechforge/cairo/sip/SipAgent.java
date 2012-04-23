@@ -22,23 +22,23 @@
  */
 package org.speechforge.cairo.sip;
 
-import java.net.Inet4Address;
+
 import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
 
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.List;
 
 import java.util.Random;
 
 import java.util.Properties;
 import java.util.TooManyListenersException;
 
+import javax.sdp.MediaDescription;
+import javax.sdp.SdpException;
 import javax.sip.ClientTransaction;
 import javax.sip.Dialog;
 
@@ -76,6 +76,8 @@ import javax.sip.message.Request;
 import javax.sip.message.Response;
 
 import org.apache.log4j.Logger;
+
+import com.sun.jndi.ldap.Connection;
 
 /**
  * The SipAgent used by Cairo elements for SIP signaling.
@@ -203,9 +205,9 @@ public class SipAgent {
                 _logger.debug(e, e);
                 e.printStackTrace();
             } catch (SocketException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	    }
         }
         
         guidPrefix = host + port + System.currentTimeMillis();
@@ -245,7 +247,6 @@ public class SipAgent {
         }
 
         try {
-        	_logger.info("Create Lisenting point: "+host+" "+port+" "+transport);
             listeningPoint = sipStack.createListeningPoint(host, port, transport);
             sipProvider = sipStack.createSipProvider(listeningPoint);
         } catch (TransportNotSupportedException e) {
@@ -333,7 +334,7 @@ public class SipAgent {
         SipAgent.sendRequest(d, ct);
     }
 
-    public SipSession sendInviteWithoutProxy(String to, SdpMessage message, String peerHost, int peerPort)
+	public SipSession sendInviteWithoutProxy(String to, SdpMessage message, String peerHost, int peerPort)
             throws SipException {
         SipSession session = null;
         try {
@@ -453,8 +454,10 @@ public class SipAgent {
             Dialog dialog = ctx.getDialog();
             
             session = SipSession.createSipSession(this, ctx, dialog, null,null,null,null);
+            session.setCtx(ctx);
             session.setState(SipSession.SessionState.waitingForInviteResponse);
             SipSession.addPendingSession(session);
+            session.setSdpMessage(message);            
 
         } catch (TransactionUnavailableException e) {
             _logger.debug(e, e);
@@ -479,6 +482,67 @@ public class SipAgent {
         byeRequest = d.createRequest(Request.BYE);
         ClientTransaction ct = sipProvider.getNewClientTransaction(byeRequest);
         SipAgent.sendRequest(d, ct);
+
+    }
+    
+    public void sendreInvite(SipSession session, String rtpHost, int rtpPort)  throws SipException {
+        Dialog d = session.getSipDialog();      
+        
+        Request inviteRequest = session.getCtx().getRequest(); 
+        
+        Request reinvite = d.createRequest(Request.INVITE); 
+        SdpMessage sdpMessage = session.getSdpMessage();   
+        
+        try { 
+        	MaxForwardsHeader mf = headerFactory.createMaxForwardsHeader(10);
+        	reinvite.setHeader(mf);        	
+            
+	        sdpMessage.setSessionAddress(rtpHost);
+	        
+	        CSeqHeader cseq = (CSeqHeader) inviteRequest.getHeader(CSeqHeader.NAME);
+	        long seq = cseq.getSeqNumber();
+	        cseq.setSeqNumber(++seq);
+	        reinvite.setHeader(cseq);
+	        
+	        List <MediaDescription> rtpChans = sdpMessage.getRtpChannels();
+	        if (!rtpChans.isEmpty()) {
+	        	//get the mrcp receiver (recognition) channel in from the sdp message
+	            MediaDescription controlChan = rtpChans.get(0);
+	            controlChan.getMedia().setMediaPort(rtpPort);	           
+	            controlChan.getConnection().setAddress(rtpHost);
+	            controlChan.setAttribute(SdpMessage.SDP_CONNECTION_ATTR_NAME, SdpMessage.SDP_EXISTING_CONNECTION);
+	        }
+	        
+	        for (MediaDescription md : sdpMessage.getMrcpChannels()) {
+	            md.setAttribute(SdpMessage.SDP_CONNECTION_ATTR_NAME, SdpMessage.SDP_EXISTING_CONNECTION);
+	        }        
+	        
+	        // Create ContentTypeHeader
+	        ContentTypeHeader contentTypeHeader = headerFactory.createContentTypeHeader("application", "sdp");
+	        // add the message body (sdp)
+	        reinvite.setContent(sdpMessage.getSessionDescription().toString(), contentTypeHeader);
+	        
+	        ClientTransaction ct = sipProvider.getNewClientTransaction(reinvite);
+	               
+	        SipAgent.sendRequest(d, ct);
+	        
+	        session.setCtx(ct);	       	        
+	        session.setState(SipSession.SessionState.waitingForInviteResponse);
+            SipSession.addPendingSession(session);
+            session.setSdpMessage(sdpMessage);            
+            
+        } catch (SipException e) {
+            _logger.debug(e, e);
+            throw e;
+        } catch (SdpException e) {
+            _logger.debug(e, e);
+            throw new SipException("Could not send reinvite due to SdpException in SIP stack.", e);
+        } catch (ParseException e) {
+            _logger.debug(e, e);
+            throw new SipException("Could not send reinvite due to a parse error in SIP stack.", e);        
+	    } catch (InvalidArgumentException e) {
+	        _logger.error(e, e);
+	    }
 
     }
 
@@ -583,7 +647,7 @@ public class SipAgent {
         
     }
     
-    public static void sendResponse(ServerTransaction serverTransaction, Response response) throws SipException, InvalidArgumentException {
+	public static void sendResponse(ServerTransaction serverTransaction, Response response) throws SipException, InvalidArgumentException {
         if (_logger.isDebugEnabled()) {
             StringBuilder sb = new StringBuilder(); 
             sb.append("------------- SENDING A SIP RESPONSE ---------------");
@@ -606,7 +670,7 @@ public class SipAgent {
         serverTransaction.sendResponse(response);
     }
 
-    public static void sendRequest(Dialog dialog, ClientTransaction ctx) throws TransactionDoesNotExistException, SipException {
+	public static void sendRequest(Dialog dialog, ClientTransaction ctx) throws TransactionDoesNotExistException, SipException {
         if (_logger.isDebugEnabled()) {
         	StringBuilder sb = new StringBuilder(); 
         	sb.append("------------- SENDING A SIP REQUEST ---------------");
@@ -628,7 +692,9 @@ public class SipAgent {
          } 
         dialog.sendRequest(ctx);
     }
-    
+
+
+   
 	public static InetAddress getLocalHost() throws SocketException, UnknownHostException {
 		Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
 		while (networkInterfaces.hasMoreElements()) {
@@ -645,5 +711,6 @@ public class SipAgent {
 		}
 		return InetAddress.getLocalHost();
 	}
+    
 
 }
