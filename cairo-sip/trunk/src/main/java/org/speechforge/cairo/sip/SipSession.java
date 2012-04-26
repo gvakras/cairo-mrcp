@@ -73,8 +73,10 @@ public class SipSession {
     
     //client side transaction
     private ClientTransaction ctx;
+    
     private MrcpChannel ttsChannel;
     private MrcpChannel recogChannel;
+    private MrcpChannel recorderChannel;
     
     private SdpMessage lastRequest;
 
@@ -385,5 +387,13 @@ public class SipSession {
     public void setSdpMessage(SdpMessage s) {
     	lastRequest = s;
     }
+
+	public void setRecorderChannel(MrcpChannel recorderChannel) {
+		this.recorderChannel = recorderChannel;
+	}
+
+	public MrcpChannel getRecorderChannel() {
+		return recorderChannel;
+	}
 
 }

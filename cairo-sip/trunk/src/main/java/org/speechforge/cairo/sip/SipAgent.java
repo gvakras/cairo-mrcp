@@ -23,12 +23,16 @@
 package org.speechforge.cairo.sip;
 
 
+import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 
@@ -205,9 +209,9 @@ public class SipAgent {
                 _logger.debug(e, e);
                 e.printStackTrace();
             } catch (SocketException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	    }
+            	// TODO Auto-generated catch block
+            	e.printStackTrace();
+            }
         }
         
         guidPrefix = host + port + System.currentTimeMillis();
@@ -337,6 +341,7 @@ public class SipAgent {
 	public SipSession sendInviteWithoutProxy(String to, SdpMessage message, String peerHost, int peerPort)
             throws SipException {
         SipSession session = null;
+        _logger.debug("sending invite "+System.currentTimeMillis());
         try {
 
             // create >From Header
