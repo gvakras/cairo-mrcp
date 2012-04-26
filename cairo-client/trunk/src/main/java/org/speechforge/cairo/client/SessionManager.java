@@ -258,15 +258,19 @@ public class SessionManager  {
             // Send the sip invitation
             SipSession session = _sipAgent.sendInviteWithoutProxy(to, message, peerAddress, peerPort);         
 
-            while (session.getState() == SipSession.SessionState.waitingForInviteResponse) {
-               try {
-                   this.wait(1000);
-               } catch (InterruptedException e) {
-                   _logger.debug("Interupt Exception while blocked in sip invite method.");
-               }
-            }
+            while (session.getState() == SipSession.SessionState.waitingForInviteResponse) {            	
+            	_logger.info("in loop not done...");
+        		synchronized (session) {        
+    	            try {
+    	            	session.wait();               
+	               } catch (InterruptedException e) {
+	                   _logger.debug("Interupt Exception while blocked in sip invite method.");
+	               }
+        		}
+	        }
             return session;
-        }
+        }       
+       
 
         /**
          * @return the cairoSipAddress
@@ -426,7 +430,7 @@ public class SessionManager  {
             /* (non-Javadoc)
              * @see org.speechforge.cairo.sip.SessionListener#processInviteResponse(boolean, org.speechforge.cairo.sip.SdpMessage, org.speechforge.cairo.sip.SipSession)
              */
-            public synchronized SdpMessage processInviteResponse(boolean ok, SdpMessage response, SipSession session) {
+		public synchronized SdpMessage processInviteResponse(boolean ok, SdpMessage response, SipSession session) {
                 _logger.debug("Got an invite response, ok is: "+ok);
                 SdpMessage pbxResponse = null;
                 if (ok) {

@@ -50,6 +50,12 @@ public class SpeechRequest {
         this.completed = completed;
     }
     
+    public SpeechRequest(long requestId, boolean completed) {
+        super();
+        this.requestId = requestId;
+        this.completed = completed;
+    }
+    
     
     /**
      * @return the completed
