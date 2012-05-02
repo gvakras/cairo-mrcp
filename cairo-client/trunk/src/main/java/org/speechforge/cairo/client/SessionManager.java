@@ -82,6 +82,11 @@ public class SessionManager  {
         private SipAgent _sipAgent;
         private SessionListener _listener;
 
+        // Need this to construct the MRCP Channels
+        String protocol = MrcpProvider.PROTOCOL_TCP_MRCPv2;
+        MrcpFactory factory = MrcpFactory.newInstance();
+        MrcpProvider ttsProvider = factory.createProvider();
+        MrcpProvider recogProvider = factory.createProvider();
         
         /**
          * Instantiates a new session manager.
@@ -224,6 +229,8 @@ public class SessionManager  {
          * @throws SipException the sip exception
          */
         public SipSession newRecogAndSynthChannels(int clientRtpPort, String clientHost, String sessionName) throws SdpException, SipException {
+        	final long startTime = System.nanoTime();
+
             Vector format = new Vector();
             format.add(SdpConstants.PCMU);
         	SdpMessage sdpMessage = SdpMessage.createNewSdpSessionMessage(mySipAddress, clientHost, sessionName);
@@ -231,6 +238,53 @@ public class SessionManager  {
             //rtpChannel.getMedia().setMediaFormats(formats);
             MediaDescription synthControlChannel = SdpMessage.createMrcpChannelRequest(MrcpResourceType.SPEECHSYNTH);
             MediaDescription recogControlChannel = SdpMessage.createMrcpChannelRequest(MrcpResourceType.SPEECHRECOG);
+            Vector v = new Vector();
+            v.add(synthControlChannel);
+            v.add(recogControlChannel);
+            v.add(rtpChannel);
+            sdpMessage.getSessionDescription().setMediaDescriptions(v);  
+        	System.out.println("before snd invite  " +System.currentTimeMillis());
+        	SipSession s = sendInviteWithoutProxy(cairoSipAddress, sdpMessage, cairoSipHostName, cairoSipPort);
+        	
+        	long endTime = System.nanoTime();
+        	long duration = (endTime - startTime)/1000000;
+        	System.out.println("sipInvite time: "+duration+" ms  (" +System.currentTimeMillis()+")");
+
+        	return s;
+        }
+        
+        
+        public SipSession newRecorderChannel(int clientRtpPort, String clientHost, String sessionName) throws SdpException, SipException {
+
+        	//TODO: Really dont need the client side RTP port in this case. Should be able to have no rtp media channel in the sip invite and have 
+        	// the server come back with the rtp media line with the port it is listeneing on.  Essesently this is a workaround due to a deficciency in
+        	// the cairo server.
+        	
+            Vector formats = new Vector();
+            formats.add(SdpConstants.PCMU);
+        	SdpMessage sdpMessage = SdpMessage.createNewSdpSessionMessage(mySipAddress, clientHost, sessionName);
+            MediaDescription rtpChannel = SdpMessage.createRtpChannelRequest(clientRtpPort,formats,clientHost);
+            //MediaDescription synthControlChannel = SdpMessage.createMrcpChannelRequest(MrcpResourceType.SPEECHSYNTH);
+            MediaDescription recogControlChannel = SdpMessage.createMrcpChannelRequest(MrcpResourceType.RECORDER);
+            Vector v = new Vector();
+            //v.add(synthControlChannel);
+            v.add(recogControlChannel);
+            v.add(rtpChannel);
+            sdpMessage.getSessionDescription().setMediaDescriptions(v);    	
+        	SipSession s = sendInviteWithoutProxy(cairoSipAddress, sdpMessage, cairoSipHostName, cairoSipPort);
+        	return s;
+        }
+    
+        
+        public SipSession newRecogAndSynthAndRecorderChannels(int clientRtpPort, String clientHost, String sessionName) throws SdpException, SipException {
+            Vector format = new Vector();
+            format.add(SdpConstants.PCMU);
+        	SdpMessage sdpMessage = SdpMessage.createNewSdpSessionMessage(mySipAddress, clientHost, sessionName);
+            MediaDescription rtpChannel = SdpMessage.createRtpChannelRequest(clientRtpPort,format,clientHost);
+            //rtpChannel.getMedia().setMediaFormats(formats);
+            MediaDescription synthControlChannel = SdpMessage.createMrcpChannelRequest(MrcpResourceType.SPEECHSYNTH);
+            MediaDescription recogControlChannel = SdpMessage.createMrcpChannelRequest(MrcpResourceType.SPEECHRECOG);
+            MediaDescription recorderControlChannel = SdpMessage.createMrcpChannelRequest(MrcpResourceType.RECORDER);
             Vector v = new Vector();
             v.add(synthControlChannel);
             v.add(recogControlChannel);
@@ -258,19 +312,15 @@ public class SessionManager  {
             // Send the sip invitation
             SipSession session = _sipAgent.sendInviteWithoutProxy(to, message, peerAddress, peerPort);         
 
-            while (session.getState() == SipSession.SessionState.waitingForInviteResponse) {            	
-            	_logger.info("in loop not done...");
-        		synchronized (session) {        
-    	            try {
-    	            	session.wait();               
-	               } catch (InterruptedException e) {
-	                   _logger.debug("Interupt Exception while blocked in sip invite method.");
-	               }
-        		}
-	        }
+            while (session.getState() == SipSession.SessionState.waitingForInviteResponse) {
+               try {
+                   this.wait(1000);
+               } catch (InterruptedException e) {
+                   _logger.debug("Interupt Exception while blocked in sip invite method.");
+               }
+            }
             return session;
-        }       
-       
+        }
 
         /**
          * @return the cairoSipAddress
@@ -430,8 +480,9 @@ public class SessionManager  {
             /* (non-Javadoc)
              * @see org.speechforge.cairo.sip.SessionListener#processInviteResponse(boolean, org.speechforge.cairo.sip.SdpMessage, org.speechforge.cairo.sip.SipSession)
              */
-		public synchronized SdpMessage processInviteResponse(boolean ok, SdpMessage response, SipSession session) {
-                _logger.debug("Got an invite response, ok is: "+ok);
+            public synchronized SdpMessage processInviteResponse(boolean ok, SdpMessage response, SipSession session) {
+                _logger.debug("Got an invite response, ok is: "+ok + " "+System.currentTimeMillis());
+                
                 SdpMessage pbxResponse = null;
                 if (ok) {
 
@@ -443,10 +494,7 @@ public class SessionManager  {
 
                         try {
                         	
-                            // Need this to construct the MRCP Channels
-                            String protocol = MrcpProvider.PROTOCOL_TCP_MRCPv2;
-                            MrcpFactory factory = MrcpFactory.newInstance();
-                            MrcpProvider provider = factory.createProvider();
+
                         	
                         	// Get the host info from the sdp response (common to all channels)
                             remoteHostName = response.getSessionDescription().getConnection().getAddress();
@@ -460,7 +508,7 @@ public class SessionManager  {
                             	String xmitterChannelId = xmitterChans.get(0).getAttribute(SdpMessage.SDP_CHANNEL_ATTR_NAME);
 
                             	//create the transmitter channel and add it to the session
-                                MrcpChannel ttsChannel = provider.createChannel(xmitterChannelId, remoteHostAdress, xmitterPort, protocol);
+                                MrcpChannel ttsChannel = ttsProvider.createChannel(xmitterChannelId, remoteHostAdress, xmitterPort, protocol);
                                 session.setTtsChannel(ttsChannel);
                             }
                             
@@ -473,19 +521,21 @@ public class SessionManager  {
 	                            String receiverChannelId = receiverChans.get(0).getAttribute(SdpMessage.SDP_CHANNEL_ATTR_NAME);
 
 	                            //create the recognition channel and add it to the session
-	                            MrcpChannel recogChannel = provider.createChannel(receiverChannelId, remoteHostAdress, receiverPort, protocol);
+	                            MrcpChannel recogChannel = recogProvider.createChannel(receiverChannelId, remoteHostAdress, receiverPort, protocol);
 	                            session.setRecogChannel(recogChannel);
 	                            
 	                            // get the rtp channel info, that is needed for the receiver channel.  The clienet will need it for setting up its stream
 	                            // that will go to the recognizer.
 	                            List <MediaDescription> rtpChans = response.getAudioChansForThisControlChan(controlChan);
-	                            int remoteRtpPort = -1;
+	                            int remoteRtpPort = -1;	                            
 	                            Vector supportedFormats = null;
 	                            if (rtpChans.size() > 0) {
 	                                //TODO: What if there is more than 1 media channels?
 	                                //TODO: check if there is an override for the host attribute in the m block
 	                                //InetAddress remoteHost = InetAddress.getByName(rtpmd.get(1).getAttribute();
-	                                remoteRtpPort =  rtpChans.get(0).getMedia().getMediaPort();
+	                                remoteRtpPort =  rtpChans.get(0).getMedia().getMediaPort();	                                
+	                                
+	                                _logger.debug("processInviteResponse-remoteRtpHost: " + remoteHostName + "remoteRtpPort:" + remoteRtpPort);
 	                                //rtpmd.get(1).getMedia().setMediaPort(localPort);
 	                                supportedFormats = rtpChans.get(0).getMedia().getMediaFormats(true);    
 	                            } else {
@@ -493,6 +543,7 @@ public class SessionManager  {
 	                                //TODO:  handle no media channel in the response corresponding tp the mrcp channel (sip/sdp error)
 	                            } 
 	                            session.setRemoteRtpPort(remoteRtpPort);
+	                            session.setRemoteRtpHost(remoteHostName);
 	                            
                             }
                             
