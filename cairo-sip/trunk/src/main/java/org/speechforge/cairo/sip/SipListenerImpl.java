@@ -259,9 +259,12 @@ public class SipListenerImpl implements SipListener {
                         }
 
                         SdpMessage sdpMessage = SdpMessage.createSdpSessionMessage(sd);
-                        _logger.debug(sdpMessage.toString());
-                        session.setState(SipSession.SessionState.inviteResponseReceived);
+                        _logger.debug(sdpMessage.toString());                        
                         SdpMessage sdpResponse = sipClient.getSessionListener().processInviteResponse(true, sdpMessage, session);
+                        session.setState(SipSession.SessionState.inviteResponseReceived);
+                        synchronized(session){
+                        	session.notifyAll();
+                        }
                     } else {
                         // TODO: handle error condition where the session was
                         // not in the pending map
@@ -289,6 +292,9 @@ public class SipListenerImpl implements SipListener {
                     if (session != null) {
                        SipSession.removeSessionFromPending(session) ;
                        session.setState(SipSession.SessionState.inviteResponseReceived);
+                       synchronized(session){
+                       	session.notifyAll();
+                       }
                        SdpMessage sdpResponse = sipClient.getSessionListener().processInviteResponse(false, null, session);
                     }
                 } else { //methods not handled for this repsonse code

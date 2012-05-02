@@ -80,8 +80,9 @@ import javax.sip.message.Request;
 import javax.sip.message.Response;
 
 import org.apache.log4j.Logger;
+import org.mrcp4j.MrcpResourceType;
 
-import com.sun.jndi.ldap.Connection;
+
 
 /**
  * The SipAgent used by Cairo elements for SIP signaling.
@@ -200,6 +201,7 @@ public class SipAgent {
 
         if (host == null) {
             try {
+                //InetAddress addr = InetAddress.getLocalHost();
                 InetAddress addr = SipAgent.getLocalHost();
                 host = addr.getHostAddress();
                 //host = addr.getCanonicalHostName();
@@ -209,9 +211,9 @@ public class SipAgent {
                 _logger.debug(e, e);
                 e.printStackTrace();
             } catch (SocketException e) {
-            	// TODO Auto-generated catch block
-            	e.printStackTrace();
-            }
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
         }
         
         guidPrefix = host + port + System.currentTimeMillis();
@@ -341,7 +343,6 @@ public class SipAgent {
 	public SipSession sendInviteWithoutProxy(String to, SdpMessage message, String peerHost, int peerPort)
             throws SipException {
         SipSession session = null;
-        _logger.debug("sending invite "+System.currentTimeMillis());
         try {
 
             // create >From Header
@@ -496,18 +497,14 @@ public class SipAgent {
         Request inviteRequest = session.getCtx().getRequest(); 
         
         Request reinvite = d.createRequest(Request.INVITE); 
-        SdpMessage sdpMessage = session.getSdpMessage();   
-        
-        try { 
+        SdpMessage sdpMessage = session.getSdpMessage();
+        try {
+         
         	MaxForwardsHeader mf = headerFactory.createMaxForwardsHeader(10);
-        	reinvite.setHeader(mf);        	
-            
-	        sdpMessage.setSessionAddress(rtpHost);
-	        
-	        CSeqHeader cseq = (CSeqHeader) inviteRequest.getHeader(CSeqHeader.NAME);
-	        long seq = cseq.getSeqNumber();
-	        cseq.setSeqNumber(++seq);
-	        reinvite.setHeader(cseq);
+        	reinvite.setHeader(mf);  
+        	reinvite.setHeader(inviteRequest.getHeader("Contact"));   
+        	            
+	        sdpMessage.setSessionAddress(rtpHost);	       
 	        
 	        List <MediaDescription> rtpChans = sdpMessage.getRtpChannels();
 	        if (!rtpChans.isEmpty()) {
@@ -515,7 +512,7 @@ public class SipAgent {
 	            MediaDescription controlChan = rtpChans.get(0);
 	            controlChan.getMedia().setMediaPort(rtpPort);	           
 	            controlChan.getConnection().setAddress(rtpHost);
-	            controlChan.setAttribute(SdpMessage.SDP_CONNECTION_ATTR_NAME, SdpMessage.SDP_EXISTING_CONNECTION);
+	            //controlChan.setAttribute(SdpMessage.SDP_CONNECTION_ATTR_NAME, SdpMessage.SDP_EXISTING_CONNECTION);
 	        }
 	        
 	        for (MediaDescription md : sdpMessage.getMrcpChannels()) {
@@ -548,7 +545,7 @@ public class SipAgent {
 	    } catch (InvalidArgumentException e) {
 	        _logger.error(e, e);
 	    }
-
+	    
     }
 
     public String getGUID() {
@@ -698,8 +695,6 @@ public class SipAgent {
         dialog.sendRequest(ctx);
     }
 
-
-   
 	public static InetAddress getLocalHost() throws SocketException, UnknownHostException {
 		Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
 		while (networkInterfaces.hasMoreElements()) {
@@ -716,6 +711,5 @@ public class SipAgent {
 		}
 		return InetAddress.getLocalHost();
 	}
-    
-
+	
 }
