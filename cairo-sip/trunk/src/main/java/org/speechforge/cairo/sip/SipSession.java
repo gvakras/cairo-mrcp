@@ -70,6 +70,7 @@ public class SipSession {
     private String applicationName;
     
     private int remoteRtpPort;
+    private String remoteRtpHost;
     
     //client side transaction
     private ClientTransaction ctx;
@@ -376,6 +377,20 @@ public class SipSession {
     }
     
     /**
+     * @return the remoteRtpHost
+     */
+    public String getRemoteRtpHost() {
+    	return remoteRtpHost;
+    }
+
+	/**
+     * @param remoteRtpHost the remoteRtpHost to set
+     */
+    public void setRemoteRtpHost(String remoteRtpHost) {
+    	this.remoteRtpHost = remoteRtpHost;
+    }
+    
+    /**
      * @return the SdpMessage
      */
     public SdpMessage getSdpMessage() {
@@ -396,5 +411,6 @@ public class SipSession {
 	public MrcpChannel getRecorderChannel() {
 		return recorderChannel;
 	}
+    
     
 }
