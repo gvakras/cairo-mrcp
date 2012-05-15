@@ -77,7 +77,7 @@ Getting Started
 ---------------
 
 The cairo-sip library is intendended as a common component to be used by MRCPv2
-clients and servers such as cairo-client and cairo-server.   If you are using
+clients and servers such as cairo-client and cairo-server.  If you are using
 either of those packages you will not need to use cairo-sip directly.
 
 If you wish to use cairo-sip in your own client or server application the best
