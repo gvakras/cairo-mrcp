@@ -23,7 +23,7 @@ The Session Initiation Protocol (SIP) and the Session Description Protocol
 New Features for cairo-sip v${project.version}
 ----------------------------------
 
-	* Adds capability to do NAT traversal.  The public IP address can be specified so 
+	* Adds capability to do NAT traversal. The public IP address can be specified so 
 	  that SDP message body and SIP headers can be setup accordingly.
 
 	* Fixes route header bug in SIP INVITE.
