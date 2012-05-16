@@ -313,8 +313,10 @@ public class SessionManager  {
             SipSession session = _sipAgent.sendInviteWithoutProxy(to, message, peerAddress, peerPort);         
 
             while (session.getState() == SipSession.SessionState.waitingForInviteResponse) {
-               try {
-                   this.wait(1000);
+ 	       _logger.info("in loop not done...");
+               synchronized (session) {        
+    	       try {
+    	           session.wait(); 
                } catch (InterruptedException e) {
                    _logger.debug("Interupt Exception while blocked in sip invite method.");
                }
